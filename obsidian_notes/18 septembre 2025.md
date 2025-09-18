@@ -15,7 +15,7 @@
 - Voir la **correction des exercices du module 4**.  
 - Lecture du **module 5 de Kokkos**.  
 - Tester de mettre en place des structs portables pour Cxx, et voir ce qui peut être porter.
-- Finir MarkDown pour avantages/inconvénients de Cxx.
+- Finir MarkDown pour avantages/inconvénients de Cxx (comparer perfs, comparer tailles codes sans/avec (si on faisait avec wrappers à la place etc)).
 
 ## Questions
 - Wrappers scalables ?  
