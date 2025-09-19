@@ -6,11 +6,12 @@
 
 namespace org {
 namespace armadillo {
+
 // Multiplies two matrices (A: m x k, B: k x n), result in C (m x n)
 
 // Mat donne une matrice par ordre column (en layout left en fait)
 
-void arma_matmul(const double* a, const double* b, double* c, int m, int k, int n) {
+std::unique_ptr<Mat> arma_matmul(const double* a, const double* b, int m, int k, int n) {
     arma::Mat<double> A(const_cast<double*>(a), m, k, true, true);
     arma::Mat<double> B(const_cast<double*>(b), k, n, true, true);
 
@@ -18,16 +19,18 @@ void arma_matmul(const double* a, const double* b, double* c, int m, int k, int 
     std::cout << "Matrix B (" << k << "x" << n << "):\n" << B << std::endl;
 
 
-    arma::Mat<double> C = (A * B).as_row();
-    std::memcpy(c, C.memptr(), sizeof(double) * m * n);
-    // for (int i = 0; i < m; ++i) {
-    //     for (int j = 0; j < n; ++j) {
-    //         c[i * n + j] = 0.0;
-    //         for (int l = 0; l < k; ++l) {
-    //             c[i * n + j] += a[i * k + l] * b[l * n + j];
-    //         }
-    //     }
-    // }
+    auto C = std::make_unique<Mat>();
+    C->mat = (A * B).as_row();
+
+    return C;
+}
+
+void transpose(Mat& a) {
+    a.mat = a.mat.t();
+}
+
+double* mat_data(const std::unique_ptr<Mat>& a) {
+    return a->mat.memptr();
 }
 
 }
