@@ -1,6 +1,12 @@
 #[cxx::bridge(namespace = "org::armadillo")]
 mod ffi {
 
+    extern "Rust" {
+        type RustMat;
+
+        unsafe fn raise_mat(a: *mut f64, l: i32, k: f64) -> Box<RustMat>;
+    }
+
     unsafe extern "C++" {
         include!("testeur_rs/include/arma_bridge.h");
 
@@ -17,9 +23,25 @@ mod ffi {
         unsafe fn transpose(a: Pin<&mut Mat>);
 
         unsafe fn mat_data(a: &UniquePtr<Mat>) -> *mut f64;
+
+        unsafe fn transpose_and_raise(a: Pin<&mut Mat>) -> Box<RustMat>;
     }
 }
 
+pub struct RustMat {
+    mat: *mut f64
+}
+
+
+fn raise_mat(a: *mut f64, l: i32, k: f64) -> Box<RustMat> {
+    for i in 0..l {
+        unsafe {
+            *a.add(i as usize) += k;
+        }
+    }
+    return Box::new(RustMat { mat: a});
+}
+use std::ops::DerefMut;
 fn main() {
 // Example: 2x3 matrix A, 3x2 matrix B, result is 2x2 matrix C
     let a: [f64; 6] = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]; // 2x3
@@ -29,9 +51,9 @@ fn main() {
     };
 
     unsafe {
-        ffi::transpose(c.pin_mut());
-        let result = ffi::mat_data(&c);
-
+        let mut my_box: Box<RustMat> = ffi::transpose_and_raise(c.pin_mut());
+        //let result = ffi::mat_data(&c);
+        let result = my_box.deref_mut().mat;
         println!("Result matrix C:");
         for i in 0..2 {
             for j in 0..2 {

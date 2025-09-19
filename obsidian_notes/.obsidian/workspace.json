@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "19 septembre 2025.md",
+                "file": "Cxx for Rust ↔ Kokkos.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "19 septembre 2025"
+              "title": "Cxx for Rust ↔ Kokkos"
             }
           }
         ],
@@ -187,7 +187,7 @@
   "active": "0754e553e2676f15",
   "lastOpenFiles": [
     "18 septembre 2025.md",
-    "19 septembre 2025.md",
-    "Cxx for Rust ↔ Kokkos.md"
+    "Cxx for Rust ↔ Kokkos.md",
+    "19 septembre 2025.md"
   ]
 }
