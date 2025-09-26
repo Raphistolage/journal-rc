@@ -8,6 +8,8 @@
 namespace test {
     namespace kernels {
 
+        struct RustViewWrapper;
+
         struct ViewWrapper {
             virtual void fill(const double* data) = 0;
             virtual size_t size() = 0;
@@ -59,10 +61,13 @@ namespace test {
 
         };
 
+        void kokkos_initialize();
+        void kokkos_finalize();
+
         int kernel_mult(/*ViewWrapper a, ViewWrapper b*/);
 
-        std::unique_ptr<HostView> create_host_view(size_t size);
-        void fill_view(std::unique_ptr<ViewWrapper>, rust::Slice<const double> data);
-        void show_view(std::unique_ptr<ViewWrapper>);
+        RustViewWrapper create_host_view(size_t size);
+        void fill_view(const RustViewWrapper& view, rust::Slice<const double> data);
+        void show_view(const RustViewWrapper& view);
     } 
 } 
