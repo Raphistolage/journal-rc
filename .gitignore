@@ -1,8 +1,3 @@
-cxx_bench/cxx_test/target/
-cxx_bench/cxx_test/Cargo.lock
-cxx_bench/wrapper_test/target/
-cxx_bench/wrapper_test/Cargo.lock
-cxx_bench/kokkos_kernel_test/Cargo.lock
-cxx_bench/kokkos_kernel_test/target/
+examples/*/target/
+target/
 .vscode/
-Cargo.lock

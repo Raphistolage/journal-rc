@@ -44,6 +44,10 @@ namespace test {
             return RustViewWrapper{std::make_unique<HostView>(size), ExecSpace::DefaultHostExecSpace};
         }
 
+        RustViewWrapper create_device_view(size_t size) {
+            return RustViewWrapper{std::make_unique<DeviceView>(size), ExecSpace::DefaultExecSpace};
+        }
+
         void fill_view(const RustViewWrapper& view, rust::Slice<const double> data) {
             switch (view.execSpace)
             {

@@ -24,6 +24,7 @@ mod ffi {
 
         // unsafe fn kernel_mult() -> i32;
         unsafe fn create_host_view(size: usize) -> RustViewWrapper;
+        unsafe fn create_device_view(size: usize) -> RustViewWrapper;
         unsafe fn fill_view(view: &RustViewWrapper, data: &[f64]);
         unsafe fn show_view(view: &RustViewWrapper);
     }
@@ -38,7 +39,7 @@ fn main() {
         
         println!("Kokkos is ready to use!");
         
-        let my_rust_view = ffi::create_host_view(21);
+        let my_rust_view = ffi::create_device_view(21);
         let data = [42.0f64; 21];
         ffi::fill_view(&my_rust_view, &data);
         ffi::show_view(&my_rust_view);

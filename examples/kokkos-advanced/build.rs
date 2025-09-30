@@ -6,7 +6,7 @@ fn main() {
     
     println!("cargo:warning=Running build.rs!"); 
     cxx_build::bridge("src/main.rs")
-        .file("src/kernel_wrapper.cpp")
+        .file("src/cpp/kernel_wrapper.cpp")
         .include("include")
         .include(kokkos_kernel_include)  // KokkosKernels first
         // .include(kokkos_include)          // Core Kokkos second
@@ -33,6 +33,6 @@ fn main() {
     println!("cargo:rustc-link-lib=lapack");
     
     println!("cargo:rerun-if-changed=src/main.rs");
-    println!("cargo:rerun-if-changed=src/kernel_wrapper.cpp");
+    println!("cargo:rerun-if-changed=src/cpp/kernel_wrapper.cpp");
     println!("cargo:rerun-if-changed=include/kernel_wrapper.h");
 }

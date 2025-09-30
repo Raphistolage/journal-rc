@@ -67,6 +67,7 @@ namespace test {
         int kernel_mult(/*ViewWrapper a, ViewWrapper b*/);
 
         RustViewWrapper create_host_view(size_t size);
+        RustViewWrapper create_device_view(size_t size);
         void fill_view(const RustViewWrapper& view, rust::Slice<const double> data);
         void show_view(const RustViewWrapper& view);
     } 
