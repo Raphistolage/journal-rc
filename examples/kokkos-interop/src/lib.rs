@@ -29,6 +29,7 @@ pub mod ffi {
         unsafe fn show_view(view: &RustViewWrapper);
         unsafe fn show_execSpace();
         unsafe fn assert_equal(view: &RustViewWrapper, data: &[f64]);
+        unsafe fn assert_equals(view1: &RustViewWrapper, view2: &RustViewWrapper);
     }
 
 }

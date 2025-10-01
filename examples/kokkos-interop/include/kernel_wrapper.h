@@ -78,5 +78,6 @@ namespace test {
         void show_view(const RustViewWrapper& view);
         void show_execSpace();
         void assert_equal(const RustViewWrapper& view, rust::Slice<const double> data);
+        void assert_equals(const RustViewWrapper& view1, const RustViewWrapper& view2);
     } 
 } 

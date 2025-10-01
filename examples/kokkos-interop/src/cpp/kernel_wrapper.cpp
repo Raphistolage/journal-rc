@@ -74,11 +74,80 @@ namespace test {
                 //mirror view and deep copy to access the view stored on device.
                 auto h_view = Kokkos::create_mirror_view(mView);
                 Kokkos::deep_copy(h_view, mView);
-                
+
                 Kokkos::parallel_for("AssertEqual", h_view.extent(0), KOKKOS_LAMBDA (int i ){
                     assert(h_view(i) == data[i]);
                 });
                 std::cout << "Equal Assertion Successful \n";
+                break;
+            }
+            default:
+                break;
+            }
+        }
+
+        void assert_equals(const RustViewWrapper& view1, const RustViewWrapper& view2) {
+            switch (view1.execSpace)
+            {
+            case ExecSpace::DefaultHostExecSpace: {
+                if(view2.execSpace == ExecSpace::DefaultHostExecSpace) {
+                    HostView* hostView1 = static_cast<HostView*>(view1.view.get());
+                    Kokkos::View<double*, Kokkos::DefaultHostExecutionSpace> hView1 = hostView1->view;
+                    HostView* hostView2 = static_cast<HostView*>(view2.view.get());
+                    Kokkos::View<double*, Kokkos::DefaultHostExecutionSpace> hView2 = hostView2->view;
+                    Kokkos::parallel_for("AssertEqual", hView1.extent(0), KOKKOS_LAMBDA (int i ){
+                        assert(hView1(i) == hView2(i));
+                    });
+                    std::cout << "Equal Assertion Successful \n";
+                } else {
+                    HostView* hostView1 = static_cast<HostView*>(view1.view.get());
+                    Kokkos::View<double*, Kokkos::DefaultHostExecutionSpace> hView1 = hostView1->view;
+                    DeviceView* deviceView = static_cast<DeviceView*>(view2.view.get());
+                    Kokkos::View<double*, Kokkos::DefaultExecutionSpace> hView2 = deviceView->view;
+
+                    //mirror view and deep copy to access the view stored on device.
+                    auto h_view = Kokkos::create_mirror_view(hView2);
+                    Kokkos::deep_copy(h_view, hView2);
+                    Kokkos::parallel_for("AssertEqual", hView1.extent(0), KOKKOS_LAMBDA (int i ){
+                        assert(hView1(i) == h_view(i));
+                    });
+                    std::cout << "Equal Assertion Successful \n";
+                }
+                break;
+            }
+            case ExecSpace::DefaultExecSpace: {
+                if(view2.execSpace == ExecSpace::DefaultHostExecSpace) {
+                    DeviceView* deviceView = static_cast<DeviceView*>(view1.view.get());
+                    Kokkos::View<double*, Kokkos::DefaultExecutionSpace> hView1 = deviceView->view;
+                    //mirror view and deep copy to access the view stored on device.
+                    auto h_view = Kokkos::create_mirror_view(hView1);
+                    Kokkos::deep_copy(h_view, hView1);
+
+                    HostView* hostView2 = static_cast<HostView*>(view2.view.get());
+                    Kokkos::View<double*, Kokkos::DefaultHostExecutionSpace> hView2 = hostView2->view;
+                    Kokkos::parallel_for("AssertEqual", h_view.extent(0), KOKKOS_LAMBDA (int i ){
+                        assert(h_view(i) == hView2(i));
+                    });
+                    std::cout << "Equal Assertion Successful " << h_view(0) << "  " << hView2(0) <<" \n";
+                } else {
+                    DeviceView* deviceView1 = static_cast<DeviceView*>(view2.view.get());
+                    Kokkos::View<double*, Kokkos::DefaultExecutionSpace> hView1 = deviceView1->view;
+                    //mirror view and deep copy to access the view stored on device.
+                    auto h_view1 = Kokkos::create_mirror_view(hView1);
+                    Kokkos::deep_copy(h_view1, hView1);
+
+                    DeviceView* deviceView2 = static_cast<DeviceView*>(view2.view.get());
+                    Kokkos::View<double*, Kokkos::DefaultExecutionSpace> hView2 = deviceView2->view;
+
+                    //mirror view and deep copy to access the view stored on device.
+                    auto h_view2 = Kokkos::create_mirror_view(hView2);
+                    Kokkos::deep_copy(h_view2, hView2);
+
+                    Kokkos::parallel_for("AssertEqual", h_view1.extent(0), KOKKOS_LAMBDA (int i ){
+                        assert(h_view1(i) == h_view2(i));
+                    });
+                    std::cout << "Equal Assertion Successful \n";
+                }
                 break;
             }
             default:
