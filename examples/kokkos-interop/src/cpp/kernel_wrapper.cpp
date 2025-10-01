@@ -1,8 +1,8 @@
 #include <Kokkos_Core.hpp>
 #include <iostream>
 
-#include "kokkos_kernel_test/include/kernel_wrapper.h"
-#include "kokkos_kernel_test/src/main.rs.h"  // This creates circular dependencies
+#include "kokkos_interop/include/kernel_wrapper.h"
+#include "kokkos_interop/src/lib.rs.h" 
 
 namespace test {
     namespace kernels {
@@ -46,6 +46,44 @@ namespace test {
 
         RustViewWrapper create_device_view(size_t size) {
             return RustViewWrapper{std::make_unique<DeviceView>(size), ExecSpace::DefaultExecSpace};
+        }
+
+        void show_execSpace() {
+            using DeviceExecSpace = Kokkos::DefaultExecutionSpace;
+            std::cout << "DefaultExecSpace = " << DeviceExecSpace::name() << "\n";
+            using HostExecSpace = Kokkos::DefaultHostExecutionSpace;
+            std::cout << "DefaultHostExecSpace = " << HostExecSpace::name() << "\n";
+        }
+
+        void assert_equal(const RustViewWrapper& view, rust::Slice<const double> data) {
+            switch (view.execSpace)
+            {
+            case ExecSpace::DefaultHostExecSpace: {
+                HostView* hostView = static_cast<HostView*>(view.view.get());
+                Kokkos::View<double*, Kokkos::DefaultHostExecutionSpace> mView = hostView->view;
+                Kokkos::parallel_for("AssertEqual", mView.extent(0), KOKKOS_LAMBDA (int i ){
+                    assert(mView(i) == data[i]);
+                });
+                std::cout << "Equal Assertion Successful \n";
+                break;
+            }
+            case ExecSpace::DefaultExecSpace: {
+                DeviceView* deviceView = static_cast<DeviceView*>(view.view.get());
+                Kokkos::View<double*, Kokkos::DefaultExecutionSpace> mView = deviceView->view;
+
+                //mirror view and deep copy to access the view stored on device.
+                auto h_view = Kokkos::create_mirror_view(mView);
+                Kokkos::deep_copy(h_view, mView);
+                
+                Kokkos::parallel_for("AssertEqual", h_view.extent(0), KOKKOS_LAMBDA (int i ){
+                    assert(h_view(i) == data[i]);
+                });
+                std::cout << "Equal Assertion Successful \n";
+                break;
+            }
+            default:
+                break;
+            }
         }
 
         void fill_view(const RustViewWrapper& view, rust::Slice<const double> data) {

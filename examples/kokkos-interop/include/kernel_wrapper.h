@@ -45,9 +45,15 @@ namespace test {
             DeviceView(size_t size) :  view("wrappedDefaultView", size) {}
 
             void fill(const double* data) override {
-                Kokkos::parallel_for("InitView", view.extent(0), KOKKOS_LAMBDA (int i) {
-                    view(i) = data[i]; 
+                //mirror view and deep copy to access the view stored on device.
+                auto h_view = Kokkos::create_mirror_view(view);
+                Kokkos::deep_copy(h_view, view);
+
+                Kokkos::parallel_for("InitView", h_view.extent(0), KOKKOS_LAMBDA (int i) {
+                    h_view(i) = data[i]; 
                 });
+
+                Kokkos::deep_copy(view, h_view);
             }
 
             size_t size() override {
@@ -70,5 +76,7 @@ namespace test {
         RustViewWrapper create_device_view(size_t size);
         void fill_view(const RustViewWrapper& view, rust::Slice<const double> data);
         void show_view(const RustViewWrapper& view);
+        void show_execSpace();
+        void assert_equal(const RustViewWrapper& view, rust::Slice<const double> data);
     } 
 } 

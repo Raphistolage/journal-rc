@@ -5,7 +5,7 @@ fn main() {
     let kokkos_kernel_lib = "/home/raphael/kokkos-install/lib";
     
     println!("cargo:warning=Running build.rs!"); 
-    cxx_build::bridge("src/main.rs")
+    cxx_build::bridge("src/lib.rs")
         .file("src/cpp/kernel_wrapper.cpp")
         .include("include")
         .include(kokkos_kernel_include)  // KokkosKernels first
@@ -16,7 +16,7 @@ fn main() {
         // .flag_if_supported("-Wno-unused-parameter")
         // .flag_if_supported("-Wno-sign-compare") 
         // .flag_if_supported("-Wno-unknown-pragmas") // Suppress OpenMP pragma warnings
-        .compile("kokkos_kernel_test");
+        .compile("kokkos_interop");
 
     // Add library search paths
     // println!("cargo:rustc-link-search=native={}", kokkos_lib);
@@ -32,7 +32,7 @@ fn main() {
     println!("cargo:rustc-link-lib=openblas");
     println!("cargo:rustc-link-lib=lapack");
     
-    println!("cargo:rerun-if-changed=src/main.rs");
+    println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=src/cpp/kernel_wrapper.cpp");
     println!("cargo:rerun-if-changed=include/kernel_wrapper.h");
 }
