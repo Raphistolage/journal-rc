@@ -3,12 +3,13 @@
 #include <Kokkos_Core.hpp>
 #include <string>
 #include <iostream>
-// #include "KokkosBlas1_nrm1.hpp"
 
 namespace test {
     namespace kernels {
 
         struct RustViewWrapper;
+
+        constexpr int Dynamic = -1;
 
         struct IView {
             virtual ~IView() = default;         
@@ -22,30 +23,14 @@ namespace test {
 namespace test {
     namespace kernels {
 
-        // void fill(const double* data) {
-        //     //mirror view and deep copy to access the view stored on device.
-        //     auto h_view = Kokkos::create_mirror_view(view);
-        //     Kokkos::deep_copy(h_view, view);
-
-        //     Kokkos::parallel_for("InitView", h_view.extent(0), KOKKOS_LAMBDA (int i) {
-        //         h_view(i) = data[i]; 
-        //     });
-
-        //     Kokkos::deep_copy(view, h_view);
-        // }
-
-        // size_t size() override {
-        //     return view.extent(0);
-        // }
-
         void kokkos_initialize();
         void kokkos_finalize();
 
-        RustViewWrapper create_view(size_t size, MemSpace memSpace);
+        RustViewWrapper create_view(uint8_t size, MemSpace memSpace, rust::String label);
         void fill_view(const RustViewWrapper& view, rust::Slice<const double> data);
         void show_view(const RustViewWrapper& view);
-        // void show_execSpace();
-        // void assert_equal(const RustViewWrapper& view, rust::Slice<const double> data);
-        // void assert_equals(const RustViewWrapper& view1, const RustViewWrapper& view2);
+        void assert_equals(const RustViewWrapper& view1, const RustViewWrapper& view2);
+        void deep_copy(const RustViewWrapper& view1, const RustViewWrapper& view2);
+        void show_metadata(const RustViewWrapper& view);
     } 
 } 
