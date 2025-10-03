@@ -1,0 +1,985 @@
+   Compiling kokkos_interop2 v0.1.0 (/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2)
+warning: kokkos_interop2@0.1.0: Running build.rs!
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:74:34: error: virt-specifiers in 'kokkos_initialize' not allowed outside a class definition
+warning: kokkos_interop2@0.1.0:    74 |         void kokkos_initialize() override {
+warning: kokkos_interop2@0.1.0:       |                                  ^~~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> >':
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>'
+warning: kokkos_interop2@0.1.0:  1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+warning: kokkos_interop2@0.1.0:       |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > > >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:  2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+warning: kokkos_interop2@0.1.0:       |                                                      ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > >; <template-parameter-1-3> = <missing>]'
+warning: kokkos_interop2@0.1.0:   368 |       template<typename _Up, typename _Ep, typename = _Require<
+warning: kokkos_interop2@0.1.0:       |                                            ^~~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:108:62:   required from here
+warning: kokkos_interop2@0.1.0:   108 |                             std::string(label), dimensions[0]);
+warning: kokkos_interop2@0.1.0:       |                                                              ^
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace>]'
+warning: kokkos_interop2@0.1.0:    17 |             ViewType getView() {
+warning: kokkos_interop2@0.1.0:       |                      ^~~~~~~
+warning: kokkos_interop2@0.1.0: In file included from src/cpp/kernel_wrapper.cpp:4:
+warning: kokkos_interop2@0.1.0: /home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+warning: kokkos_interop2@0.1.0:    26 |             virtual void getView() = 0;
+warning: kokkos_interop2@0.1.0:       |                          ^~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> >':
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>'
+warning: kokkos_interop2@0.1.0:  1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+warning: kokkos_interop2@0.1.0:       |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > > >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:  2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+warning: kokkos_interop2@0.1.0:       |                                                      ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > >; <template-parameter-1-3> = <missing>]'
+warning: kokkos_interop2@0.1.0:   368 |       template<typename _Up, typename _Ep, typename = _Require<
+warning: kokkos_interop2@0.1.0:       |                                            ^~~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:112:77:   required from here
+warning: kokkos_interop2@0.1.0:   112 |                             std::string(label), dimensions[0], dimensions[1]);
+warning: kokkos_interop2@0.1.0:       |                                                                             ^
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace>]'
+warning: kokkos_interop2@0.1.0:    17 |             ViewType getView() {
+warning: kokkos_interop2@0.1.0:       |                      ^~~~~~~
+warning: kokkos_interop2@0.1.0: /home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+warning: kokkos_interop2@0.1.0:    26 |             virtual void getView() = 0;
+warning: kokkos_interop2@0.1.0:       |                          ^~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> >':
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>'
+warning: kokkos_interop2@0.1.0:  1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+warning: kokkos_interop2@0.1.0:       |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > > >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:  2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+warning: kokkos_interop2@0.1.0:       |                                                      ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > >; <template-parameter-1-3> = <missing>]'
+warning: kokkos_interop2@0.1.0:   368 |       template<typename _Up, typename _Ep, typename = _Require<
+warning: kokkos_interop2@0.1.0:       |                                            ^~~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:116:92:   required from here
+warning: kokkos_interop2@0.1.0:   116 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2]);
+warning: kokkos_interop2@0.1.0:       |                                                                                            ^
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace>]'
+warning: kokkos_interop2@0.1.0:    17 |             ViewType getView() {
+warning: kokkos_interop2@0.1.0:       |                      ^~~~~~~
+warning: kokkos_interop2@0.1.0: /home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+warning: kokkos_interop2@0.1.0:    26 |             virtual void getView() = 0;
+warning: kokkos_interop2@0.1.0:       |                          ^~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> >':
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>'
+warning: kokkos_interop2@0.1.0:  1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+warning: kokkos_interop2@0.1.0:       |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:  2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+warning: kokkos_interop2@0.1.0:       |                                                      ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > >; <template-parameter-1-3> = <missing>]'
+warning: kokkos_interop2@0.1.0:   368 |       template<typename _Up, typename _Ep, typename = _Require<
+warning: kokkos_interop2@0.1.0:       |                                            ^~~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:120:107:   required from here
+warning: kokkos_interop2@0.1.0:   120 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
+warning: kokkos_interop2@0.1.0:       |                                                                                                           ^
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace>]'
+warning: kokkos_interop2@0.1.0:    17 |             ViewType getView() {
+warning: kokkos_interop2@0.1.0:       |                      ^~~~~~~
+warning: kokkos_interop2@0.1.0: /home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+warning: kokkos_interop2@0.1.0:    26 |             virtual void getView() = 0;
+warning: kokkos_interop2@0.1.0:       |                          ^~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> >':
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>'
+warning: kokkos_interop2@0.1.0:  1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+warning: kokkos_interop2@0.1.0:       |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:  2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+warning: kokkos_interop2@0.1.0:       |                                                      ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > >; <template-parameter-1-3> = <missing>]'
+warning: kokkos_interop2@0.1.0:   368 |       template<typename _Up, typename _Ep, typename = _Require<
+warning: kokkos_interop2@0.1.0:       |                                            ^~~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:124:122:   required from here
+warning: kokkos_interop2@0.1.0:   124 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
+warning: kokkos_interop2@0.1.0:       |                                                                                                                          ^
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace>]'
+warning: kokkos_interop2@0.1.0:    17 |             ViewType getView() {
+warning: kokkos_interop2@0.1.0:       |                      ^~~~~~~
+warning: kokkos_interop2@0.1.0: /home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+warning: kokkos_interop2@0.1.0:    26 |             virtual void getView() = 0;
+warning: kokkos_interop2@0.1.0:       |                          ^~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> >':
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>'
+warning: kokkos_interop2@0.1.0:  1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+warning: kokkos_interop2@0.1.0:       |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:  2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+warning: kokkos_interop2@0.1.0:       |                                                      ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > >; <template-parameter-1-3> = <missing>]'
+warning: kokkos_interop2@0.1.0:   368 |       template<typename _Up, typename _Ep, typename = _Require<
+warning: kokkos_interop2@0.1.0:       |                                            ^~~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:128:137:   required from here
+warning: kokkos_interop2@0.1.0:   128 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
+warning: kokkos_interop2@0.1.0:       |                                                                                                                                         ^
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace>]'
+warning: kokkos_interop2@0.1.0:    17 |             ViewType getView() {
+warning: kokkos_interop2@0.1.0:       |                      ^~~~~~~
+warning: kokkos_interop2@0.1.0: /home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+warning: kokkos_interop2@0.1.0:    26 |             virtual void getView() = 0;
+warning: kokkos_interop2@0.1.0:       |                          ^~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> >':
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>'
+warning: kokkos_interop2@0.1.0:  1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+warning: kokkos_interop2@0.1.0:       |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:  2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+warning: kokkos_interop2@0.1.0:       |                                                      ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > >; <template-parameter-1-3> = <missing>]'
+warning: kokkos_interop2@0.1.0:   368 |       template<typename _Up, typename _Ep, typename = _Require<
+warning: kokkos_interop2@0.1.0:       |                                            ^~~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:132:152:   required from here
+warning: kokkos_interop2@0.1.0:   132 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
+warning: kokkos_interop2@0.1.0:       |                                                                                                                                                        ^
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace>]'
+warning: kokkos_interop2@0.1.0:    17 |             ViewType getView() {
+warning: kokkos_interop2@0.1.0:       |                      ^~~~~~~
+warning: kokkos_interop2@0.1.0: /home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+warning: kokkos_interop2@0.1.0:    26 |             virtual void getView() = 0;
+warning: kokkos_interop2@0.1.0:       |                          ^~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> >':
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>'
+warning: kokkos_interop2@0.1.0:  1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+warning: kokkos_interop2@0.1.0:       |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > > >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:  2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+warning: kokkos_interop2@0.1.0:       |                                                      ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > >; <template-parameter-1-3> = <missing>]'
+warning: kokkos_interop2@0.1.0:   368 |       template<typename _Up, typename _Ep, typename = _Require<
+warning: kokkos_interop2@0.1.0:       |                                            ^~~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:150:62:   required from here
+warning: kokkos_interop2@0.1.0:   150 |                             std::string(label), dimensions[0]);
+warning: kokkos_interop2@0.1.0:       |                                                              ^
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP>]'
+warning: kokkos_interop2@0.1.0:    17 |             ViewType getView() {
+warning: kokkos_interop2@0.1.0:       |                      ^~~~~~~
+warning: kokkos_interop2@0.1.0: /home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+warning: kokkos_interop2@0.1.0:    26 |             virtual void getView() = 0;
+warning: kokkos_interop2@0.1.0:       |                          ^~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> >':
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>'
+warning: kokkos_interop2@0.1.0:  1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+warning: kokkos_interop2@0.1.0:       |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > > >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:  2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+warning: kokkos_interop2@0.1.0:       |                                                      ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > >; <template-parameter-1-3> = <missing>]'
+warning: kokkos_interop2@0.1.0:   368 |       template<typename _Up, typename _Ep, typename = _Require<
+warning: kokkos_interop2@0.1.0:       |                                            ^~~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:154:77:   required from here
+warning: kokkos_interop2@0.1.0:   154 |                             std::string(label), dimensions[0], dimensions[1]);
+warning: kokkos_interop2@0.1.0:       |                                                                             ^
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP>]'
+warning: kokkos_interop2@0.1.0:    17 |             ViewType getView() {
+warning: kokkos_interop2@0.1.0:       |                      ^~~~~~~
+warning: kokkos_interop2@0.1.0: /home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+warning: kokkos_interop2@0.1.0:    26 |             virtual void getView() = 0;
+warning: kokkos_interop2@0.1.0:       |                          ^~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> >':
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>'
+warning: kokkos_interop2@0.1.0:  1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+warning: kokkos_interop2@0.1.0:       |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > > >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:  2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+warning: kokkos_interop2@0.1.0:       |                                                      ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > >; <template-parameter-1-3> = <missing>]'
+warning: kokkos_interop2@0.1.0:   368 |       template<typename _Up, typename _Ep, typename = _Require<
+warning: kokkos_interop2@0.1.0:       |                                            ^~~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:158:92:   required from here
+warning: kokkos_interop2@0.1.0:   158 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2]);
+warning: kokkos_interop2@0.1.0:       |                                                                                            ^
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP>]'
+warning: kokkos_interop2@0.1.0:    17 |             ViewType getView() {
+warning: kokkos_interop2@0.1.0:       |                      ^~~~~~~
+warning: kokkos_interop2@0.1.0: /home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+warning: kokkos_interop2@0.1.0:    26 |             virtual void getView() = 0;
+warning: kokkos_interop2@0.1.0:       |                          ^~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> >':
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>'
+warning: kokkos_interop2@0.1.0:  1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+warning: kokkos_interop2@0.1.0:       |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:  2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+warning: kokkos_interop2@0.1.0:       |                                                      ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > >; <template-parameter-1-3> = <missing>]'
+warning: kokkos_interop2@0.1.0:   368 |       template<typename _Up, typename _Ep, typename = _Require<
+warning: kokkos_interop2@0.1.0:       |                                            ^~~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:162:107:   required from here
+warning: kokkos_interop2@0.1.0:   162 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
+warning: kokkos_interop2@0.1.0:       |                                                                                                           ^
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP>]'
+warning: kokkos_interop2@0.1.0:    17 |             ViewType getView() {
+warning: kokkos_interop2@0.1.0:       |                      ^~~~~~~
+warning: kokkos_interop2@0.1.0: /home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+warning: kokkos_interop2@0.1.0:    26 |             virtual void getView() = 0;
+warning: kokkos_interop2@0.1.0:       |                          ^~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> >':
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>'
+warning: kokkos_interop2@0.1.0:  1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+warning: kokkos_interop2@0.1.0:       |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:  2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+warning: kokkos_interop2@0.1.0:       |                                                      ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > >; <template-parameter-1-3> = <missing>]'
+warning: kokkos_interop2@0.1.0:   368 |       template<typename _Up, typename _Ep, typename = _Require<
+warning: kokkos_interop2@0.1.0:       |                                            ^~~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:166:122:   required from here
+warning: kokkos_interop2@0.1.0:   166 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
+warning: kokkos_interop2@0.1.0:       |                                                                                                                          ^
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP>]'
+warning: kokkos_interop2@0.1.0:    17 |             ViewType getView() {
+warning: kokkos_interop2@0.1.0:       |                      ^~~~~~~
+warning: kokkos_interop2@0.1.0: /home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+warning: kokkos_interop2@0.1.0:    26 |             virtual void getView() = 0;
+warning: kokkos_interop2@0.1.0:       |                          ^~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> >':
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>'
+warning: kokkos_interop2@0.1.0:  1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+warning: kokkos_interop2@0.1.0:       |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:  2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+warning: kokkos_interop2@0.1.0:       |                                                      ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > >; <template-parameter-1-3> = <missing>]'
+warning: kokkos_interop2@0.1.0:   368 |       template<typename _Up, typename _Ep, typename = _Require<
+warning: kokkos_interop2@0.1.0:       |                                            ^~~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:170:137:   required from here
+warning: kokkos_interop2@0.1.0:   170 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
+warning: kokkos_interop2@0.1.0:       |                                                                                                                                         ^
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP>]'
+warning: kokkos_interop2@0.1.0:    17 |             ViewType getView() {
+warning: kokkos_interop2@0.1.0:       |                      ^~~~~~~
+warning: kokkos_interop2@0.1.0: /home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+warning: kokkos_interop2@0.1.0:    26 |             virtual void getView() = 0;
+warning: kokkos_interop2@0.1.0:       |                          ^~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> >':
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>'
+warning: kokkos_interop2@0.1.0:  1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+warning: kokkos_interop2@0.1.0:       |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:   183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+warning: kokkos_interop2@0.1.0:       |                                                               ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> > >'
+warning: kokkos_interop2@0.1.0:   199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+warning: kokkos_interop2@0.1.0:       |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+warning: kokkos_interop2@0.1.0:  2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+warning: kokkos_interop2@0.1.0:       |                                                      ^~~~~
+warning: kokkos_interop2@0.1.0: /usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > >; <template-parameter-1-3> = <missing>]'
+warning: kokkos_interop2@0.1.0:   368 |       template<typename _Up, typename _Ep, typename = _Require<
+warning: kokkos_interop2@0.1.0:       |                                            ^~~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:174:152:   required from here
+warning: kokkos_interop2@0.1.0:   174 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
+warning: kokkos_interop2@0.1.0:       |                                                                                                                                                        ^
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP>]'
+warning: kokkos_interop2@0.1.0:    17 |             ViewType getView() {
+warning: kokkos_interop2@0.1.0:       |                      ^~~~~~~
+warning: kokkos_interop2@0.1.0: /home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+warning: kokkos_interop2@0.1.0:    26 |             virtual void getView() = 0;
+warning: kokkos_interop2@0.1.0:       |                          ^~~~~~~
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp: In function 'void test::kernels::deep_copy(const RustViewWrapper&, const RustViewWrapper&)':
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:221:55: error: forming reference to void
+warning: kokkos_interop2@0.1.0:   221 |                 auto& hostView1 = view1.view->getView();
+warning: kokkos_interop2@0.1.0:       |                                                       ^
+warning: kokkos_interop2@0.1.0: src/cpp/kernel_wrapper.cpp:222:55: error: forming reference to void
+warning: kokkos_interop2@0.1.0:   222 |                 auto& hostView2 = view2.view->getView();
+warning: kokkos_interop2@0.1.0:       |                                                       ^
+error: failed to run custom build command for `kokkos_interop2 v0.1.0 (/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2)`
+
+Caused by:
+  process didn't exit successfully: `/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-17602b51e94d4b9c/build-script-build` (exit status: 1)
+  --- stdout
+  cargo:warning=Running build.rs!
+  cargo:rerun-if-changed=src/lib.rs
+  cargo:CXXBRIDGE_PREFIX=kokkos_interop2
+  cargo:CXXBRIDGE_DIR0=/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/include
+  cargo:CXXBRIDGE_DIR1=/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate
+  OUT_DIR = Some(/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out)
+  OPT_LEVEL = Some(0)
+  TARGET = Some(x86_64-unknown-linux-gnu)
+  HOST = Some(x86_64-unknown-linux-gnu)
+  cargo:rerun-if-env-changed=CXX_x86_64-unknown-linux-gnu
+  CXX_x86_64-unknown-linux-gnu = None
+  cargo:rerun-if-env-changed=CXX_x86_64_unknown_linux_gnu
+  CXX_x86_64_unknown_linux_gnu = None
+  cargo:rerun-if-env-changed=HOST_CXX
+  HOST_CXX = None
+  cargo:rerun-if-env-changed=CXX
+  CXX = None
+  cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+  RUSTC_WRAPPER = None
+  cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+  CRATE_CC_NO_DEFAULTS = None
+  DEBUG = Some(true)
+  CARGO_CFG_TARGET_FEATURE = Some(fxsr,sse,sse2)
+  cargo:rerun-if-env-changed=CXXFLAGS
+  CXXFLAGS = None
+  cargo:rerun-if-env-changed=HOST_CXXFLAGS
+  HOST_CXXFLAGS = None
+  cargo:rerun-if-env-changed=CXXFLAGS_x86_64_unknown_linux_gnu
+  CXXFLAGS_x86_64_unknown_linux_gnu = None
+  cargo:rerun-if-env-changed=CXXFLAGS_x86_64-unknown-linux-gnu
+  CXXFLAGS_x86_64-unknown-linux-gnu = None
+  CARGO_ENCODED_RUSTFLAGS = Some(-L/usr/lib/x86_64-linux-gnu/openblas-pthread-L/usr/local/lib-L/home/raphael/kokkos-install/lib-larmadillo-lopenblas-llapack-lkokkoscore-lkokkoskernels-lgomp)
+  OUT_DIR = Some(/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out)
+  cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+  cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+  CRATE_CC_NO_DEFAULTS = None
+  TARGET = Some(x86_64-unknown-linux-gnu)
+  CARGO_CFG_TARGET_FEATURE = Some(fxsr,sse,sse2)
+  HOST = Some(x86_64-unknown-linux-gnu)
+  cargo:rerun-if-env-changed=CXXFLAGS
+  CXXFLAGS = None
+  cargo:rerun-if-env-changed=HOST_CXXFLAGS
+  HOST_CXXFLAGS = None
+  cargo:rerun-if-env-changed=CXXFLAGS_x86_64_unknown_linux_gnu
+  CXXFLAGS_x86_64_unknown_linux_gnu = None
+  cargo:rerun-if-env-changed=CXXFLAGS_x86_64-unknown-linux-gnu
+  CXXFLAGS_x86_64-unknown-linux-gnu = None
+  OUT_DIR = Some(/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out)
+  cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+  cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+  CRATE_CC_NO_DEFAULTS = None
+  TARGET = Some(x86_64-unknown-linux-gnu)
+  CARGO_CFG_TARGET_FEATURE = Some(fxsr,sse,sse2)
+  HOST = Some(x86_64-unknown-linux-gnu)
+  cargo:rerun-if-env-changed=CXXFLAGS
+  CXXFLAGS = None
+  cargo:rerun-if-env-changed=HOST_CXXFLAGS
+  HOST_CXXFLAGS = None
+  cargo:rerun-if-env-changed=CXXFLAGS_x86_64_unknown_linux_gnu
+  CXXFLAGS_x86_64_unknown_linux_gnu = None
+  cargo:rerun-if-env-changed=CXXFLAGS_x86_64-unknown-linux-gnu
+  CXXFLAGS_x86_64-unknown-linux-gnu = None
+  OUT_DIR = Some(/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out)
+  cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+  cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+  CRATE_CC_NO_DEFAULTS = None
+  TARGET = Some(x86_64-unknown-linux-gnu)
+  CARGO_CFG_TARGET_FEATURE = Some(fxsr,sse,sse2)
+  HOST = Some(x86_64-unknown-linux-gnu)
+  cargo:rerun-if-env-changed=CXXFLAGS
+  CXXFLAGS = None
+  cargo:rerun-if-env-changed=HOST_CXXFLAGS
+  HOST_CXXFLAGS = None
+  cargo:rerun-if-env-changed=CXXFLAGS_x86_64_unknown_linux_gnu
+  CXXFLAGS_x86_64_unknown_linux_gnu = None
+  cargo:rerun-if-env-changed=CXXFLAGS_x86_64-unknown-linux-gnu
+  CXXFLAGS_x86_64-unknown-linux-gnu = None
+  cargo:warning=src/cpp/kernel_wrapper.cpp:74:34: error: virt-specifiers in 'kokkos_initialize' not allowed outside a class definition
+  cargo:warning=   74 |         void kokkos_initialize() override {
+  cargo:warning=      |                                  ^~~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> >':
+  cargo:warning=/usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>'
+  cargo:warning= 1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+  cargo:warning=      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > > >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning= 2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+  cargo:warning=      |                                                      ^~~~~
+  cargo:warning=/usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace> > >; <template-parameter-1-3> = <missing>]'
+  cargo:warning=  368 |       template<typename _Up, typename _Ep, typename = _Require<
+  cargo:warning=      |                                            ^~~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp:108:62:   required from here
+  cargo:warning=  108 |                             std::string(label), dimensions[0]);
+  cargo:warning=      |                                                              ^
+  cargo:warning=src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace>]'
+  cargo:warning=   17 |             ViewType getView() {
+  cargo:warning=      |                      ^~~~~~~
+  cargo:warning=In file included from src/cpp/kernel_wrapper.cpp:4:
+  cargo:warning=/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+  cargo:warning=   26 |             virtual void getView() = 0;
+  cargo:warning=      |                          ^~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> >':
+  cargo:warning=/usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>'
+  cargo:warning= 1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+  cargo:warning=      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > > >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning= 2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+  cargo:warning=      |                                                      ^~~~~
+  cargo:warning=/usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace> > >; <template-parameter-1-3> = <missing>]'
+  cargo:warning=  368 |       template<typename _Up, typename _Ep, typename = _Require<
+  cargo:warning=      |                                            ^~~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp:112:77:   required from here
+  cargo:warning=  112 |                             std::string(label), dimensions[0], dimensions[1]);
+  cargo:warning=      |                                                                             ^
+  cargo:warning=src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::HostSpace>]'
+  cargo:warning=   17 |             ViewType getView() {
+  cargo:warning=      |                      ^~~~~~~
+  cargo:warning=/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+  cargo:warning=   26 |             virtual void getView() = 0;
+  cargo:warning=      |                          ^~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> >':
+  cargo:warning=/usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>'
+  cargo:warning= 1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+  cargo:warning=      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > > >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning= 2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+  cargo:warning=      |                                                      ^~~~~
+  cargo:warning=/usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace> > >; <template-parameter-1-3> = <missing>]'
+  cargo:warning=  368 |       template<typename _Up, typename _Ep, typename = _Require<
+  cargo:warning=      |                                            ^~~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp:116:92:   required from here
+  cargo:warning=  116 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2]);
+  cargo:warning=      |                                                                                            ^
+  cargo:warning=src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::HostSpace>]'
+  cargo:warning=   17 |             ViewType getView() {
+  cargo:warning=      |                      ^~~~~~~
+  cargo:warning=/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+  cargo:warning=   26 |             virtual void getView() = 0;
+  cargo:warning=      |                          ^~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> >':
+  cargo:warning=/usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>'
+  cargo:warning= 1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+  cargo:warning=      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning= 2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+  cargo:warning=      |                                                      ^~~~~
+  cargo:warning=/usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace> > >; <template-parameter-1-3> = <missing>]'
+  cargo:warning=  368 |       template<typename _Up, typename _Ep, typename = _Require<
+  cargo:warning=      |                                            ^~~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp:120:107:   required from here
+  cargo:warning=  120 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
+  cargo:warning=      |                                                                                                           ^
+  cargo:warning=src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::HostSpace>]'
+  cargo:warning=   17 |             ViewType getView() {
+  cargo:warning=      |                      ^~~~~~~
+  cargo:warning=/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+  cargo:warning=   26 |             virtual void getView() = 0;
+  cargo:warning=      |                          ^~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> >':
+  cargo:warning=/usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>'
+  cargo:warning= 1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+  cargo:warning=      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning= 2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+  cargo:warning=      |                                                      ^~~~~
+  cargo:warning=/usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace> > >; <template-parameter-1-3> = <missing>]'
+  cargo:warning=  368 |       template<typename _Up, typename _Ep, typename = _Require<
+  cargo:warning=      |                                            ^~~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp:124:122:   required from here
+  cargo:warning=  124 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
+  cargo:warning=      |                                                                                                                          ^
+  cargo:warning=src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::HostSpace>]'
+  cargo:warning=   17 |             ViewType getView() {
+  cargo:warning=      |                      ^~~~~~~
+  cargo:warning=/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+  cargo:warning=   26 |             virtual void getView() = 0;
+  cargo:warning=      |                          ^~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> >':
+  cargo:warning=/usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>'
+  cargo:warning= 1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+  cargo:warning=      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning= 2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+  cargo:warning=      |                                                      ^~~~~
+  cargo:warning=/usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace> > >; <template-parameter-1-3> = <missing>]'
+  cargo:warning=  368 |       template<typename _Up, typename _Ep, typename = _Require<
+  cargo:warning=      |                                            ^~~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp:128:137:   required from here
+  cargo:warning=  128 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
+  cargo:warning=      |                                                                                                                                         ^
+  cargo:warning=src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::HostSpace>]'
+  cargo:warning=   17 |             ViewType getView() {
+  cargo:warning=      |                      ^~~~~~~
+  cargo:warning=/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+  cargo:warning=   26 |             virtual void getView() = 0;
+  cargo:warning=      |                          ^~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> >':
+  cargo:warning=/usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>'
+  cargo:warning= 1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+  cargo:warning=      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning= 2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+  cargo:warning=      |                                                      ^~~~~
+  cargo:warning=/usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace> > >; <template-parameter-1-3> = <missing>]'
+  cargo:warning=  368 |       template<typename _Up, typename _Ep, typename = _Require<
+  cargo:warning=      |                                            ^~~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp:132:152:   required from here
+  cargo:warning=  132 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
+  cargo:warning=      |                                                                                                                                                        ^
+  cargo:warning=src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::HostSpace>]'
+  cargo:warning=   17 |             ViewType getView() {
+  cargo:warning=      |                      ^~~~~~~
+  cargo:warning=/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+  cargo:warning=   26 |             virtual void getView() = 0;
+  cargo:warning=      |                          ^~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> >':
+  cargo:warning=/usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>'
+  cargo:warning= 1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+  cargo:warning=      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > > >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning= 2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+  cargo:warning=      |                                                      ^~~~~
+  cargo:warning=/usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP> > >; <template-parameter-1-3> = <missing>]'
+  cargo:warning=  368 |       template<typename _Up, typename _Ep, typename = _Require<
+  cargo:warning=      |                                            ^~~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp:150:62:   required from here
+  cargo:warning=  150 |                             std::string(label), dimensions[0]);
+  cargo:warning=      |                                                              ^
+  cargo:warning=src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::OpenMP>]'
+  cargo:warning=   17 |             ViewType getView() {
+  cargo:warning=      |                      ^~~~~~~
+  cargo:warning=/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+  cargo:warning=   26 |             virtual void getView() = 0;
+  cargo:warning=      |                          ^~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> >':
+  cargo:warning=/usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>'
+  cargo:warning= 1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+  cargo:warning=      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > > >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning= 2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+  cargo:warning=      |                                                      ^~~~~
+  cargo:warning=/usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP> > >; <template-parameter-1-3> = <missing>]'
+  cargo:warning=  368 |       template<typename _Up, typename _Ep, typename = _Require<
+  cargo:warning=      |                                            ^~~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp:154:77:   required from here
+  cargo:warning=  154 |                             std::string(label), dimensions[0], dimensions[1]);
+  cargo:warning=      |                                                                             ^
+  cargo:warning=src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::OpenMP>]'
+  cargo:warning=   17 |             ViewType getView() {
+  cargo:warning=      |                      ^~~~~~~
+  cargo:warning=/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+  cargo:warning=   26 |             virtual void getView() = 0;
+  cargo:warning=      |                          ^~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> >':
+  cargo:warning=/usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>'
+  cargo:warning= 1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+  cargo:warning=      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > > >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning= 2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+  cargo:warning=      |                                                      ^~~~~
+  cargo:warning=/usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP> > >; <template-parameter-1-3> = <missing>]'
+  cargo:warning=  368 |       template<typename _Up, typename _Ep, typename = _Require<
+  cargo:warning=      |                                            ^~~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp:158:92:   required from here
+  cargo:warning=  158 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2]);
+  cargo:warning=      |                                                                                            ^
+  cargo:warning=src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double***, Kokkos::LayoutLeft, Kokkos::OpenMP>]'
+  cargo:warning=   17 |             ViewType getView() {
+  cargo:warning=      |                      ^~~~~~~
+  cargo:warning=/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+  cargo:warning=   26 |             virtual void getView() = 0;
+  cargo:warning=      |                          ^~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> >':
+  cargo:warning=/usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>'
+  cargo:warning= 1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+  cargo:warning=      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning= 2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+  cargo:warning=      |                                                      ^~~~~
+  cargo:warning=/usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP> > >; <template-parameter-1-3> = <missing>]'
+  cargo:warning=  368 |       template<typename _Up, typename _Ep, typename = _Require<
+  cargo:warning=      |                                            ^~~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp:162:107:   required from here
+  cargo:warning=  162 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
+  cargo:warning=      |                                                                                                           ^
+  cargo:warning=src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double****, Kokkos::LayoutLeft, Kokkos::OpenMP>]'
+  cargo:warning=   17 |             ViewType getView() {
+  cargo:warning=      |                      ^~~~~~~
+  cargo:warning=/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+  cargo:warning=   26 |             virtual void getView() = 0;
+  cargo:warning=      |                          ^~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> >':
+  cargo:warning=/usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>'
+  cargo:warning= 1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+  cargo:warning=      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning= 2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+  cargo:warning=      |                                                      ^~~~~
+  cargo:warning=/usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP> > >; <template-parameter-1-3> = <missing>]'
+  cargo:warning=  368 |       template<typename _Up, typename _Ep, typename = _Require<
+  cargo:warning=      |                                            ^~~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp:166:122:   required from here
+  cargo:warning=  166 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
+  cargo:warning=      |                                                                                                                          ^
+  cargo:warning=src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double*****, Kokkos::LayoutLeft, Kokkos::OpenMP>]'
+  cargo:warning=   17 |             ViewType getView() {
+  cargo:warning=      |                      ^~~~~~~
+  cargo:warning=/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+  cargo:warning=   26 |             virtual void getView() = 0;
+  cargo:warning=      |                          ^~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> >':
+  cargo:warning=/usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>'
+  cargo:warning= 1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+  cargo:warning=      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning= 2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+  cargo:warning=      |                                                      ^~~~~
+  cargo:warning=/usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP> > >; <template-parameter-1-3> = <missing>]'
+  cargo:warning=  368 |       template<typename _Up, typename _Ep, typename = _Require<
+  cargo:warning=      |                                            ^~~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp:170:137:   required from here
+  cargo:warning=  170 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
+  cargo:warning=      |                                                                                                                                         ^
+  cargo:warning=src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double******, Kokkos::LayoutLeft, Kokkos::OpenMP>]'
+  cargo:warning=   17 |             ViewType getView() {
+  cargo:warning=      |                      ^~~~~~~
+  cargo:warning=/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+  cargo:warning=   26 |             virtual void getView() = 0;
+  cargo:warning=      |                          ^~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp: In instantiation of 'struct test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> >':
+  cargo:warning=/usr/include/c++/14/type_traits:1499:30:   required from 'struct std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>'
+  cargo:warning= 1499 |     : public __bool_constant<__is_convertible(_From, _To)>
+  cargo:warning=      |                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:183:35:   required by substitution of 'template<class ... _Bn> std::__detail::__first_t<std::integral_constant<bool, true>, typename std::enable_if<(bool)(_Bn::value), void>::type ...> std::__detail::__and_fn(int) [with _Bn = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning=  183 |                                       __enable_if_t<bool(_Bn::value)>...>;
+  cargo:warning=      |                                                               ^~~~~
+  cargo:warning=/usr/include/c++/14/type_traits:199:42:   required from 'struct std::__and_<std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> > >'
+  cargo:warning=  199 |     : decltype(__detail::__and_fn<_Bn...>(0))
+  cargo:warning=      |                ~~~~~~~~~~~~~~~~~~~~~~~~~~^~~
+  cargo:warning=/usr/include/c++/14/type_traits:2323:54:   required by substitution of 'template<class ... _Cond> using std::_Require = std::__enable_if_t<((bool)std::__and_<_Bn>::value)> [with _Cond = {std::__and_<std::is_convertible<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> >*, test::kernels::IView*>, std::__not_<std::is_array<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > > > >, std::is_convertible<std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > >, std::default_delete<test::kernels::IView> >}]'
+  cargo:warning= 2323 |     using _Require = __enable_if_t<__and_<_Cond...>::value>;
+  cargo:warning=      |                                                      ^~~~~
+  cargo:warning=/usr/include/c++/14/bits/unique_ptr.h:368:44:   required by substitution of 'template<class _Up, class _Ep, class> std::unique_ptr<test::kernels::IView>::unique_ptr(std::unique_ptr<_Tp, _Dp>&&) [with _Up = test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> >; _Ep = std::default_delete<test::kernels::ViewHolder<Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP> > >; <template-parameter-1-3> = <missing>]'
+  cargo:warning=  368 |       template<typename _Up, typename _Ep, typename = _Require<
+  cargo:warning=      |                                            ^~~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp:174:152:   required from here
+  cargo:warning=  174 |                             std::string(label), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
+  cargo:warning=      |                                                                                                                                                        ^
+  cargo:warning=src/cpp/kernel_wrapper.cpp:17:22: error: conflicting return type specified for 'ViewType test::kernels::ViewHolder<ViewType>::getView() [with ViewType = Kokkos::View<double*******, Kokkos::LayoutLeft, Kokkos::OpenMP>]'
+  cargo:warning=   17 |             ViewType getView() {
+  cargo:warning=      |                      ^~~~~~~
+  cargo:warning=/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate/kokkos_interop2/include/kernel_wrapper.h:26:26: note: overridden function is 'virtual void test::kernels::IView::getView()'
+  cargo:warning=   26 |             virtual void getView() = 0;
+  cargo:warning=      |                          ^~~~~~~
+  cargo:warning=src/cpp/kernel_wrapper.cpp: In function 'void test::kernels::deep_copy(const RustViewWrapper&, const RustViewWrapper&)':
+  cargo:warning=src/cpp/kernel_wrapper.cpp:221:55: error: forming reference to void
+  cargo:warning=  221 |                 auto& hostView1 = view1.view->getView();
+  cargo:warning=      |                                                       ^
+  cargo:warning=src/cpp/kernel_wrapper.cpp:222:55: error: forming reference to void
+  cargo:warning=  222 |                 auto& hostView2 = view2.view->getView();
+  cargo:warning=      |                                                       ^
+
+  --- stderr
+
+  CXX include path:
+    /home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/include
+    /home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate
+
+
+  error occurred in cc-rs: command did not execute successfully (status code exit status: 1): LC_ALL="C" "c++" "-O0" "-ffunction-sections" "-fdata-sections" "-fPIC" "-gdwarf-4" "-fno-omit-frame-pointer" "-m64" "-I" "/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/include" "-I" "/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/cxxbridge/crate" "-I" "include" "-I" "/home/raphael/kokkos-install/include" "-Wall" "-Wextra" "-std=c++20" "-DKOKKOS_ENABLE_CXX20" "-fopenmp" "-o" "/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2/target/debug/build/kokkos_interop2-b53b6d47737f91f0/out/82e98a3609c225b5-kernel_wrapper.o" "-c" "src/cpp/kernel_wrapper.cpp"
+
+
