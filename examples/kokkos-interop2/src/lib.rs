@@ -27,9 +27,9 @@ pub mod ffi {
         view: UniquePtr<IView>,
         memSpace: MemSpace,
         layout: Layout,
-        rank: u8,
+        rank: u32,
         label: String,
-        extent: [u32; 7],
+        extent: Vec<i32>,
         span: u32,
     }
 
@@ -42,11 +42,11 @@ pub mod ffi {
         unsafe fn kokkos_initialize();
         unsafe fn kokkos_finalize();
 
-        unsafe fn create_view(memSpace: MemSpace, label: String, rank: u8, dimensions: [u32; 7]) -> RustViewWrapper;
-        unsafe fn fill_view(view: &RustViewWrapper, data: &[f64]);
+        unsafe fn create_view(memSpace: MemSpace, label: String, dimensions: Vec<i32>) -> RustViewWrapper;
+        // unsafe fn fill_view(view: &RustViewWrapper, data: &[f64]);
         unsafe fn show_view(view: &RustViewWrapper);
         unsafe fn show_metadata(view: &RustViewWrapper);
-        unsafe fn deep_copy(view1: &RustViewWrapper, view2: &RustViewWrapper);
+        // unsafe fn deep_copy(view1: &RustViewWrapper, view2: &RustViewWrapper);
         // unsafe fn assert_equals(view1: &RustViewWrapper, view2: &RustViewWrapper);
     }
 

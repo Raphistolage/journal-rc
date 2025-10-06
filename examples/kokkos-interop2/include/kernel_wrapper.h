@@ -21,9 +21,8 @@ namespace test {
 
         struct IView {
             virtual ~IView() = default; 
-            virtual void fill(rust::Slice<const double> data, MemSpace memSpace) = 0;
-            virtual void show(MemSpace memSpace) = 0;
-            virtual void* getView() = 0;      
+            // virtual void fill(rust::Slice<const double> data, MemSpace memSpace) = 0;
+            virtual void show(MemSpace memSpace) = 0;     
         };
 
     }
@@ -37,11 +36,11 @@ namespace test {
         void kokkos_initialize();
         void kokkos_finalize();
 
-        RustViewWrapper create_view(MemSpace memSpace, rust::String label, uint8_t rank, std::array<uint32_t, 7> dimensions);
-        void fill_view(const RustViewWrapper& view, rust::Slice<const double> data);
+        RustViewWrapper create_view(MemSpace memSpace, rust::String label, rust::Vec<int> dimensions);
+        // void fill_view(const RustViewWrapper& view, rust::Slice<const double> data);
         void show_view(const RustViewWrapper& view);
         void show_metadata(const RustViewWrapper& view);
-        void deep_copy(const RustViewWrapper& view1, const RustViewWrapper& view2);
+        // void deep_copy(const RustViewWrapper& view1, const RustViewWrapper& view2);
         // void assert_equals(const RustViewWrapper& view1, const RustViewWrapper& view2);
     } 
 } 
