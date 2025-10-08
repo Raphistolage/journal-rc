@@ -15,4 +15,5 @@ namespace mdspan_interop {
 namespace mdspan_interop {
     void test_fn();
     std::unique_ptr<IArray> create_mdspan(rust::Vec<int> dimensions, rust::Slice<double> data);
+    void test_castor(void* my_ndarray);
 }
