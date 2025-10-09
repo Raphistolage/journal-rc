@@ -3,8 +3,9 @@
 #include <vector>
 #include <iostream>
 #include <memory>
-#include "rust/cxx.h"
 #include <mdspan>
+#include "rust/cxx.h"
+
 
 
 #include "mdspan_interop/include/mdspan_interop.h"
@@ -41,13 +42,6 @@ namespace mdspan_interop {
                 fixed_dimensions[i] = 0;
             }
         }
-        // std::tuple tp1 {fixed_dimensions[0],fixed_dimensions[1],fixed_dimensions[2],fixed_dimensions[3],fixed_dimensions[4],fixed_dimensions[5],fixed_dimensions[6]};
-        
-        // uint32_t size = 1;
-        // for (size_t i = 0; i < rank; i++)
-        // {
-        //     size *= dimensions[i];
-        // }
 
         std::unique_ptr<IArray> view;
         switch(rank) {
@@ -83,12 +77,58 @@ namespace mdspan_interop {
                 view = std::make_unique<ArrayHolder<double,7,std::layout_right>>(mData, dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
                 break;
         }
-
-        // std::tuple tp {mData, dimensions[i] for i in dimensions.length};
-
-        // std::unique_ptr<IArray> view = std::make_unique<IArray>(std::apply(std::mdspan, tp));
-        
         return view;
+
+        //TODO :: 3Dimensions.
     } 
+
+    template <int D, typename... Dims>
+    std::mdspan<const double, std::dextents<std::size_t, D>> cast_from_sharedArray(SharedArrayView* arrayView, Dims... dims) {
+        std::mdspan<const double, std::dextents<std::size_t, D>> casted_span = std::mdspan(arrayView->ptr.data(), dims...);
+        for (size_t i = 0; i < casted_span.rank(); ++i) {
+            std::cout << "extent(" << i << "): " << casted_span.extent(i) << "\n";
+            std::cout << "stride(" << i << "): " << casted_span.stride(i) << "\n";
+        }
+        std::cout << "size: " << casted_span.size() << "\n";
+        std::cout << "empty: " << casted_span.empty() << "\n";
+        return casted_span;
+    }
+
+    void test_cast_display(SharedArrayView arrayView) {
+        size_t* shapes = arrayView.shape.data();
+        switch (arrayView.dim)
+        {
+        case 1: {
+            auto array1 = cast_from_sharedArray<1>(&arrayView, shapes[0]);
+            break;
+        }
+        case 2: {
+            auto array2 = cast_from_sharedArray<2>(&arrayView, shapes[0], shapes[1]);
+            break;
+        }
+        case 3: {
+            auto array3 = cast_from_sharedArray<3>(&arrayView, shapes[0], shapes[1], shapes[2]);
+            break;
+        }
+        case 4: {
+            auto array4 = cast_from_sharedArray<4>(&arrayView, shapes[0], shapes[1], shapes[2], shapes[3]);
+            break;
+        }
+        case 5: {
+            auto array5 = cast_from_sharedArray<5>(&arrayView, shapes[0], shapes[1], shapes[2], shapes[3], shapes[4]);
+            break;
+        }
+        case 6: {
+            auto array6 = cast_from_sharedArray<6>(&arrayView, shapes[0], shapes[1], shapes[2], shapes[3], shapes[4], shapes[5]);
+            break;
+        }
+        case 7: {
+            auto array7 = cast_from_sharedArray<7>(&arrayView, shapes[0], shapes[1], shapes[2], shapes[3], shapes[4], shapes[5], shapes[6]);
+            break;
+        }
+        default:
+            break;
+    }
+    }
 
 }
