@@ -6,12 +6,8 @@
 #include <mdspan>
 #include "rust/cxx.h"
 
-
-
+#include "mdspan_interop/src/lib.rs.h"
 #include "mdspan_interop/include/mdspan_interop.h"
-#include "mdspan_interop/src/main.rs.h"
-
-
 
 namespace mdspan_interop {
 
@@ -25,66 +21,9 @@ namespace mdspan_interop {
         ArrayHolder(std::mdspan<T, std::dextents<std::size_t, D>, std::layout_right> span) : array(span) {}
     };
 
-    std::unique_ptr<IArray> create_mdspan(rust::Vec<int> dimensions, rust::Slice<double> data) {
-        double* mData = data.data();
-        uint32_t rank = dimensions.size();
-        if (rank < 1 || rank>7) {
-            std::cout << "Rank must be between 1 and 7. \n";
-            return std::make_unique<IArray>();
-        }
-        int fixed_dimensions[7];
-        for (uint32_t i = 0; i < 7; i++)
-        {
-            if (i<rank)
-            {
-                fixed_dimensions[i] = dimensions[i];
-            } else {
-                fixed_dimensions[i] = 0;
-            }
-        }
-
-        std::unique_ptr<IArray> view;
-        switch(rank) {
-            case 1:
-                view = std::make_unique<ArrayHolder<double,1,std::layout_right>>(mData, dimensions[0]);
-                break;
-            case 2: {
-                ArrayHolder arrayTest = ArrayHolder<double,2,std::layout_right>(mData, dimensions[0], dimensions[1]);
-
-                for (std::size_t j = 0; j != arrayTest.array.extent(0); j++)
-                {
-                    for (std::size_t k = 0; k != arrayTest.array.extent(1); k++) {
-                        std::print("{} ", arrayTest.array[j, k]);
-                    }
-                    std::println("");
-                }
-                view = std::make_unique<ArrayHolder<double,2,std::layout_right>>(mData, dimensions[0], dimensions[1]);
-                break;
-            }
-            case 3:
-                view = std::make_unique<ArrayHolder<double,3,std::layout_right>>(mData, dimensions[0], dimensions[1], dimensions[2]);
-                break;
-            case 4:
-                view = std::make_unique<ArrayHolder<double,4,std::layout_right>>(mData, dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
-                break;
-            case 5:
-                view = std::make_unique<ArrayHolder<double,5,std::layout_right>>(mData, dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
-                break;
-            case 6:
-                view = std::make_unique<ArrayHolder<double,6,std::layout_right>>(mData, dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
-                break;
-            case 7:
-                view = std::make_unique<ArrayHolder<double,7,std::layout_right>>(mData, dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
-                break;
-        }
-        return view;
-
-        //TODO :: 3Dimensions.
-    } 
-
     template <int D, typename... Dims>
-    std::mdspan<const double, std::dextents<std::size_t, D>> cast_from_sharedArray(SharedArrayView* arrayView, Dims... dims) {
-        std::mdspan<const double, std::dextents<std::size_t, D>> casted_span = std::mdspan(arrayView->ptr.data(), dims...);
+    std::mdspan<double, std::dextents<std::size_t, D>> cast_from_sharedArray(SharedArrayView* arrayView, Dims... dims) {
+        std::mdspan<double, std::dextents<std::size_t, D>> casted_span = std::mdspan(arrayView->ptr, dims...);
         for (size_t i = 0; i < casted_span.rank(); ++i) {
             std::cout << "extent(" << i << "): " << casted_span.extent(i) << "\n";
             std::cout << "stride(" << i << "): " << casted_span.stride(i) << "\n";
@@ -94,41 +33,68 @@ namespace mdspan_interop {
         return casted_span;
     }
 
-    void test_cast_display(SharedArrayView arrayView) {
-        size_t* shapes = arrayView.shape.data();
-        switch (arrayView.dim)
+    void deep_copy(SharedArrayViewMut& arrayView1, const SharedArrayView& arrayView2) {
+        std::cout << "Info quick : "<< static_cast<int>(arrayView1.dim) << "\n";
+        size_t rank1 = arrayView1.dim;
+        size_t rank2 = arrayView2.dim;
+        const size_t* shape1 = arrayView1.shape.data();
+        const size_t* shape2 = arrayView2.shape.data();
+        const long* stride1 = arrayView1.stride.data();
+        const long* stride2 = arrayView2.stride.data();
+        if (rank1 != rank2){
+            std::cout << "Both views should be of same rank. \n Deep copy aborted." << "\n";
+            return;
+        }
+        switch (rank1)
         {
-        case 1: {
-            auto array1 = cast_from_sharedArray<1>(&arrayView, shapes[0]);
-            break;
+            case 1: {
+                if (shape1[0] != shape2[0])
+                {
+                    std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
+                    return;
+                }
+                for (size_t i = 0; i < shape1[0]; i++)
+                {
+                    arrayView1.ptr[i*stride2[0]] = arrayView2.ptr[i*stride2[0]];
+                }
+                break;
+            }
+            case 2: {
+                if (shape1[0] != shape2[0] || shape1[1] != shape2[1])
+                {
+                    std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
+                    return;
+                }
+                for (size_t i = 0; i < shape1[0]; i++)
+                {
+                    for (size_t j = 0; j < shape1[1]; j++)
+                    {
+                        arrayView1.ptr[i*stride2[0]+j*stride2[1]] = arrayView2.ptr[i*stride2[0]+j*stride2[1]];
+                    }
+                }
+                break;
+            }
+            case 3: {
+                if (shape1[0] != shape2[0] || shape1[1] != shape2[1] || shape1[2] != shape2[2])
+                {
+                    std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
+                    return;
+                }
+                for (size_t i = 0; i < shape1[0]; i++)
+                {
+                    for (size_t j = 0; j < shape1[1]; j++)
+                    {
+                        for (size_t k = 0; k < shape1[2]; k++)
+                        {
+                            arrayView1.ptr[i*stride2[0]+ j*stride2[1] + k*stride2[2]] = arrayView2.ptr[i*stride2[0]+ j*stride2[1] + k*stride2[2]];
+                        }
+                    }
+                }
+                break;
+            }
+            default:
+                break;
         }
-        case 2: {
-            auto array2 = cast_from_sharedArray<2>(&arrayView, shapes[0], shapes[1]);
-            break;
-        }
-        case 3: {
-            auto array3 = cast_from_sharedArray<3>(&arrayView, shapes[0], shapes[1], shapes[2]);
-            break;
-        }
-        case 4: {
-            auto array4 = cast_from_sharedArray<4>(&arrayView, shapes[0], shapes[1], shapes[2], shapes[3]);
-            break;
-        }
-        case 5: {
-            auto array5 = cast_from_sharedArray<5>(&arrayView, shapes[0], shapes[1], shapes[2], shapes[3], shapes[4]);
-            break;
-        }
-        case 6: {
-            auto array6 = cast_from_sharedArray<6>(&arrayView, shapes[0], shapes[1], shapes[2], shapes[3], shapes[4], shapes[5]);
-            break;
-        }
-        case 7: {
-            auto array7 = cast_from_sharedArray<7>(&arrayView, shapes[0], shapes[1], shapes[2], shapes[3], shapes[4], shapes[5], shapes[6]);
-            break;
-        }
-        default:
-            break;
-    }
     }
 
 }

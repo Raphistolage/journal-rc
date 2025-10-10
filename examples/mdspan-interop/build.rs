@@ -1,6 +1,6 @@
 fn main() {
     println!("cargo:warning=Running build.rs!"); 
-    cxx_build::bridge("src/main.rs")
+    cxx_build::bridge("src/lib.rs")
         .file("src/cpp/mdspan_interop.cpp")
         // .file("src/cpp/mdspan_cast.cpp")
         .include("include")
@@ -9,13 +9,11 @@ fn main() {
         .flag_if_supported("-stdlib=libc++")
         .compile("mdspan_interop");
 
-
-     
     println!("cargo:rustc-link-lib=c++");
     println!("cargo:rustc-link-lib=openblas");
     println!("cargo:rustc-link-lib=lapack");
     
-    println!("cargo:rerun-if-changed=src/main.rs");
+    println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=src/cpp/mdspan_interop.cpp");
     println!("cargo:rerun-if-changed=include/mdspan_interop.h");
     // println!("cargo:rerun-if-changed=src/cpp/mdspan_cast.cpp");
