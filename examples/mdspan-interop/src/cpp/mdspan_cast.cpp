@@ -7,10 +7,10 @@
 #include <cstring>
 
 extern "C" {
-    void test_castor(void* my_ndarray) {
-        std::mdspan<double, std::dextents<std::size_t, 2>, std::layout_right>* array_casted = static_cast<std::mdspan<double, std::dextents<std::size_t, 2>, std::layout_right>*>(my_ndarray);
-        std::println("TestCastooooooooooooooooooooor ");
-        std::println("Extents : {} x {}", array_casted->extent(0), array_casted->extent(1));
+    void test_castor(void* my_ndarray, int N) {
+        std::mdspan<double, std::dextents<std::size_t, N>, std::layout_right>* array_casted = static_cast<std::mdspan<double, std::dextents<std::size_t, N>, std::layout_right>*>(my_ndarray);
+        std::println("TestCastor ");
+        std::println("Extents : {} * {}", array_casted->extent(0), array_casted->extent(1));
         for (std::size_t j = 0; j != array_casted->extent(0); j++)
         {
             for (std::size_t k = 0; k != array_casted->extent(1); k++)
@@ -19,7 +19,7 @@ extern "C" {
         }
 
 
-        // IA {
+        // AI {
         // Test of mdspan's methods, see if they work when casted from ndarray.
         for (size_t i = 0; i < array_casted->rank(); ++i) {
             std::cout << "extent(" << i << "): " << array_casted->extent(i) << "\n";

@@ -6,6 +6,11 @@
 #include <mdspan>
 
 namespace mdspan_interop {
+    enum Errors : uint8_t{
+        NoErrors = 0,
+        IncompatibleRanks = 1,
+        IncompatibleShapes = 2,
+    };
     struct SharedArrayViewMut;
     struct SharedArrayView;
     struct IArray {
@@ -16,9 +21,8 @@ namespace mdspan_interop {
 #include "mdspan_interop/src/lib.rs.h"
 
 namespace mdspan_interop {
-    // void test_fn();
     template <int D, typename... Dims>
     std::mdspan<double, std::dextents<std::size_t, D>> cast_from_sharedArray(SharedArrayView* arrayView, Dims... dims);
-    void deep_copy(SharedArrayViewMut& arrayView1, const SharedArrayView& arrayView2);
-    // void test_castor(void* my_ndarray);
+    Errors deep_copy(SharedArrayViewMut& arrayView1, const SharedArrayView& arrayView2);
+    std::unique_ptr<IArray> create_mdspan(rust::Vec<int> dimensions, rust::Slice<double> data);
 }
