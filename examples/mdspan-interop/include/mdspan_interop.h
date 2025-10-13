@@ -22,7 +22,9 @@ namespace mdspan_interop {
 
 namespace mdspan_interop {
     template <int D, typename... Dims>
-    std::mdspan<double, std::dextents<std::size_t, D>> cast_from_sharedArray(SharedArrayView* arrayView, Dims... dims);
+    std::mdspan<const double, std::dextents<std::size_t, D>> cast_from_sharedArray(SharedArrayView* arrayView, Dims... dims);
     Errors deep_copy(SharedArrayViewMut& arrayView1, const SharedArrayView& arrayView2);
-    std::unique_ptr<IArray> create_mdspan(rust::Vec<int> dimensions, rust::Slice<double> data);
+    IArray from_shared(SharedArrayView arrayView);
+    SharedArrayView dot(SharedArrayView arrayView1, SharedArrayView arrayView2);
+    void free_shared_array(const double* ptr);
 }

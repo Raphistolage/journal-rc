@@ -6,7 +6,7 @@ use ndarray::ShapeBuilder;
 fn create_shared_test() {
     let mut v = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
     let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-    let mut arr1 = ArrayViewMut::from_shape((2, 5).strides((1,2)), &mut v).unwrap();
+    let mut arr1 = ArrayViewMut::from_shape((2, 6).strides((1,2)), &mut v).unwrap();
     let arr2 = ArrayView::from_shape((2, 6).strides((1, 2)), &s).unwrap();
 
     println!("Orgininal ArrayViews : ");

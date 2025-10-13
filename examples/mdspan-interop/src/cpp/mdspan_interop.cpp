@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <mdspan>
+#include <cassert>
 #include "rust/cxx.h"
 
 #include "mdspan_interop/src/lib.rs.h"
@@ -22,8 +23,8 @@ namespace mdspan_interop {
     };
 
     template <int D, typename... Dims>
-    std::mdspan<double, std::dextents<std::size_t, D>> cast_from_sharedArray(SharedArrayView* arrayView, Dims... dims) {
-        std::mdspan<double, std::dextents<std::size_t, D>> casted_span = std::mdspan(arrayView->ptr, dims...);
+    std::mdspan<const double, std::dextents<std::size_t, D>> cast_from_sharedArray(SharedArrayView* arrayView, Dims... dims) {
+        std::mdspan<const double, std::dextents<std::size_t, D>> casted_span = std::mdspan(arrayView->ptr, dims...);
         for (size_t i = 0; i < casted_span.rank(); ++i) {
             std::cout << "extent(" << i << "): " << casted_span.extent(i) << "\n";
             std::cout << "stride(" << i << "): " << casted_span.stride(i) << "\n";
@@ -34,12 +35,11 @@ namespace mdspan_interop {
     }
 
     Errors deep_copy(SharedArrayViewMut& arrayView1, const SharedArrayView& arrayView2) {
-        std::cout << "Info quick : "<< static_cast<int>(arrayView1.dim) << "\n";
-        size_t rank1 = arrayView1.dim;
-        size_t rank2 = arrayView2.dim;
-        const size_t* shape1 = arrayView1.shape.data();
-        const size_t* shape2 = arrayView2.shape.data();
-        const long* stride2 = arrayView2.stride.data();
+        int rank1 = arrayView1.rank;
+        int rank2 = arrayView2.rank;
+        const int* shape1 = arrayView1.shape.data();
+        const int* shape2 = arrayView2.shape.data();
+        const int* stride2 = arrayView2.stride.data();
         if (rank1 != rank2){
             std::cout << "Both views should be of same rank. \n Deep copy aborted." << "\n";
             return Errors::IncompatibleRanks;
@@ -52,7 +52,7 @@ namespace mdspan_interop {
                     std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
                     return Errors::IncompatibleShapes;
                 }
-                for (size_t i = 0; i < shape1[0]; i++)
+                for (int i = 0; i < shape1[0]; i++)
                 {
                     arrayView1.ptr[i*stride2[0]] = arrayView2.ptr[i*stride2[0]];
                 }
@@ -64,9 +64,9 @@ namespace mdspan_interop {
                     std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
                     return Errors::IncompatibleShapes;
                 }
-                for (size_t i = 0; i < shape1[0]; i++)
+                for (int i = 0; i < shape1[0]; i++)
                 {
-                    for (size_t j = 0; j < shape1[1]; j++)
+                    for (int j = 0; j < shape1[1]; j++)
                     {
                         arrayView1.ptr[i*stride2[0]+j*stride2[1]] = arrayView2.ptr[i*stride2[0]+j*stride2[1]];
                     }
@@ -79,11 +79,11 @@ namespace mdspan_interop {
                     std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
                     return Errors::IncompatibleShapes;
                 }
-                for (size_t i = 0; i < shape1[0]; i++)
+                for (int i = 0; i < shape1[0]; i++)
                 {
-                    for (size_t j = 0; j < shape1[1]; j++)
+                    for (int j = 0; j < shape1[1]; j++)
                     {
-                        for (size_t k = 0; k < shape1[2]; k++)
+                        for (int k = 0; k < shape1[2]; k++)
                         {
                             arrayView1.ptr[i*stride2[0]+ j*stride2[1] + k*stride2[2]] = arrayView2.ptr[i*stride2[0]+ j*stride2[1] + k*stride2[2]];
                         }
@@ -97,51 +97,87 @@ namespace mdspan_interop {
         return Errors::NoErrors;
     }
 
-    std::unique_ptr<IArray> create_mdspan(rust::Vec<int> dimensions, rust::Slice<double> data) {
-        double* mData = data.data();
-        uint32_t rank = dimensions.size();
-        if (rank < 1 || rank>7) {
-            std::cout << "Rank must be between 1 and 7. \n";
-            return std::make_unique<IArray>();
-        }
-        int fixed_dimensions[7];
-        for (uint32_t i = 0; i < 7; i++)
-        {
-            if (i<rank)
-            {
-                fixed_dimensions[i] = dimensions[i];
-            } else {
-                fixed_dimensions[i] = 0;
-            }
-        }
-        std::unique_ptr<IArray> view;
-        switch(rank) {
+    IArray from_shared(SharedArrayView* arrayView) {
+        const int* shape = arrayView->shape.data();
+        IArray view;
+        switch(arrayView->rank) {
             case 1:
-                view = std::make_unique<ArrayHolder<double,1,std::layout_right>>(mData, dimensions[0]);
+                view = ArrayHolder<const double,1,std::layout_right>(arrayView->ptr, shape[0]);
                 break;
-            case 2: {
-                view = std::make_unique<ArrayHolder<double,2,std::layout_right>>(mData, dimensions[0], dimensions[1]);
+            case 2:
+                view = ArrayHolder<const double,2,std::layout_right>(arrayView->ptr, shape[0], shape[1]);
                 break;
-            }
             case 3:
-                view = std::make_unique<ArrayHolder<double,3,std::layout_right>>(mData, dimensions[0], dimensions[1], dimensions[2]);
+                view = ArrayHolder<const double,3,std::layout_right>(arrayView->ptr, shape[0], shape[1], shape[2]);
                 break;
             case 4:
-                view = std::make_unique<ArrayHolder<double,4,std::layout_right>>(mData, dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
+                view = ArrayHolder<const double,4,std::layout_right>(arrayView->ptr, shape[0], shape[1], shape[2], shape[3]);
                 break;
             case 5:
-                view = std::make_unique<ArrayHolder<double,5,std::layout_right>>(mData, dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
+                view = ArrayHolder<const double,5,std::layout_right>(arrayView->ptr, shape[0], shape[1], shape[2], shape[3], shape[4]);
                 break;
             case 6:
-                view = std::make_unique<ArrayHolder<double,6,std::layout_right>>(mData, dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
+                view = ArrayHolder<const double,6,std::layout_right>(arrayView->ptr, shape[0], shape[1], shape[2], shape[3], shape[4], shape[5]);
                 break;
             case 7:
-                view = std::make_unique<ArrayHolder<double,7,std::layout_right>>(mData, dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
+                view = ArrayHolder<const double,7,std::layout_right>(arrayView->ptr, shape[0], shape[1], shape[2], shape[3], shape[4], shape[5], shape[6]);
                 break;
         }
         return view;
+    }
 
-        //TODO :: 3Dimensions.
-    } 
+    template <int D>
+    SharedArrayView to_shared(std::mdspan<double, std::dextents<std::size_t, D>> from_ms) {
+        int rank = from_ms.rank();
+        rust::Vec<int> shapes;
+        rust::Vec<int> strides;
+        for (int i = 0; i < rank; i++)
+        {
+            shapes.push_back(from_ms.extent(i));
+            strides.push_back(from_ms.stride(i));
+        }
+        
+        return SharedArrayView {
+            from_ms.data_handle(),
+            rank,
+            shapes,
+            strides,
+        };
+    }
 
+    SharedArrayView dot(SharedArrayView arrayView1, SharedArrayView arrayView2) {
+        int rank1 = arrayView1.rank;
+        int rank2 = arrayView2.rank;
+        const int* shape1 = arrayView1.shape.data();
+        // const int* shape2 = arrayView2.shape.data();
+        // const int* stride2 = arrayView2.stride.data();
+        // assert(("Incompatible matrices product", shape1[rank1-1] == shape2[rank2-1]));
+
+        if (rank1 == 1)
+        {
+            if (rank2 == 1)
+            {
+                double r = 0;
+                for (int i = 0; i < shape1[0]; i++)
+                {
+                    r += arrayView1.ptr[i]*arrayView2.ptr[i];
+                }
+
+                
+                double* heap_result = new double[1]; // sur la heap pour que la valeur reste après la sortie de la fonction. Pourrait metre un Smart Pointer.
+                heap_result[0] = r;
+                std::cout<< "Prod result C++ side : " << heap_result[0] << "\n";
+                auto result = std::mdspan(heap_result, 1);
+                std::println("Result mdspan C++ side : {}", result[0]);
+                return to_shared<1>(result);
+            }
+        }
+        return SharedArrayView{nullptr, 0, {}, {}};
+    }
+    
+    // cette fonction devra être appelé sur chaque ptr de data de sharedArray qui auront été instanciés depuis le côté C++
+    void free_shared_array(const double* ptr) {
+        delete[] ptr;
+    }
+    
 }
