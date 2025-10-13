@@ -55,6 +55,8 @@ use std::slice::from_raw_parts;
 use::ndarray::{ArrayView};
 use ndarray::{Dim, IxDyn, ShapeBuilder};
 
+use crate::ffi::SharedArrayView;
+
 pub fn to_shared_mut<'a,D>(arr: &'a mut ndarray::ArrayViewMut<f64, D>) -> ffi::SharedArrayViewMut where D: ndarray::Dimension + 'a{
     println!("Creating Shared Mut");
     let rank = arr.ndim();
@@ -99,19 +101,16 @@ pub fn deep_copy<D: ndarray::Dimension>(arr1: &mut ndarray::ArrayViewMut<f64,D>,
     }
 }
 
-pub fn dot <D: ndarray::Dimension>(arr1: ndarray::ArrayView<f64,D>, arr2: ndarray::ArrayView<f64,D>) {
+pub fn dot <D: ndarray::Dimension>(arr1: ndarray::ArrayView<f64,D>, arr2: ndarray::ArrayView<f64,D>) -> SharedArrayView{
     let shared_array1 = to_shared(&arr1);
     let shared_array2 = to_shared(&arr2);
-    let result = ffi::dot(shared_array1, shared_array2);
+    ffi::dot(shared_array1, shared_array2)
+}
 
-    let result_array = from_shared(result);
-    println!("Resulting matrix : {:?}", result_array);
-    
+pub fn free_shared_array(ptr: *const f64) {
     unsafe {
-        ffi::free_shared_array(result_array.as_ptr());
+        ffi::free_shared_array(ptr);
     }
-
-    println!("Resulting matrix after freeing pointer : {:?}", result_array);
 }
 
 
