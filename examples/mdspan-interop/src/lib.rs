@@ -5,8 +5,6 @@ On pourrait passer directement un raw ptr et la metadata en parametre, mais c'es
 
 */
 
-
-
 #[cxx::bridge(namespace = "mdspan_interop")]
 mod ffi {
     enum Errors {
@@ -46,13 +44,15 @@ mod ffi {
         type Errors;
         fn deep_copy(arrayView1: &mut SharedArrayViewMut, arrayView2: &SharedArrayView) -> Errors;
         fn dot(arrayView1: SharedArrayView , arrayView2: SharedArrayView ) -> SharedArrayView ;
+        fn matrix_vector_product(arrayView1: SharedArrayView , arrayView2: SharedArrayView ) -> SharedArrayView ;
+        fn matrix_product(arrayView1: SharedArrayView , arrayView2: SharedArrayView ) -> SharedArrayView ;
         unsafe fn free_shared_array(ptr: *const f64);
     }
 }
 
 use std::slice::from_raw_parts;
 
-use::ndarray::{ArrayView};
+use::ndarray::{ArrayView, ArrayView2, ArrayView1};
 use ndarray::{Dim, IxDyn, ShapeBuilder};
 
 use crate::ffi::SharedArrayView;
@@ -101,10 +101,22 @@ pub fn deep_copy<D: ndarray::Dimension>(arr1: &mut ndarray::ArrayViewMut<f64,D>,
     }
 }
 
-pub fn dot <D: ndarray::Dimension>(arr1: ndarray::ArrayView<f64,D>, arr2: ndarray::ArrayView<f64,D>) -> SharedArrayView{
+pub fn dot(arr1: ArrayView1<f64>, arr2: ArrayView1<f64>) -> SharedArrayView{
     let shared_array1 = to_shared(&arr1);
     let shared_array2 = to_shared(&arr2);
     ffi::dot(shared_array1, shared_array2)
+}
+
+pub fn matrix_vector_product(arr1: ArrayView2<f64>, arr2: ArrayView1<f64>) -> SharedArrayView{
+    let shared_array1 = to_shared(&arr1);
+    let shared_array2 = to_shared(&arr2);
+    ffi::matrix_vector_product(shared_array1, shared_array2)
+}
+
+pub fn matrix_product(arr1: ArrayView2<f64>, arr2: ArrayView2<f64>) -> SharedArrayView{
+    let shared_array1 = to_shared(&arr1);
+    let shared_array2 = to_shared(&arr2);
+    ffi::matrix_product(shared_array1, shared_array2)
 }
 
 pub fn free_shared_array(ptr: *const f64) {

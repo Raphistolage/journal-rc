@@ -23,8 +23,8 @@ namespace mdspan_interop {
     };
 
     template <int D, typename... Dims>
-    std::mdspan<const double, std::dextents<std::size_t, D>> cast_from_sharedArray(SharedArrayView* arrayView, Dims... dims) {
-        std::mdspan<const double, std::dextents<std::size_t, D>> casted_span = std::mdspan(arrayView->ptr, dims...);
+    std::mdspan<const double, std::dextents<std::size_t, D>> cast_from_sharedArray(const double* ptr, Dims... dims) {
+        std::mdspan<const double, std::dextents<std::size_t, D>> casted_span = std::mdspan(ptr, dims...);
         for (size_t i = 0; i < casted_span.rank(); ++i) {
             std::cout << "extent(" << i << "): " << casted_span.extent(i) << "\n";
             std::cout << "stride(" << i << "): " << casted_span.stride(i) << "\n";
@@ -97,33 +97,32 @@ namespace mdspan_interop {
         return Errors::NoErrors;
     }
 
-    IArray from_shared(SharedArrayView* arrayView) {
+    template <int D>
+    std::mdspan<const double, std::dextents<std::size_t, D>> from_shared(SharedArrayView* arrayView) {
         const int* shape = arrayView->shape.data();
-        IArray view;
         switch(arrayView->rank) {
             case 1:
-                view = ArrayHolder<const double,1,std::layout_right>(arrayView->ptr, shape[0]);
+                return cast_from_sharedArray<1>(arrayView->ptr, shape[0]);
                 break;
             case 2:
-                view = ArrayHolder<const double,2,std::layout_right>(arrayView->ptr, shape[0], shape[1]);
+                return cast_from_sharedArray<2>(arrayView->ptr, shape[0], shape[1]);
                 break;
             case 3:
-                view = ArrayHolder<const double,3,std::layout_right>(arrayView->ptr, shape[0], shape[1], shape[2]);
+                return cast_from_sharedArray<3>(arrayView->ptr, shape[0], shape[1], shape[2]);
                 break;
             case 4:
-                view = ArrayHolder<const double,4,std::layout_right>(arrayView->ptr, shape[0], shape[1], shape[2], shape[3]);
+                return cast_from_sharedArray<4>(arrayView->ptr, shape[0], shape[1], shape[2], shape[3]);
                 break;
             case 5:
-                view = ArrayHolder<const double,5,std::layout_right>(arrayView->ptr, shape[0], shape[1], shape[2], shape[3], shape[4]);
+                return cast_from_sharedArray<5>(arrayView->ptr, shape[0], shape[1], shape[2], shape[3], shape[4]);
                 break;
             case 6:
-                view = ArrayHolder<const double,6,std::layout_right>(arrayView->ptr, shape[0], shape[1], shape[2], shape[3], shape[4], shape[5]);
+                return cast_from_sharedArray<6>(arrayView->ptr, shape[0], shape[1], shape[2], shape[3], shape[4], shape[5]);
                 break;
             case 7:
-                view = ArrayHolder<const double,7,std::layout_right>(arrayView->ptr, shape[0], shape[1], shape[2], shape[3], shape[4], shape[5], shape[6]);
+                return cast_from_sharedArray<7>(arrayView->ptr, shape[0], shape[1], shape[2], shape[3], shape[4], shape[5], shape[6]);
                 break;
         }
-        return view;
     }
 
     template <int D>
@@ -149,30 +148,85 @@ namespace mdspan_interop {
         int rank1 = arrayView1.rank;
         int rank2 = arrayView2.rank;
         const int* shape1 = arrayView1.shape.data();
-        // const int* shape2 = arrayView2.shape.data();
-        // const int* stride2 = arrayView2.stride.data();
-        // assert(("Incompatible matrices product", shape1[rank1-1] == shape2[rank2-1]));
-
-        if (rank1 == 1)
+        const int* stride1 = arrayView1.stride.data();
+        const int* shape2 = arrayView2.shape.data();
+        const int* stride2 = arrayView2.stride.data();
+        // assert(("Must be vectors of 1D", rank1 == rank2));
+        // assert(("Incompatible vectors product", shape1[0] == shape2[0]));
+ 
+        double r = 0;
+        for (int i = 0; i < shape1[0]; i++)
         {
-            if (rank2 == 1)
-            {
-                double r = 0;
-                for (int i = 0; i < shape1[0]; i++)
-                {
-                    r += arrayView1.ptr[i]*arrayView2.ptr[i];
-                }
-
-                
-                double* heap_result = new double[1]; // sur la heap pour que la valeur reste après la sortie de la fonction. Pourrait metre un Smart Pointer.
-                heap_result[0] = r;
-                std::cout<< "Prod result C++ side : " << heap_result[0] << "\n";
-                auto result = std::mdspan(heap_result, 1);
-                std::println("Result mdspan C++ side : {}", result[0]);
-                return to_shared<1>(result);
-            }
+            std::cout << "Dot intermed add : " << arrayView1.ptr[i*stride1[0]]*arrayView2.ptr[i*stride2[0]] << "\n";
+            r += arrayView1.ptr[i*stride1[0]]*arrayView2.ptr[i*stride2[0]];
         }
-        return SharedArrayView{nullptr, 0, {}, {}};
+
+        double* heap_result = new double[1]; // sur la heap pour que la valeur reste après la sortie de la fonction. Pourrait metre un Smart Pointer.
+        heap_result[0] = r;
+        auto result = std::mdspan(heap_result, 1);
+        return to_shared<1>(result);
+    }
+
+    SharedArrayView matrix_vector_product(SharedArrayView arrayView1, SharedArrayView arrayView2) {
+        int rank1 = arrayView1.rank;
+        int rank2 = arrayView2.rank;
+        const int* shape1 = arrayView1.shape.data();
+        const int* stride1 = arrayView1.stride.data();
+        const int* shape2 = arrayView2.shape.data();
+        const int* stride2 = arrayView2.stride.data();
+        // assert(("Array1 must be a 2D matrix", rank1 == 2));
+        // assert(("Array2 must be a 1D vector", rank2 == 1));
+        // assert(("Incompatible product", shape1[1] == shape2[0]));
+
+        double* heap_result = new double[shape1[0]]; // sur la heap pour que la valeur reste après la sortie de la fonction. Pourrait metre un Smart Pointer.
+
+        for (int i = 0; i < shape1[0]; i++)
+        {
+            double r = 0;
+            const double* line_ptr = arrayView1.ptr + i*stride1[0];
+            rust::Vec<int> shape;
+            shape.push_back(shape1[1]);
+            rust::Vec<int> stride;
+            stride.push_back(stride1[1]);
+
+            SharedArrayView line = SharedArrayView {line_ptr, 1, shape, stride};
+            auto res = dot(line, arrayView2);
+            heap_result[i] = res.ptr[0];
+            delete[] res.ptr;  // doit libérer la heap allocated memory de dot()
+        }
+        auto result = std::mdspan(heap_result, shape1[0]);
+        return to_shared<1>(result);
+    }
+
+    SharedArrayView matrix_product(SharedArrayView arrayView1, SharedArrayView arrayView2) {
+        int rank1 = arrayView1.rank;
+        int rank2 = arrayView2.rank;
+        const int* shape1 = arrayView1.shape.data();
+        const int* stride1 = arrayView1.stride.data();
+        const int* shape2 = arrayView2.shape.data();
+        const int* stride2 = arrayView2.stride.data();
+        // assert(("Array1 must be a 2D matrix", rank1 == 2));
+        // assert(("Array2 must be a 2D matrix", rank2 == 2));
+        // assert(("Incompatible product", shape1[1] == shape2[0]));
+
+        double* heap_result = new double[shape1[0]*shape2[1]]; // sur la heap pour que la valeur reste après la sortie de la fonction. Pourrait metre un Smart Pointer.
+
+        for (int i = 0; i < shape1[0]; i++)
+        {
+            const double* col_ptr = arrayView2.ptr + i*stride2[1];
+            rust::Vec<int> shape;
+            shape.push_back(shape2[0]);
+            rust::Vec<int> stride;
+            stride.push_back(stride2[0]);
+
+            SharedArrayView col = SharedArrayView {col_ptr, 1, shape, stride};
+            auto res = matrix_vector_product(arrayView1, col);
+            std::memcpy(heap_result, res.ptr, shape2[0] * sizeof(double));
+            heap_result += shape2[0];
+        }
+        heap_result -= shape1[0]*shape2[0];
+        auto result = std::mdspan(heap_result, shape1[0], shape2[1]);
+        return to_shared<2>(result);
     }
     
     // cette fonction devra être appelé sur chaque ptr de data de sharedArray qui auront été instanciés depuis le côté C++
