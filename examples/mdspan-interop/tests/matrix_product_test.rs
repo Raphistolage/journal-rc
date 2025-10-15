@@ -1,6 +1,5 @@
 use::ndarray::{ArrayView};
 use::mdspan_interop;
-use ndarray::ShapeBuilder;
 
 #[test] 
 fn matrix_product_test() {
@@ -17,8 +16,6 @@ fn matrix_product_test() {
 
     let result = mdspan_interop::matrix_product(arr1, arr2);
 
-
-    // Le résultat n'est pas bon, il faut transposer la matrice, car j'utilise matrix_vector_product pour faire le matrix_product.
     let result_array = mdspan_interop::from_shared(result);
     println!("Resulting vector : {:?}", result_array);
     
