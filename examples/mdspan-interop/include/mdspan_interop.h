@@ -24,7 +24,10 @@ namespace mdspan_interop {
     template <int D, typename... Dims>
     std::mdspan<const double, std::dextents<std::size_t, D>> cast_from_sharedArray(SharedArrayView* arrayView, Dims... dims);
     Errors deep_copy(SharedArrayViewMut& arrayView1, const SharedArrayView& arrayView2);
-    IArray from_shared(SharedArrayView arrayView);
+    template <int D>
+    std::mdspan<const double, std::dextents<std::size_t, D>> from_shared(SharedArrayView arrayView);
+    template <int D>
+    std::mdspan<double, std::dextents<std::size_t, D>> from_shared_mut(SharedArrayViewMut arrayView);
     SharedArrayView dot(SharedArrayView arrayView1, SharedArrayView arrayView2);
     SharedArrayView matrix_vector_product(SharedArrayView arrayView1, SharedArrayView arrayView2);
     SharedArrayView matrix_product(SharedArrayView arrayView1, SharedArrayView arrayView2);

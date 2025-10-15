@@ -6,7 +6,7 @@ use ndarray::ShapeBuilder;
 fn vector_product_test() {
     let v = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
     let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-    let arr1 = ArrayView::from_shape((7).strides(1), &v).unwrap();
+    let arr1 = ArrayView::from_shape((6).strides(1), &v).unwrap();
     let arr2 = ArrayView::from_shape((6).strides(1), &s).unwrap();
 
     println!("Orgininal ArrayViews : ");
@@ -24,5 +24,4 @@ fn vector_product_test() {
     mdspan_interop::free_shared_array(result_array.as_ptr());
 
     println!("Resulting scalar after freeing pointer : {:?}", result_array);
-
 }
