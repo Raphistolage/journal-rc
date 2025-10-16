@@ -13,9 +13,6 @@ namespace mdspan_interop {
     };
     struct SharedArrayViewMut;
     struct SharedArrayView;
-    struct IArray {
-        virtual ~IArray() = default;
-    };
 }
 
 #include "mdspan_interop/src/lib.rs.h"
