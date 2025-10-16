@@ -12,6 +12,20 @@ mod ffi {
         IncompatibleRanks = 1,
         IncompatibleShapes = 2,
     }
+
+    #[derive(Debug)]
+    enum MemSpace {
+        CudaSpace,
+        CudaHostPinnedSpace,
+        HIPSpace,
+        HIPHostPinnedSpace,
+        HIPManagedSpace,
+        HostSpace,
+        SharedSpace,
+        SYCLDeviceUSMSpace,
+        SYCLHostUSMSpace,
+        SYCLSharedUSMSpace,
+    }
     //  En mutable pour tout ce qui va etre deep_copy etc
     #[derive(Debug)]
     struct SharedArrayViewMut {
@@ -22,6 +36,8 @@ mod ffi {
         shape: Vec<i32>,
  
         stride: Vec<i32>,
+
+        memSpace: MemSpace,
     }
     #[derive(Debug)]
     struct SharedArrayView{
@@ -32,6 +48,8 @@ mod ffi {
         shape: Vec<i32>,
  
         stride: Vec<i32>,
+        
+        memSpace: MemSpace,
     }
 
     extern "Rust" {
@@ -41,6 +59,7 @@ mod ffi {
     unsafe extern "C++" {
         include!("mdspan_interop/include/mdspan_interop.h");
         type Errors;
+        type MemSpace;
         fn deep_copy(arrayView1: &mut SharedArrayViewMut, arrayView2: &SharedArrayView) -> Errors;
         fn dot(arrayView1: SharedArrayView , arrayView2: SharedArrayView ) -> SharedArrayView ;
         fn matrix_vector_product(arrayView1: SharedArrayView , arrayView2: SharedArrayView ) -> SharedArrayView ;
@@ -53,11 +72,12 @@ use std::slice::from_raw_parts;
 
 use ndarray::Ix1;
 use ndarray::Ix2;
-use::ndarray::{ArrayView, ArrayView2, ArrayView1};
-use ndarray::{Dim, IxDyn, ShapeBuilder};
+use::ndarray::{ArrayView};
+use ndarray::{IxDyn, ShapeBuilder};
 
 use ffi::SharedArrayView;
 use ffi::SharedArrayViewMut;
+use ffi::MemSpace;
 
 pub trait ToShared {
     type Dim: ndarray::Dimension;
@@ -97,7 +117,7 @@ pub fn to_shared_mut<'a,D>(arr: &'a mut ndarray::ArrayViewMut<f64, D>) -> ffi::S
     let shape= arr.shape().to_vec();
     let shape = shape.into_iter().map(|s| s as i32).collect();
     let data_ptr = arr.as_mut_ptr();
-    ffi::SharedArrayViewMut {ptr: data_ptr, rank: rank as i32, shape: shape, stride: strides}
+    ffi::SharedArrayViewMut {ptr: data_ptr, rank: rank as i32, shape: shape, stride: strides, memSpace: MemSpace::HostSpace}
 }
 
 pub fn to_shared<'a, D>(arr: &'a ndarray::ArrayView<f64, D>) -> ffi::SharedArrayView where D: ndarray::Dimension + 'a{
@@ -107,10 +127,13 @@ pub fn to_shared<'a, D>(arr: &'a ndarray::ArrayView<f64, D>) -> ffi::SharedArray
     let strides = strides.into_iter().map(|s| s as i32).collect();
     let shape= arr.shape().to_vec();
     let shape = shape.into_iter().map(|s| s as i32).collect();
-    ffi::SharedArrayView {ptr: arr.as_ptr(), rank: rank as i32, shape: shape, stride: strides}
+    ffi::SharedArrayView {ptr: arr.as_ptr(), rank: rank as i32, shape: shape, stride: strides, memSpace: MemSpace::HostSpace}
 }
 
 pub fn from_shared(shared_array: ffi::SharedArrayView) -> ndarray::ArrayView<'static, f64, ndarray::IxDyn> {
+    if shared_array.memSpace != MemSpace::HostSpace && shared_array.memSpace !=  MemSpace::CudaHostPinnedSpace && shared_array.memSpace != MemSpace::HIPHostPinnedSpace{
+        panic!("Cannot cast from a sharedArrayView that is not on host space.");
+    }
     let len = shared_array.shape.iter().map(|&s| s as usize).product();
     let v = unsafe { from_raw_parts(shared_array.ptr, len) };
 
@@ -160,6 +183,3 @@ pub fn free_shared_array(ptr: *const f64) {
         ffi::free_shared_array(ptr);
     }
 }
-
-
-
