@@ -40,7 +40,6 @@ mod ffi {
 
     unsafe extern "C++" {
         include!("mdspan_interop/include/mdspan_interop.h");
-        type IArray;
         type Errors;
         fn deep_copy(arrayView1: &mut SharedArrayViewMut, arrayView2: &SharedArrayView) -> Errors;
         fn dot(arrayView1: SharedArrayView , arrayView2: SharedArrayView ) -> SharedArrayView ;
@@ -52,10 +51,43 @@ mod ffi {
 
 use std::slice::from_raw_parts;
 
+use ndarray::Ix1;
+use ndarray::Ix2;
 use::ndarray::{ArrayView, ArrayView2, ArrayView1};
 use ndarray::{Dim, IxDyn, ShapeBuilder};
 
-use crate::ffi::SharedArrayView;
+use ffi::SharedArrayView;
+use ffi::SharedArrayViewMut;
+
+pub trait ToShared {
+    type Dim: ndarray::Dimension;
+    fn to_shared(&self) -> SharedArrayView;
+}
+
+pub trait IntoShared {
+    type Dim: ndarray::Dimension;
+    fn into_shared(&mut self) -> SharedArrayViewMut;
+}
+
+impl<'a, D> ToShared for ndarray::ArrayView<'a, f64, D>
+where
+    D: ndarray::Dimension + 'a,
+{
+    type Dim = D;
+    fn to_shared(&self) -> SharedArrayView {
+        to_shared(self)
+    }
+}
+
+impl<'a, D> IntoShared for ndarray::ArrayViewMut<'a, f64, D>
+where
+    D: ndarray::Dimension + 'a,
+{
+    type Dim = D;
+    fn into_shared(&mut self) -> SharedArrayViewMut {
+        to_shared_mut(self)
+    }
+}
 
 pub fn to_shared_mut<'a,D>(arr: &'a mut ndarray::ArrayViewMut<f64, D>) -> ffi::SharedArrayViewMut where D: ndarray::Dimension + 'a{
     println!("Creating Shared Mut");
@@ -88,9 +120,13 @@ pub fn from_shared(shared_array: ffi::SharedArrayView) -> ndarray::ArrayView<'st
     ArrayView::from_shape(IxDyn(&shape).strides(IxDyn(strides.as_slice())), v).unwrap()
 }
 
-pub fn deep_copy<D: ndarray::Dimension>(arr1: &mut ndarray::ArrayViewMut<f64,D>, arr2: &ndarray::ArrayView<f64,D>) -> Result<(), ffi::Errors> {
-    let mut shared_array1 = to_shared_mut(arr1);
-    let shared_array2 = to_shared(arr2);
+pub fn deep_copy<T, U>(arr1: &mut U, arr2: &T) -> Result<(), ffi::Errors> 
+where 
+    T: ToShared,
+    U: IntoShared
+{
+    let mut shared_array1 = arr1.into_shared();
+    let shared_array2 = arr2.to_shared();
     let result = ffi::deep_copy(&mut shared_array1, &shared_array2);
     if result == ffi::Errors::NoErrors {
         return Ok(());
@@ -101,21 +137,21 @@ pub fn deep_copy<D: ndarray::Dimension>(arr1: &mut ndarray::ArrayViewMut<f64,D>,
     }
 }
 
-pub fn dot(arr1: ArrayView1<f64>, arr2: ArrayView1<f64>) -> SharedArrayView{
-    let shared_array1 = to_shared(&arr1);
-    let shared_array2 = to_shared(&arr2);
+pub fn dot<T: ToShared<Dim = Ix1>>(arr1: T, arr2: T) -> SharedArrayView{
+    let shared_array1 = arr1.to_shared();
+    let shared_array2 = arr2.to_shared();
     ffi::dot(shared_array1, shared_array2)
 }
 
-pub fn matrix_vector_product(arr1: ArrayView2<f64>, arr2: ArrayView1<f64>) -> SharedArrayView{
-    let shared_array1 = to_shared(&arr1);
-    let shared_array2 = to_shared(&arr2);
+pub fn matrix_vector_product<T2: ToShared<Dim = Ix2>, T1: ToShared<Dim = Ix1>>(arr1: T2, arr2: T1) -> SharedArrayView{
+    let shared_array1 = arr1.to_shared();
+    let shared_array2 = arr2.to_shared();
     ffi::matrix_vector_product(shared_array1, shared_array2)
 }
 
-pub fn matrix_product(arr1: ArrayView2<f64>, arr2: ArrayView2<f64>) -> SharedArrayView{
-    let shared_array1 = to_shared(&arr1);
-    let shared_array2 = to_shared(&arr2);
+pub fn matrix_product<T: ToShared<Dim = Ix2>>(arr1: T, arr2: T) -> SharedArrayView{
+    let shared_array1 = arr1.to_shared();
+    let shared_array2 = arr2.to_shared();
     ffi::matrix_product(shared_array1, shared_array2)
 }
 

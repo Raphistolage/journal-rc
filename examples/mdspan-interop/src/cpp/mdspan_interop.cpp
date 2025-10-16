@@ -13,16 +13,6 @@
 
 namespace mdspan_interop {
 
-    template <typename T, int D, typename LayoutPolicy>
-    struct ArrayHolder : IArray {
-        std::mdspan<T, std::dextents<std::size_t, D>, LayoutPolicy> array;
-
-        template <typename... Dims>
-        ArrayHolder(T* data, Dims... dims) : array(data, dims...) {}
-
-        ArrayHolder(std::mdspan<T, std::dextents<std::size_t, D>, std::layout_right> span) : array(span) {}
-    };
-
     template <int D, std::size_t... Is>
     std::mdspan<const double, std::dextents<std::size_t, D>> from_shared_impl(SharedArrayView arrayView, std::index_sequence<Is...>) {
         const int* shape = arrayView.shape.data();
