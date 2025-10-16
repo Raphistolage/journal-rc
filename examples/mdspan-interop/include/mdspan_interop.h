@@ -13,13 +13,24 @@ namespace mdspan_interop {
     };
     struct SharedArrayViewMut;
     struct SharedArrayView;
+
+    enum MemSpace : uint8_t {
+        CudaSpace,
+        CudaHostPinnedSpace,
+        HIPSpace,
+        HIPHostPinnedSpace,
+        HIPManagedSpace,
+        HostSpace,
+        SharedSpace,
+        SYCLDeviceUSMSpace,
+        SYCLHostUSMSpace,
+        SYCLSharedUSMSpace,
+    };
 }
 
 #include "mdspan_interop/src/lib.rs.h"
 
 namespace mdspan_interop {
-    template <int D, typename... Dims>
-    std::mdspan<const double, std::dextents<std::size_t, D>> cast_from_sharedArray(SharedArrayView* arrayView, Dims... dims);
     Errors deep_copy(SharedArrayViewMut& arrayView1, const SharedArrayView& arrayView2);
     template <int D>
     std::mdspan<const double, std::dextents<std::size_t, D>> from_shared(SharedArrayView arrayView);

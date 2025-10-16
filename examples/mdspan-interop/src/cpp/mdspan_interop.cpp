@@ -44,20 +44,78 @@ namespace mdspan_interop {
     }
 
     template <int D>
-    SharedArrayView to_shared(std::mdspan<double, std::dextents<std::size_t, D>> from_ms) {
-        int rank = from_ms.rank();
+    SharedArrayView to_shared(std::mdspan<const double, std::dextents<std::size_t, D>> fromMds, MemSpace memorySpace) {
+        int rank = fromMds.rank();
         rust::Vec<int> shapes;
         rust::Vec<int> strides;
         for (int i = 0; i < rank; i++)
         {
-            shapes.push_back(from_ms.extent(i));
-            strides.push_back(from_ms.stride(i));
+            shapes.push_back(fromMds.extent(i));
+            strides.push_back(fromMds.stride(i));
         }
         return SharedArrayView {
-            from_ms.data_handle(),
+            fromMds.data_handle(),
             rank,
             shapes,
             strides,
+            memorySpace,
+        };
+    }
+
+    template <int D>
+    SharedArrayViewMut to_shared_mut(std::mdspan<double, std::dextents<std::size_t, D>> fromMds, MemSpace memorySpace) {
+        int rank = fromMds.rank();
+        rust::Vec<int> shapes;
+        rust::Vec<int> strides;
+        for (int i = 0; i < rank; i++)
+        {
+            shapes.push_back(fromMds.extent(i));
+            strides.push_back(fromMds.stride(i));
+        }
+        return SharedArrayViewMut {
+            fromMds.data_handle(),
+            rank,
+            shapes,
+            strides,
+            memorySpace,
+        };
+    }
+
+        template <int D>
+    SharedArrayView to_shared(std::mdspan<const double, std::dextents<std::size_t, D>> fromMds) {
+        int rank = fromMds.rank();
+        rust::Vec<int> shapes;
+        rust::Vec<int> strides;
+        for (int i = 0; i < rank; i++)
+        {
+            shapes.push_back(fromMds.extent(i));
+            strides.push_back(fromMds.stride(i));
+        }
+        return SharedArrayView {
+            fromMds.data_handle(),
+            rank,
+            shapes,
+            strides,
+            MemSpace::HostSpace,
+        };
+    }
+
+    template <int D>
+    SharedArrayViewMut to_shared_mut(std::mdspan<double, std::dextents<std::size_t, D>> fromMds) {
+        int rank = fromMds.rank();
+        rust::Vec<int> shapes;
+        rust::Vec<int> strides;
+        for (int i = 0; i < rank; i++)
+        {
+            shapes.push_back(fromMds.extent(i));
+            strides.push_back(fromMds.stride(i));
+        }
+        return SharedArrayViewMut {
+            fromMds.data_handle(),
+            rank,
+            shapes,
+            strides,
+            MemSpace::HostSpace,
         };
     }
 
@@ -66,6 +124,7 @@ namespace mdspan_interop {
         int rank2 = arrayView2.rank;
         const int* shape1 = arrayView1.shape.data();
         const int* shape2 = arrayView2.shape.data();
+        
         if (rank1 != rank2){
             std::cout << "Both views should be of same rank. \n Deep copy aborted." << "\n";
             return Errors::IncompatibleRanks;
@@ -139,7 +198,7 @@ namespace mdspan_interop {
         }
 
         double r = 0;
-        for (int i = 0; i < vec1.extent(0); i++)
+        for (size_t i = 0; i < vec1.extent(0); i++)
         {
             r += vec1[i]*vec2[i];
         }
@@ -147,7 +206,7 @@ namespace mdspan_interop {
         double* heap_result = new double[1]; // sur la heap pour que la valeur reste après la sortie de la fonction. Pourrait metre un Smart Pointer.
         heap_result[0] = r;
         auto result = std::mdspan(heap_result, 1);
-        return to_shared<1>(result);
+        return to_shared<1>(result, MemSpace::HostSpace);
     }
 
     SharedArrayView matrix_vector_product(SharedArrayView arrayView1, SharedArrayView arrayView2) {
@@ -160,10 +219,10 @@ namespace mdspan_interop {
 
         double* heap_result = new double[mat.extent(0)]; // sur la heap pour que la valeur reste après la sortie de la fonction. Pourrait metre un Smart Pointer.
 
-        for (int i = 0; i < mat.extent(0); i++)
+        for (size_t i = 0; i < mat.extent(0); i++)
         {
             double r = 0;
-            for (int j = 0; j < mat.extent(1); j++)
+            for (size_t j = 0; j < mat.extent(1); j++)
             {
                 r += mat[i,j]*vec[j];
             }
@@ -183,12 +242,12 @@ namespace mdspan_interop {
 
         double* heap_result = new double[mat1.extent(0)*mat2.extent(1)]; // sur la heap pour que la valeur reste après la sortie de la fonction. Pourrait metre un Smart Pointer.
 
-        for (int i = 0; i < mat1.extent(0); i++)
+        for (size_t i = 0; i < mat1.extent(0); i++)
         {
-            for (int j = 0; j < mat2.extent(1); j++)
+            for (size_t j = 0; j < mat2.extent(1); j++)
             {
                 double r = 0;
-                for (int k = 0; k < mat1.extent(1); k++)
+                for (size_t k = 0; k < mat1.extent(1); k++)
                 {
                     r += mat1[i,k]*mat2[k,j];
                 }
@@ -203,5 +262,4 @@ namespace mdspan_interop {
     void free_shared_array(const double* ptr) {
         delete[] ptr;
     }
-    
 }
