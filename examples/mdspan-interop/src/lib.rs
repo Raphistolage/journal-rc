@@ -84,9 +84,9 @@ pub trait ToShared {
     fn to_shared(&self) -> SharedArrayView;
 }
 
-pub trait IntoShared {
+pub trait ToSharedMut {
     type Dim: ndarray::Dimension;
-    fn into_shared(&mut self) -> SharedArrayViewMut;
+    fn to_shared_mut(&mut self) -> SharedArrayViewMut;
 }
 
 impl<'a, D> ToShared for ndarray::ArrayView<'a, f64, D>
@@ -99,35 +99,35 @@ where
     }
 }
 
-impl<'a, D> IntoShared for ndarray::ArrayViewMut<'a, f64, D>
+impl<'a, D> ToSharedMut for ndarray::ArrayViewMut<'a, f64, D>
 where
     D: ndarray::Dimension + 'a,
 {
     type Dim = D;
-    fn into_shared(&mut self) -> SharedArrayViewMut {
+    fn to_shared_mut(&mut self) -> SharedArrayViewMut {
         to_shared_mut(self)
     }
 }
 
-pub fn to_shared_mut<'a,D>(arr: &'a mut ndarray::ArrayViewMut<f64, D>) -> ffi::SharedArrayViewMut where D: ndarray::Dimension + 'a{
+pub fn to_shared_mut<'a, D>(arr: &'a mut ndarray::ArrayViewMut<f64, D>) -> ffi::SharedArrayViewMut where D: ndarray::Dimension + 'a{
     println!("Creating Shared Mut");
     let rank = arr.ndim();
-    let strides  = arr.strides().to_vec();
-    let strides = strides.into_iter().map(|s| s as i32).collect();
+    let stride  = arr.strides().to_vec();
+    let stride = stride.into_iter().map(|s| s as i32).collect();
     let shape= arr.shape().to_vec();
     let shape = shape.into_iter().map(|s| s as i32).collect();
     let data_ptr = arr.as_mut_ptr();
-    ffi::SharedArrayViewMut {ptr: data_ptr, rank: rank as i32, shape: shape, stride: strides, memSpace: MemSpace::HostSpace}
+    ffi::SharedArrayViewMut {ptr: data_ptr, rank: rank as i32, shape, stride, memSpace: MemSpace::HostSpace}
 }
 
 pub fn to_shared<'a, D>(arr: &'a ndarray::ArrayView<f64, D>) -> ffi::SharedArrayView where D: ndarray::Dimension + 'a{
     println!("Creating Shared");
     let rank = arr.ndim();
-    let strides  = arr.strides().to_vec();
-    let strides = strides.into_iter().map(|s| s as i32).collect();
+    let stride  = arr.strides().to_vec();
+    let stride = stride.into_iter().map(|s| s as i32).collect();
     let shape= arr.shape().to_vec();
     let shape = shape.into_iter().map(|s| s as i32).collect();
-    ffi::SharedArrayView {ptr: arr.as_ptr(), rank: rank as i32, shape: shape, stride: strides, memSpace: MemSpace::HostSpace}
+    ffi::SharedArrayView {ptr: arr.as_ptr(), rank: rank as i32, shape, stride, memSpace: MemSpace::HostSpace}
 }
 
 pub fn from_shared(shared_array: ffi::SharedArrayView) -> ndarray::ArrayView<'static, f64, ndarray::IxDyn> {
@@ -146,17 +146,17 @@ pub fn from_shared(shared_array: ffi::SharedArrayView) -> ndarray::ArrayView<'st
 pub fn deep_copy<T, U>(arr1: &mut U, arr2: &T) -> Result<(), ffi::Errors> 
 where 
     T: ToShared,
-    U: IntoShared
+    U: ToSharedMut
 {
-    let mut shared_array1 = arr1.into_shared();
+    let mut shared_array1 = arr1.to_shared_mut();
     let shared_array2 = arr2.to_shared();
     let result = ffi::deep_copy(&mut shared_array1, &shared_array2);
     if result == ffi::Errors::NoErrors {
-        return Ok(());
+        Ok(())
     } else if result == ffi::Errors::IncompatibleRanks {
-        return Err(ffi::Errors::IncompatibleRanks);
+        Err(ffi::Errors::IncompatibleRanks)
     } else {
-        return Err(ffi::Errors::IncompatibleShapes);      
+        Err(ffi::Errors::IncompatibleShapes)     
     }
 }
 

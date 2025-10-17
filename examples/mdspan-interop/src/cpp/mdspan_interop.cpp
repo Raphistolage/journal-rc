@@ -81,7 +81,7 @@ namespace mdspan_interop {
         };
     }
 
-        template <int D>
+    template <int D>
     SharedArrayView to_shared(std::mdspan<const double, std::dextents<std::size_t, D>> fromMds) {
         int rank = fromMds.rank();
         rust::Vec<int> shapes;
