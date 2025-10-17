@@ -16,7 +16,7 @@ fn matrix_vector_prod_test() {
 
     println!("Test Matrix Vector prod through shared struct : ");
 
-    let result = mdspan_interop::matrix_vector_product(arr1, arr2);
+    let result = mdspan_interop::matrix_vector_product(&arr1, &arr2);
 
 
     let result_array = mdspan_interop::from_shared(result);

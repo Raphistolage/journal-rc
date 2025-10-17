@@ -17,7 +17,7 @@ fn vector_product_test() {
 
     println!("Test vector prod through shared struct : ");
 
-    let result = mdspan_interop::dot(arr1, arr2);
+    let result = mdspan_interop::dot(&arr1, &arr2);
 
 
     let result_array = mdspan_interop::from_shared(result);

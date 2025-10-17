@@ -14,14 +14,14 @@
 namespace mdspan_interop {
 
     template <int D, std::size_t... Is>
-    std::mdspan<const double, std::dextents<std::size_t, D>> from_shared_impl(SharedArrayView arrayView, std::index_sequence<Is...>) {
+    std::mdspan<const double, std::dextents<std::size_t, D>> from_shared_impl(const SharedArrayView &arrayView, std::index_sequence<Is...>) {
         const int* shape = arrayView.shape.data();
         std::mdspan<const double, std::dextents<std::size_t, D>> casted_span = std::mdspan(arrayView.ptr, shape[Is]...);
         return casted_span;
     }
 
     template <int D>
-    std::mdspan<const double, std::dextents<std::size_t, D>> from_shared(SharedArrayView arrayView) {
+    std::mdspan<const double, std::dextents<std::size_t, D>> from_shared(const SharedArrayView &arrayView) {
         if (arrayView.rank != D) {
             throw std::runtime_error("Incompatible dimensions of cast and sharedArrayView");
         }
@@ -29,14 +29,14 @@ namespace mdspan_interop {
     }
 
         template <int D, std::size_t... Is>
-    std::mdspan<double, std::dextents<std::size_t, D>> from_shared_mut_impl(SharedArrayViewMut arrayView, std::index_sequence<Is...>) {
+    std::mdspan<double, std::dextents<std::size_t, D>> from_shared_mut_impl(SharedArrayViewMut &arrayView, std::index_sequence<Is...>) {
         const int* shape = arrayView.shape.data();
         std::mdspan<double, std::dextents<std::size_t, D>> casted_span = std::mdspan(arrayView.ptr, shape[Is]...);
         return casted_span;
     }
 
     template <int D>
-    std::mdspan<double, std::dextents<std::size_t, D>> from_shared_mut(SharedArrayViewMut arrayView) {
+    std::mdspan<double, std::dextents<std::size_t, D>> from_shared_mut(SharedArrayViewMut &arrayView) {
         if (arrayView.rank != D) {
             throw std::runtime_error("Incompatible dimensions of cast and sharedArrayView");
         }
@@ -202,7 +202,7 @@ namespace mdspan_interop {
         return Errors::NoErrors;
     }
 
-    SharedArrayView dot(SharedArrayView arrayView1, SharedArrayView arrayView2) {
+    SharedArrayView dot(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2) {
         auto vec1 = from_shared<1>(arrayView1);
         auto vec2 = from_shared<1>(arrayView2);
 
@@ -222,7 +222,7 @@ namespace mdspan_interop {
         return to_shared<1>(result, MemSpace::HostSpace);
     }
 
-    SharedArrayView matrix_vector_product(SharedArrayView arrayView1, SharedArrayView arrayView2) {
+    SharedArrayView matrix_vector_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2) {
         auto mat = from_shared<2>(arrayView1);
         auto vec = from_shared<1>(arrayView2);
 
@@ -245,9 +245,15 @@ namespace mdspan_interop {
         return to_shared<1>(result);
     }
 
-    SharedArrayView matrix_product(SharedArrayView arrayView1, SharedArrayView arrayView2) {
+    SharedArrayView matrix_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2) {
         auto mat1 = from_shared<2>(arrayView1);
         auto mat2 = from_shared<2>(arrayView2);
+
+        // const int* shape1 = arrayView1.shape.data();
+        // std::mdspan<const double, std::dextents<std::size_t, 2>> mat1 = std::mdspan(arrayView1.ptr, shape1[0], shape1[1]);
+
+        // const int* shape2 = arrayView2.shape.data();
+        // std::mdspan<const double, std::dextents<std::size_t, 2>> mat2 = std::mdspan(arrayView2.ptr, shape2[0], shape2[1]);
 
         if (mat1.extent(1) != mat2.extent(0)) {
             throw std::runtime_error("Incompatible sizes of matrix and vector");
@@ -267,8 +273,16 @@ namespace mdspan_interop {
                 heap_result[i*mat2.extent(1) + j] = r;
             }
         }
-        auto result = std::mdspan(heap_result, mat1.extent(0), mat2.extent(1));
-        return to_shared<2>(result);
+        // auto result = std::mdspan(heap_result, mat1.extent(0), mat2.extent(1));
+        // return to_shared<2>(result);   
+        return SharedArrayView {
+            heap_result,
+            2,
+            rust::Vec<int>{static_cast<int>(mat1.extent(0)), static_cast<int>(mat2.extent(1))},
+            rust::Vec<int>{static_cast<int>(mat2.extent(1)), 1},
+            MemSpace::HostSpace,
+            Layout::LayoutRight,
+        };
     }
     
     // cette fonction devra être appelé sur chaque ptr de data de sharedArray qui auront été instanciés depuis le côté C++
