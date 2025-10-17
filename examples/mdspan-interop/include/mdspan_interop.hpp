@@ -11,8 +11,6 @@ namespace mdspan_interop {
         IncompatibleRanks = 1,
         IncompatibleShapes = 2,
     };
-    struct SharedArrayViewMut;
-    struct SharedArrayView;
 
     enum MemSpace : uint8_t {
         CudaSpace,
@@ -26,6 +24,17 @@ namespace mdspan_interop {
         SYCLHostUSMSpace,
         SYCLSharedUSMSpace,
     };
+
+    enum Layout : uint8_t {
+        LayoutLeft,
+        LayoutRight,
+        LayoutStride,
+    };
+
+    struct SharedArrayViewMut;
+    struct SharedArrayView;
+
+
 }
 
 #include "mdspan_interop/src/lib.rs.h"

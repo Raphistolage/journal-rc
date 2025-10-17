@@ -9,7 +9,7 @@
 #include "rust/cxx.h"
 
 #include "mdspan_interop/src/lib.rs.h"
-#include "mdspan_interop/include/mdspan_interop.h"
+#include "mdspan_interop/include/mdspan_interop.hpp"
 
 namespace mdspan_interop {
 
@@ -53,12 +53,15 @@ namespace mdspan_interop {
             shapes.push_back(fromMds.extent(i));
             strides.push_back(fromMds.stride(i));
         }
+        Layout layout = Layout::LayoutStride;
+        // TODO : Une maniere de detecter si layout_left ou layout_right ?
         return SharedArrayView {
             fromMds.data_handle(),
             rank,
             shapes,
             strides,
             memorySpace,
+            layout,
         };
     }
 
@@ -72,12 +75,15 @@ namespace mdspan_interop {
             shapes.push_back(fromMds.extent(i));
             strides.push_back(fromMds.stride(i));
         }
+        Layout layout = Layout::LayoutStride;
+        // TODO : Une maniere de detecter si layout_left ou layout_right ?
         return SharedArrayViewMut {
             fromMds.data_handle(),
             rank,
             shapes,
             strides,
             memorySpace,
+            layout,
         };
     }
 
@@ -91,12 +97,15 @@ namespace mdspan_interop {
             shapes.push_back(fromMds.extent(i));
             strides.push_back(fromMds.stride(i));
         }
+        Layout layout = Layout::LayoutStride;
+        // TODO : Une maniere de detecter si layout_left ou layout_right ?
         return SharedArrayView {
             fromMds.data_handle(),
             rank,
             shapes,
             strides,
             MemSpace::HostSpace,
+            layout,
         };
     }
 
@@ -110,14 +119,18 @@ namespace mdspan_interop {
             shapes.push_back(fromMds.extent(i));
             strides.push_back(fromMds.stride(i));
         }
+        Layout layout = Layout::LayoutStride;
+        // TODO : Une maniere de detecter si layout_left ou layout_right ?
         return SharedArrayViewMut {
             fromMds.data_handle(),
             rank,
             shapes,
             strides,
             MemSpace::HostSpace,
+            layout,
         };
     }
+
 
     Errors deep_copy(SharedArrayViewMut& arrayView1, const SharedArrayView& arrayView2) {
         int rank1 = arrayView1.rank;
