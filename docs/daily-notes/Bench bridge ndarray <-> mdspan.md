@@ -39,3 +39,17 @@ To tackle these performance losses, the next steps could be to :
 - **Move all casting operations to C++ side** to benefit from eventual optimization when setting O3 (however we already have the Rust -> C++ way conversions on the C++ side, so we can only put the C++ -> Rust way conversions on the C++ to make a difference now)
 - **Multiply bigger matrices**,  see the impact on memory and time performance.
 - Most importantly : **pass only reference or pointers**, to avoid copies. (However this has the downside of not respecting know implementation of Blas' matrix_product, who is supposed to take objects as parameters, not refs).
+
+
+### Results after modifications
+
+- Passing **only references** ==> times /2.
+- Casting inside matrix_product instead of calling **from_shared** ==> saves a few nanoseconds, **negligible**.
+- Casting inside matrix_product instead of calling **to_shared** ==> **reduces by a third** the time (280ns -> 190ns). (but this is very not practical)
+- Not counting the cast from_shared at the end of operations => 190ns -> 120ns (we can see that most of the time consumed comes from the calls to the casting functions).
+
+### Comparison with plain Rust
+
+If we were doing these operations only in Rust (which means initializing the 2 ndarray and multiplying them straight away) the average time would be 45ns, so about a third of what we get in our best case scenario with the bridge.
+
+**Real need to test on bigger operations with bigger matrices, to see the impact of castings and callings then.**

@@ -40,13 +40,13 @@ namespace mdspan_interop {
 #include "mdspan_interop/src/lib.rs.h"
 
 namespace mdspan_interop {
-    Errors deep_copy(SharedArrayViewMut& arrayView1, const SharedArrayView& arrayView2);
+    Errors deep_copy(SharedArrayViewMut &arrayView1, const SharedArrayView &arrayView2);
     template <int D>
-    std::mdspan<const double, std::dextents<std::size_t, D>> from_shared(SharedArrayView arrayView);
+    std::mdspan<const double, std::dextents<std::size_t, D>> from_shared(const SharedArrayView &arrayView);
     template <int D>
-    std::mdspan<double, std::dextents<std::size_t, D>> from_shared_mut(SharedArrayViewMut arrayView);
-    SharedArrayView dot(SharedArrayView arrayView1, SharedArrayView arrayView2);
-    SharedArrayView matrix_vector_product(SharedArrayView arrayView1, SharedArrayView arrayView2);
-    SharedArrayView matrix_product(SharedArrayView arrayView1, SharedArrayView arrayView2);
+    std::mdspan<double, std::dextents<std::size_t, D>> from_shared_mut(const SharedArrayViewMut &arrayView);
+    SharedArrayView dot(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2);
+    SharedArrayView matrix_vector_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2);
+    SharedArrayView matrix_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2);
     void free_shared_array(const double* ptr);
 }

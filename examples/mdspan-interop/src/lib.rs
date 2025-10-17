@@ -73,9 +73,9 @@ mod ffi {
         type MemSpace;
         type Layout;
         fn deep_copy(arrayView1: &mut SharedArrayViewMut, arrayView2: &SharedArrayView) -> Errors;
-        fn dot(arrayView1: SharedArrayView , arrayView2: SharedArrayView ) -> SharedArrayView ;
-        fn matrix_vector_product(arrayView1: SharedArrayView , arrayView2: SharedArrayView ) -> SharedArrayView ;
-        fn matrix_product(arrayView1: SharedArrayView , arrayView2: SharedArrayView ) -> SharedArrayView ;
+        fn dot(arrayView1: &SharedArrayView , arrayView2: &SharedArrayView ) -> SharedArrayView ;
+        fn matrix_vector_product(arrayView1: &SharedArrayView , arrayView2: &SharedArrayView ) -> SharedArrayView ;
+        fn matrix_product(arrayView1: &SharedArrayView , arrayView2: &SharedArrayView ) -> SharedArrayView ;
         unsafe fn free_shared_array(ptr: *const f64);
     }
 }
@@ -170,22 +170,22 @@ where
     }
 }
 
-pub fn dot<T: ToShared<Dim = Ix1>>(arr1: T, arr2: T) -> SharedArrayView{
+pub fn dot<T: ToShared<Dim = Ix1>>(arr1: &T, arr2: &T) -> SharedArrayView{
     let shared_array1 = arr1.to_shared();
     let shared_array2 = arr2.to_shared();
-    ffi::dot(shared_array1, shared_array2)
+    ffi::dot(&shared_array1, &shared_array2)
 }
 
-pub fn matrix_vector_product<T2: ToShared<Dim = Ix2>, T1: ToShared<Dim = Ix1>>(arr1: T2, arr2: T1) -> SharedArrayView{
+pub fn matrix_vector_product<T2: ToShared<Dim = Ix2>, T1: ToShared<Dim = Ix1>>(arr1: &T2, arr2: &T1) -> SharedArrayView{
     let shared_array1 = arr1.to_shared();
     let shared_array2 = arr2.to_shared();
-    ffi::matrix_vector_product(shared_array1, shared_array2)
+    ffi::matrix_vector_product(&shared_array1, &shared_array2)
 }
 
-pub fn matrix_product<T: ToShared<Dim = Ix2>>(arr1: T, arr2: T) -> SharedArrayView{
+pub fn matrix_product<T: ToShared<Dim = Ix2>>(arr1: &T, arr2: &T) -> SharedArrayView{
     let shared_array1 = arr1.to_shared();
     let shared_array2 = arr2.to_shared();
-    ffi::matrix_product(shared_array1, shared_array2)
+    ffi::matrix_product(&shared_array1, &shared_array2)
 }
 
 pub fn free_shared_array(ptr: *const f64) {

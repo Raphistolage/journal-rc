@@ -17,7 +17,7 @@ fn matrix_product_test() {
 
     println!("Test Matrix Vector prod through shared struct : ");
 
-    let result = matrix_product(arr1, arr2);
+    let result = matrix_product(&arr1, &arr2);
 
     let result_array = from_shared(result);
     let elapsed = now.elapsed();
