@@ -1,24 +1,24 @@
 {
   "main": {
-    "id": "2da7da999b574e8d",
+    "id": "e9203aa9dc95e002",
     "type": "split",
     "children": [
       {
-        "id": "6b7601f8610d59ba",
+        "id": "c8c1d590758f8f02",
         "type": "tabs",
         "children": [
           {
-            "id": "b15a006daf72a80f",
+            "id": "e4526c7c64635b17",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Bench bridge ndarray <-> mdspan.md",
+                "file": "Cxx for Rust-Kokkos.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Bench bridge ndarray <-> mdspan"
+              "title": "Cxx for Rust-Kokkos"
             }
           }
         ]
@@ -27,15 +27,15 @@
     "direction": "vertical"
   },
   "left": {
-    "id": "20b2e21f64bb487a",
+    "id": "fb455a2a412b49db",
     "type": "split",
     "children": [
       {
-        "id": "a484fa8f8a075cc9",
+        "id": "cd2d048b3b5909b8",
         "type": "tabs",
         "children": [
           {
-            "id": "970d5b0bef86599c",
+            "id": "20f5b2755f9807e8",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
@@ -48,7 +48,7 @@
             }
           },
           {
-            "id": "8fde533d6b17e04a",
+            "id": "f2c09741ccff985f",
             "type": "leaf",
             "state": {
               "type": "search",
@@ -65,7 +65,7 @@
             }
           },
           {
-            "id": "bb47565c80df7718",
+            "id": "fd6ae9ceb04f1665",
             "type": "leaf",
             "state": {
               "type": "bookmarks",
@@ -81,20 +81,20 @@
     "width": 300
   },
   "right": {
-    "id": "836aa18d3df1ed67",
+    "id": "e0798e06f5cb20b3",
     "type": "split",
     "children": [
       {
-        "id": "56c7fb1d18c52e85",
+        "id": "7948d2738b25c572",
         "type": "tabs",
         "children": [
           {
-            "id": "bf494e396754f25b",
+            "id": "bca2a754a2fcb66b",
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Cxx for Rust ↔ Kokkos.md",
+                "file": "Cxx for Rust-Kokkos.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,25 +104,25 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Cxx for Rust ↔ Kokkos"
+              "title": "Backlinks for Cxx for Rust-Kokkos"
             }
           },
           {
-            "id": "fff2d586cca3f064",
+            "id": "5af7f66d1bc6fb5b",
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Cxx for Rust ↔ Kokkos.md",
+                "file": "Cxx for Rust-Kokkos.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Cxx for Rust ↔ Kokkos"
+              "title": "Outgoing links from Cxx for Rust-Kokkos"
             }
           },
           {
-            "id": "6f69912572e50c06",
+            "id": "9df4f1fb5381343e",
             "type": "leaf",
             "state": {
               "type": "tag",
@@ -137,18 +137,18 @@
             }
           },
           {
-            "id": "756ce96c476744c0",
+            "id": "e8e3a3a81b9b6d69",
             "type": "leaf",
             "state": {
               "type": "outline",
               "state": {
-                "file": "Cxx for Rust ↔ Kokkos.md",
+                "file": "Cxx for Rust-Kokkos.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Cxx for Rust ↔ Kokkos"
+              "title": "Outline of Cxx for Rust-Kokkos"
             }
           }
         ]
@@ -169,29 +169,15 @@
       "bases:Create new base": false
     }
   },
-  "active": "b15a006daf72a80f",
+  "active": "e4526c7c64635b17",
   "lastOpenFiles": [
-    "images/RustPerfO3.png",
-    "images/RustPerfO0.png",
-    "Bench bridge ndarray <-> mdspan.md",
-    "images/C++PerfO3.png",
-    "images/C++PerfO0.png",
-    "19 septembre 2025.md",
-    "22 septembre 2025.md",
-    "10 Octobre 2025.md",
-    "9 Octobre 2025.md",
-    "1 Octobre 2025.md",
-    "26 septembre 2025.md",
-    "24 septembre 2025.md",
-    "23 septembre 2025.md",
-    "images/cxx_size.png",
-    "18 septembre 2025.md",
-    "Cxx for Rust ↔ Kokkos.md",
-    "images/wrapper_size.png",
-    "images/Screenshot from 2025-09-19 16-01-26.png",
-    "images/Screenshot from 2025-09-19 15-51-32.png",
-    "images/cxx_test.png",
-    "images/wrapper_test.png",
-    "images"
+    "daily-notes/images/RustPerfO3.png",
+    "daily-notes/images/RustPerfO0.png",
+    "daily-notes/images/C++PerfO3.png",
+    "daily-notes/images/C++PerfO0.png",
+    "daily-notes/images/Screenshot From 2025-10-17 11-06-32.png",
+    "daily-notes/images/Screenshot From 2025-10-17 11-06-01.png",
+    "daily-notes/images/Screenshot From 2025-10-17 11-04-58.png",
+    "daily-notes/images/Screenshot From 2025-10-17 11-04-12.png"
   ]
 }

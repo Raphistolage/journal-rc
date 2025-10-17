@@ -1,8 +1,10 @@
 use::ndarray::{ArrayView};
 use::mdspan_interop;
+use std::time::Instant;
 
 #[test] 
 fn matrix_vector_prod_test() {
+    let now = Instant::now();
     let v = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
     let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
     let arr1 = ArrayView::from_shape((2, 6), &v).unwrap();
@@ -18,7 +20,9 @@ fn matrix_vector_prod_test() {
 
 
     let result_array = mdspan_interop::from_shared(result);
+    let elapsed = now.elapsed();
     println!("Resulting vector : {:?}", result_array);
+    println!("Time elapsed : {}", elapsed.as_secs_f64());
     
     mdspan_interop::free_shared_array(result_array.as_ptr());
 
