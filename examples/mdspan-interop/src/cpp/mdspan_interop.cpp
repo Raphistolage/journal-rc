@@ -15,9 +15,12 @@ namespace mdspan_interop {
 
     template <int D, std::size_t... Is>
     std::mdspan<const double, std::dextents<std::size_t, D>> from_shared_impl(const SharedArrayView &arrayView, std::index_sequence<Is...>) {
-        const int* shape = arrayView.shape.data();
-        std::mdspan<const double, std::dextents<std::size_t, D>> casted_span = std::mdspan(arrayView.ptr, shape[Is]...);
-        return casted_span;
+        if(arrayView.memSpace == MemSpace::HostSpace) {
+            const int* shape = arrayView.shape.data();
+            std::mdspan<const double, std::dextents<std::size_t, D>> casted_span = std::mdspan(arrayView.ptr, shape[Is]...);
+            return casted_span; 
+        }
+        // TODO: Else, return une Kokkos::view sur device
     }
 
     template <int D>
@@ -30,9 +33,12 @@ namespace mdspan_interop {
 
         template <int D, std::size_t... Is>
     std::mdspan<double, std::dextents<std::size_t, D>> from_shared_mut_impl(SharedArrayViewMut &arrayView, std::index_sequence<Is...>) {
-        const int* shape = arrayView.shape.data();
-        std::mdspan<double, std::dextents<std::size_t, D>> casted_span = std::mdspan(arrayView.ptr, shape[Is]...);
-        return casted_span;
+        if(arrayView.memSpace == MemSpace::HostSpace) {
+            const int* shape = arrayView.shape.data();
+            std::mdspan<double, std::dextents<std::size_t, D>> casted_span = std::mdspan(arrayView.ptr, shape[Is]...);
+            return casted_span;
+        }
+        // TODO: Else, return une Kokkos::view sur device
     }
 
     template <int D>

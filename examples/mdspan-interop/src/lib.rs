@@ -4,7 +4,7 @@ Obligé d'utiliser des structs comme SharedArray afin d'être FFI-safe, ce qui n
 On pourrait passer directement un raw ptr et la metadata en parametre, mais c'est mieux de tout envelopper dans une struct commune.
 
 */
-
+use std::ffi::c_void;
 #[cxx::bridge(namespace = "mdspan_interop")]
 mod ffi {
     enum Errors {
@@ -36,7 +36,7 @@ mod ffi {
     //  En mutable pour tout ce qui va etre deep_copy etc
     #[derive(Debug)]
     struct SharedArrayViewMut {
-        ptr: *mut f64,
+        ptr: *const c_void,
 
         rank: i32,
 
@@ -128,15 +128,17 @@ pub fn to_shared_mut<'a, D>(arr: &'a mut ndarray::ArrayViewMut<f64, D>) -> ffi::
     let shape= arr.shape().to_vec();
     let shape = shape.into_iter().map(|s| s as i32).collect();
     let data_ptr = arr.as_mut_ptr();
+    // An ndarray is always on hostspace
     ffi::SharedArrayViewMut {ptr: data_ptr, rank: rank as i32, shape, stride, memSpace: MemSpace::HostSpace, layout: Layout::LayoutLeft}
 }
 
-pub fn to_shared<'a, D>(arr: &'a ndarray::ArrayView<f64, D>) -> ffi::SharedArrayView where D: ndarray::Dimension + 'a{
+pub fn to_shared<'a,T, D>(arr: &'a ndarray::ArrayView<T, D>) -> ffi::SharedArrayView where D: ndarray::Dimension + 'a{
     let rank = arr.ndim();
     let stride  = arr.strides().to_vec();
     let stride = stride.into_iter().map(|s| s as i32).collect();
     let shape= arr.shape().to_vec();
     let shape = shape.into_iter().map(|s| s as i32).collect();
+    // An ndarray is always on hostspace
     ffi::SharedArrayView {ptr: arr.as_ptr(), rank: rank as i32, shape, stride, memSpace: MemSpace::HostSpace, layout: Layout::LayoutLeft}
 }
 
