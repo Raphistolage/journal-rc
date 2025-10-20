@@ -169,13 +169,20 @@
       "bases:Create new base": false
     }
   },
-  "active": "b15a006daf72a80f",
+  "active": "970d5b0bef86599c",
   "lastOpenFiles": [
-    "images/RustPerfO3.png",
-    "images/RustPerfO0.png",
+    "images/RustPerfBMLayoutRight.png",
     "Bench bridge ndarray <-> mdspan.md",
-    "images/C++PerfO3.png",
-    "images/C++PerfO0.png",
+    "images/RustPerfBMLayoutRight.tmp.png",
+    "images/RustCppPerfBMLayoutRight.png",
+    "images/RustPerfBM.png~",
+    "images/RustCppPerfBM.png",
+    "images/RustPerfBM.png",
+    "images/CppPerfBMLayoutRight.png",
+    "images/CppPerfBM.png",
+    "images/RustPerfO3Reference.png",
+    "images/RustPerfO0Reference.png",
+    "images/RustPerfO3.png",
     "19 septembre 2025.md",
     "22 septembre 2025.md",
     "10 Octobre 2025.md",
@@ -184,14 +191,8 @@
     "26 septembre 2025.md",
     "24 septembre 2025.md",
     "23 septembre 2025.md",
-    "images/cxx_size.png",
     "18 septembre 2025.md",
     "Cxx for Rust ↔ Kokkos.md",
-    "images/wrapper_size.png",
-    "images/Screenshot from 2025-09-19 16-01-26.png",
-    "images/Screenshot from 2025-09-19 15-51-32.png",
-    "images/cxx_test.png",
-    "images/wrapper_test.png",
     "images"
   ]
 }
