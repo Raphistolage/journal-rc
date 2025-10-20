@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use ndarray::{Array, ArrayViewMut};
+use ndarray::{Array};
 use::ndarray::{ArrayView};
 use::mdspan_interop::{matrix_product, from_shared, free_shared_array};
 
@@ -8,8 +8,8 @@ use::mdspan_interop::{matrix_product, from_shared, free_shared_array};
 fn perf_test_1() {
 
     {
-        let mut v = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let mut s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let mut v = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,];
+        let mut s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,];
         // let arr1 = ArrayView::from_shape((2,2), &v).unwrap();
         // let arr2 = ArrayView::from_shape((2,2), &s).unwrap();
 
@@ -25,43 +25,42 @@ fn perf_test_1() {
         for _ in 0..n {
             v[0] += 1.0;
             s[1] += 2.0; 
-            let arr1 = ArrayView::from_shape((2,2), &v).unwrap();
-            let arr2 = ArrayView::from_shape((2,2), &s).unwrap();
+            let arr1 = ArrayView::from_shape((4,30), &v).unwrap();
+            let arr2 = ArrayView::from_shape((30,4), &s).unwrap();
 
             let now = Instant::now();
             let result = matrix_product(&arr1, &arr2);
-            tot_time += now.elapsed().as_secs_f64();
-
             let result_array = from_shared(result);
-
+            
+            tot_time += now.elapsed().as_secs_f64();
 
                 
             free_shared_array(result_array.as_ptr());
         }
         
         println!("Total time elapsed in seconds: {}", tot_time);
-        println!("Time elapsed in average per 2x2 matrix product in ns: {}", tot_time*1000.0);
+        println!("Time elapsed in average per 4x30 matrix product in ns: {}", tot_time*1000.0);
     }
 
 
     println!("Test with only Rust : ");
 
     {
-        let mut v = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let mut s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let mut v = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,];
+        let mut s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,];
 
         let mut tot_time = 0.0;
         let n = 1_000_000;
 
-        for _ in 0..n {
-            v[0] += 1.0;
-            s[1] += 2.0; 
-            let arr1 = ArrayView::from_shape((2,2), &v).unwrap();
-            let arr2 = ArrayView::from_shape((2,2), &s).unwrap();
+
+        for i in 0..n {
+            v[i%120] += 1.0;
+            s[i%120] += 2.0; 
+            let arr1 = ArrayView::from_shape((4, 30), &v).unwrap();
+            let arr2 = ArrayView::from_shape((30, 4), &s).unwrap();
 
             let now = Instant::now();
-
-            let mut result: ndarray::ArrayBase<ndarray::OwnedRepr<f64>, ndarray::Dim<[usize; 2]>> = Array::zeros((2,2));
+            let mut result: ndarray::ArrayBase<ndarray::OwnedRepr<f64>, ndarray::Dim<[usize; 2]>> = Array::zeros((30,30));
             for i in 0..arr1.dim().0  {
                 for j in 0..arr2.dim().1  {
                     let mut r: f64 = 0.0;
@@ -70,12 +69,12 @@ fn perf_test_1() {
                     }
                     result[[i,j]] = r;
                 }
-                tot_time += now.elapsed().as_secs_f64();
             }
+            tot_time += now.elapsed().as_secs_f64();
         }
         
         println!("Total time elapsed in seconds: {}", tot_time);
-        println!("Time elapsed in average per 2x2 matrix product in ns: {}", tot_time*1000.0);
+        println!("Time elapsed in average per 4x30 matrix product in ns: {}", tot_time*1000.0);
     }
 
 }

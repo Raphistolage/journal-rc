@@ -39,21 +39,23 @@ std::vector<double> matrix_product(
 }
 
 int main() {
-    std::vector<double> v = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0};
-    std::vector<double> s = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0};
+    std::vector<double> v = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,};
+    std::vector<double> s = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0,};
 
     std::cout << "Test Matrix Product using mdspan:" << std::endl;
 
     double tot_time = 0.0;
     const int N = 1'000'000;
 
+
+
     for (int i = 0; i < N; i++) {
         v[0] += 1.0;
         s[1] += 2.0;
 
         // Create mdspan views (2x2 matrices)
-        std::mdspan<const double, std::dextents<std::size_t, 2>> mat1(v.data(), 2, 2);
-        std::mdspan<const double, std::dextents<std::size_t, 2>> mat2(s.data(), 2, 2);
+        std::mdspan<const double, std::dextents<std::size_t, 2>> mat1(v.data(), 4,30);
+        std::mdspan<const double, std::dextents<std::size_t, 2>> mat2(s.data(), 30, 4);
 
         auto start = std::chrono::high_resolution_clock::now();
         
@@ -66,7 +68,7 @@ int main() {
     }
 
     std::cout << "Total time elapsed in seconds: " << tot_time << std::endl;
-    std::cout << "Time elapsed in average per 2x2 matrix product: " << (tot_time / N) << " seconds" << std::endl;
+    std::cout << "Time elapsed in average per 4x30 matrix product: " << (tot_time / N) << " seconds" << std::endl;
     std::cout << "Average time in nanoseconds: " << (tot_time / N * 1e9) << " ns" << std::endl;
 
     return 0;
