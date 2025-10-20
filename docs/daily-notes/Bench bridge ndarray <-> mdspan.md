@@ -58,7 +58,7 @@ Average time per product : 271**ns**
 
 ### Comparison with pure Rust
 
-When doing these operations only in Rust (which means initializing the two ndarray and multiplying them straight away) the average time is be 45ns, so about a third of what we get in our best case scenario with the bridge.
+When doing these operations only in Rust (which means initializing the two ndarray and multiplying them straight away) the average time is be 13ns, so about a tenth of what we get in our best case scenario with the bridge.
 
 **Real need to test on bigger operations with bigger matrices, to see the impact of casting and FFI calls then.**
 
@@ -113,10 +113,10 @@ Then, focusing only on interoperability, this Rust–C++ layer is not very time-
 | **Rust–C++**        | (2×2)x(2x2)   | -o3                  | 585           | x19.5       |
 | **Rust–C++**        | (2×2)x(2x2)   | -o0                  | 1720          | x2.9        |
 | **Rust–C++ (refs)** | (2×2)x(2x2)   | -o3                  | 271           | x9          |
-| **Rust**            | (2×2)x(2x2)   |                      | 45            | x1.5        |
+| **Rust**            | (2×2)x(2x2)   |                      | 12            | x0.4        |
 | **C++**             | (30×4)×(4×30) | -o3                  | 1145          |             |
 | **Rust–C++ (refs)** | (30×4)×(4×30) | -o3                  | 1286          | x1.12       |
-| Rust                | (30×4)×(4×30) |                      | 381           | x0.33       |
+| **Rust**            | (30×4)×(4×30) |                      | 381           | x0.33       |
 | **C++**             | (4x30)x(30x4) | -o3                  | 129           |             |
 | **Rust–C++ (refs)** | (4x30)×(30x4) | -o3                  | 348           | x2.7        |
 | **Rust**            | (4×30)×(30×4) |                      | 16            | x0.12       |
