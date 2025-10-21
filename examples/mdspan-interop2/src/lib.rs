@@ -105,8 +105,6 @@ use std::mem::size_of;
 
 use ndarray::ArrayBase;
 use ndarray::Dim;
-use ndarray::Ix1;
-use ndarray::Ix2;
 use ndarray::IxDynImpl;
 use ndarray::ViewRepr;
 use ndarray::{ArrayView};
@@ -271,16 +269,22 @@ where
     }
 }
 
-pub fn dot<T: ToSharedArray<Dim = Ix1>>(arr1: &T, arr2: &T) -> SharedArrayView{
+pub fn dot<T>(arr1: &ndarray::ArrayView1<T>, arr2: &ndarray::ArrayView1<T>) -> ArrayBase<ViewRepr<&'static T>, Dim<IxDynImpl>>
+where
+    T: RustDataType,
+{
     let shared_array1 = arr1.to_shared_array();
     let shared_array2 = arr2.to_shared_array();
-    unsafe {ffi::dot(&shared_array1, &shared_array2)}
+    from_shared(unsafe {ffi::dot(&shared_array1, &shared_array2)})
 }
 
-pub fn matrix_vector_product<T2: ToSharedArray<Dim = Ix2>, T1: ToSharedArray<Dim = Ix1>>(arr1: &T2, arr2: &T1) -> SharedArrayView{
+pub fn matrix_vector_product<T>(arr1: &ndarray::ArrayView2<T>, arr2: &ndarray::ArrayView1<T>) -> ArrayBase<ViewRepr<&'static T>, Dim<IxDynImpl>>
+where
+    T: RustDataType,
+{
     let shared_array1 = arr1.to_shared_array();
     let shared_array2 = arr2.to_shared_array();
-    unsafe {ffi::matrix_vector_product(&shared_array1, &shared_array2)}
+    from_shared(unsafe {ffi::matrix_vector_product(&shared_array1, &shared_array2)})
 }
 
 pub fn matrix_product<T>(arr1: &ndarray::ArrayView2<T>, arr2: &ndarray::ArrayView2<T>) -> ArrayBase<ViewRepr<&'static T>, Dim<IxDynImpl>>

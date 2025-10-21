@@ -14,7 +14,7 @@ fn matrix_product_test() {
 
     println!("Test Matrix Vector prod through shared struct : ");
 
-    let result: ndarray::ArrayBase<ndarray::ViewRepr<&'static f32>, ndarray::Dim<ndarray::IxDynImpl>> = matrix_product(&arr1, &arr2);
+    let result = matrix_product(&arr1, &arr2);
 
     println!("Result : {:?}", result);
 }
