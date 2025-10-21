@@ -248,3 +248,50 @@ SharedArrayView templated_matrix_product(const SharedArrayView &arrayView1, cons
     auto result = std::mdspan(heap_result, mat1.extent(0), mat2.extent(1));
     return to_shared<2>(result);   
 }
+
+template <typename T = double>
+SharedArrayView templated_dot(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2) {
+    auto vec1 = from_shared<1, T>(arrayView1);
+    auto vec2 = from_shared<1, T>(arrayView2);
+
+    if (vec1.extent(0) != vec2.extent(0)) {
+        throw std::runtime_error("Incompatible sizes of vectors");
+    }
+
+    T r = 0;
+    for (size_t i = 0; i < vec1.extent(0); i++)
+    {
+        r += vec1[i]*vec2[i];
+    }
+
+    T* tmp = new T[1]; // sur la heap
+    tmp[0] = r;
+    const T* heap_result = tmp;
+    auto result = std::mdspan(heap_result, 1);
+    return to_shared<1>(result, MemSpace::HostSpace);
+}
+
+template <typename T = double>
+SharedArrayView templated_matrix_vector_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2) {
+    auto mat = from_shared<2, T>(arrayView1);
+    auto vec = from_shared<1, T>(arrayView2);
+
+    if (mat.extent(1) != vec.extent(0)) {
+        throw std::runtime_error("Incompatible sizes of matrix and vector");
+    }
+
+    T* tmp = new T[mat.extent(0)]; // sur la heap pour que la valeur reste après la sortie de la fonction. Pourrait metre un Smart Pointer.
+
+    for (size_t i = 0; i < mat.extent(0); i++)
+    {
+        T r = 0;
+        for (size_t j = 0; j < mat.extent(1); j++)
+        {
+            r += mat[i,j]*vec[j];
+        }
+        tmp[i] = r;
+    }
+    const T* heap_result = tmp;
+    auto result = std::mdspan(heap_result, mat.extent(0));
+    return to_shared<1>(result);
+}
