@@ -8,7 +8,7 @@ On pourrait passer directement un raw ptr et la metadata en parametre, mais c'es
 mod ffi {
     use std::ffi::c_void;
 
-    #[repr(C)]
+    #[repr(u8)]// pour matcher avec le cote C++
     #[derive(PartialEq)]
     pub enum Errors {
         NoErrors = 0,
@@ -18,36 +18,36 @@ mod ffi {
 
     #[derive(Debug)]
     #[derive(PartialEq)]
-    #[repr(C)]
-    pub enum MemSpace {
-        CudaSpace,
-        CudaHostPinnedSpace,
-        HIPSpace,
-        HIPHostPinnedSpace,
-        HIPManagedSpace,
-        HostSpace,
-        SharedSpace,
-        SYCLDeviceUSMSpace,
-        SYCLHostUSMSpace,
-        SYCLSharedUSMSpace,
+    #[repr(u8)]// pour matcher avec le cote C++
+    pub enum MemSpace{
+        CudaSpace = 1,
+        CudaHostPinnedSpace = 2,
+        HIPSpace = 3,
+        HIPHostPinnedSpace = 4,
+        HIPManagedSpace = 5,
+        HostSpace = 6,
+        SharedSpace = 7,
+        SYCLDeviceUSMSpace = 8,
+        SYCLHostUSMSpace = 9,
+        SYCLSharedUSMSpace = 10,
     }
 
     #[derive(Debug)]
     #[derive(PartialEq)]
-    #[repr(C)]
+    #[repr(u8)]// pour matcher avec le cote C++
     pub enum Layout {
-        LayoutLeft,
-        LayoutRight,
-        LayoutStride,
+        LayoutLeft = 0,
+        LayoutRight = 1,
+        LayoutStride = 2,
     }
 
     #[derive(Debug)]
     #[derive(PartialEq)]
-    #[repr(C)]
+    #[repr(u8)] // pour matcher avec le cote C++
     pub enum DataType {
-        Float,
-        Unsigned,
-        Signed,
+        Float = 1,
+        Unsigned = 2,
+        Signed = 3,
     }
     //  En mutable pour tout ce qui va etre deep_copy etc
     #[derive(Debug)]
@@ -61,9 +61,9 @@ mod ffi {
 
         pub rank: i32,
 
-        pub shape: *const i32,
+        pub shape: *const usize,
  
-        pub stride: *const i32,
+        pub stride: *const isize,
 
         pub mem_space: MemSpace,
 
@@ -81,9 +81,9 @@ mod ffi {
 
         pub rank: i32,
 
-        pub shape: *const i32,
+        pub shape: *const usize,
  
-        pub stride: *const i32,
+        pub stride: *const isize,
         
         pub mem_space: MemSpace,
 
@@ -103,86 +103,164 @@ use std::slice::from_raw_parts;
 use std::ffi::c_void;
 use std::mem::size_of;
 
+use ndarray::ArrayBase;
+use ndarray::Dim;
 use ndarray::Ix1;
 use ndarray::Ix2;
+use ndarray::IxDynImpl;
+use ndarray::ViewRepr;
 use ndarray::{ArrayView};
 use ndarray::{IxDyn, ShapeBuilder};
 
 use ffi::{SharedArrayView, SharedArrayViewMut, MemSpace, Layout, DataType};
 
-
-
-pub trait ToShared {
-    type Dim: ndarray::Dimension;
-    fn to_shared(&self) -> SharedArrayView;
+// Trait pour savoir le DataType de la data dans les ndarray.
+pub trait RustDataType {
+    fn data_type() -> DataType;
 }
 
-pub trait ToSharedMut {
-    type Dim: ndarray::Dimension;
-    fn to_shared_mut(&mut self) -> SharedArrayViewMut;
+impl RustDataType for f32 {
+    fn data_type() -> DataType { DataType::Float }
+}
+impl RustDataType for f64 {
+    fn data_type() -> DataType { DataType::Float }
 }
 
-impl<'a, D> ToShared for ndarray::ArrayView<'a, f64, D>
+impl RustDataType for u8 {
+    fn data_type() -> DataType { DataType::Unsigned }
+}
+impl RustDataType for u16 {
+    fn data_type() -> DataType { DataType::Unsigned }
+}
+impl RustDataType for u32 {
+    fn data_type() -> DataType { DataType::Unsigned }
+}
+impl RustDataType for u64 {
+    fn data_type() -> DataType { DataType::Unsigned }
+}
+impl RustDataType for u128 {
+    fn data_type() -> DataType { DataType::Unsigned }
+}
+impl RustDataType for usize {
+    fn data_type() -> DataType { DataType::Unsigned }
+}
+
+impl RustDataType for i8 {
+    fn data_type() -> DataType { DataType::Signed }
+}
+impl RustDataType for i16 {
+    fn data_type() -> DataType { DataType::Signed }
+}
+impl RustDataType for i32 {
+    fn data_type() -> DataType { DataType::Signed }
+}
+impl RustDataType for i64 {
+    fn data_type() -> DataType { DataType::Signed }
+}
+impl RustDataType for i128 {
+    fn data_type() -> DataType { DataType::Signed }
+}
+impl RustDataType for isize {
+    fn data_type() -> DataType { DataType::Signed }
+}
+
+pub trait ToSharedArray {
+    type Dim: ndarray::Dimension;
+    fn to_shared_array(&self) -> SharedArrayView;
+}
+
+pub trait ToSharedArrayMut {
+    type Dim: ndarray::Dimension;
+    fn to_shared_array_mut(&mut self) -> SharedArrayViewMut;
+}
+
+impl<'a, D, T> ToSharedArray for ndarray::ArrayView<'a, T, D>
 where
     D: ndarray::Dimension + 'a,
+    T: RustDataType,
 {
     type Dim = D;
-    fn to_shared(&self) -> SharedArrayView {
-        to_shared(self)
+    fn to_shared_array(&self) -> SharedArrayView {
+        to_shared_array(self)
     }
 }
 
-impl<'a, D> ToSharedMut for ndarray::ArrayViewMut<'a, f64, D>
+impl<'a, D, T> ToSharedArrayMut for ndarray::ArrayViewMut<'a, T, D>
 where
     D: ndarray::Dimension + 'a,
+    T: RustDataType,
 {
     type Dim = D;
-    fn to_shared_mut(&mut self) -> SharedArrayViewMut {
-        to_shared_mut(self)
+    fn to_shared_array_mut(&mut self) -> SharedArrayViewMut {
+        to_shared_array_mut(self)
     }
 }
 
-pub fn to_shared_mut<'a, T, D>(arr: &'a mut ndarray::ArrayViewMut<T, D>) -> ffi::SharedArrayViewMut where D: ndarray::Dimension + 'a{
+pub fn to_shared_array_mut<'a, T, D>(arr: &'a mut ndarray::ArrayViewMut<T, D>) -> ffi::SharedArrayViewMut 
+where 
+    D: ndarray::Dimension + 'a,
+    T: RustDataType
+{
     let rank = arr.ndim();
-    let stride  = arr.strides().as_ptr() as *const i32;
-    let shape= arr.shape().as_ptr() as *const i32;
+    let stride = arr.strides().as_ptr();
+    let shape= arr.shape().as_ptr();
     let data_ptr = arr.as_mut_ptr();
     // An ndarray is always on hostspace
-    ffi::SharedArrayViewMut {ptr: data_ptr as *mut c_void, size: size_of::<T>() as i32, data_type: DataType::Unsigned, rank: rank as i32, shape, stride, mem_space: MemSpace::HostSpace, layout: Layout::LayoutLeft}
+    ffi::SharedArrayViewMut {
+        ptr: data_ptr as *mut c_void, 
+        size: size_of::<T>() as i32, 
+        data_type: T::data_type(), 
+        rank: rank as i32, 
+        shape, 
+        stride, 
+        mem_space: MemSpace::HostSpace, 
+        layout: Layout::LayoutLeft
+    }
 }
 
-pub fn to_shared<'a,T, D>(arr: &'a ndarray::ArrayView<T, D>) -> ffi::SharedArrayView where D: ndarray::Dimension + 'a{
+pub fn to_shared_array<'a,T, D>(arr: &'a ndarray::ArrayView<T, D>) -> ffi::SharedArrayView 
+where 
+    D: ndarray::Dimension + 'a,
+    T: RustDataType
+{
     let rank = arr.ndim();
-    let stride  = arr.strides().as_ptr() as *const i32;
-    let shape= arr.shape().as_ptr() as *const i32;
+    let stride  = arr.strides().as_ptr();
+    let shape= arr.shape().as_ptr();
     let data_ptr = arr.as_ptr();
     // An ndarray is always on hostspace
-    ffi::SharedArrayView {ptr: data_ptr as *const c_void, size: size_of::<T>() as i32, data_type: DataType::Unsigned, rank: rank as i32, shape, stride, mem_space: MemSpace::HostSpace, layout: Layout::LayoutLeft}
+    ffi::SharedArrayView {
+        ptr: data_ptr as *const c_void, 
+        size: size_of::<T>() as i32, 
+        data_type: T::data_type(), 
+        rank: rank as i32, 
+        shape, 
+        stride, 
+        mem_space: MemSpace::HostSpace, 
+        layout: Layout::LayoutLeft
+    }
 }
 
-pub fn from_shared(shared_array: ffi::SharedArrayView) -> ndarray::ArrayView<'static, c_void, ndarray::IxDyn> {
+pub fn from_shared<T>(shared_array: ffi::SharedArrayView) -> ndarray::ArrayView<'static, T, ndarray::IxDyn> {
     if shared_array.mem_space != MemSpace::HostSpace && shared_array.mem_space !=  MemSpace::CudaHostPinnedSpace && shared_array.mem_space != MemSpace::HIPHostPinnedSpace{
         panic!("Cannot cast from a sharedArrayView that is not on host space.");
     }
 
-    let shape: &[usize] = unsafe { from_raw_parts(shared_array.shape as *const usize, shared_array.rank as usize) };
-    let stride: &[usize] = unsafe { from_raw_parts(shared_array.stride as *const usize, shared_array.rank as usize) };
+    let shape: &[usize] = unsafe { from_raw_parts(shared_array.shape, shared_array.rank as usize) };
+    let stride: &[usize] = unsafe { from_raw_parts(shared_array.stride as *const usize , shared_array.rank as usize) }; // WARNING : C'est bizarre que ndarray::ArrayView.strides renvoi un &[isize], mais que en parametre shape.strides(&[usize])
 
-    let len = shape.iter().map(|&s| s as usize).product();
-    let v = unsafe { from_raw_parts(shared_array.ptr, len) };
-
-
+    let len = shape.iter().product();
+    let v = unsafe { from_raw_parts(shared_array.ptr as *const T, len) };
 
     ArrayView::from_shape(IxDyn(shape).strides(IxDyn(stride)), v).unwrap()
 }
 
 pub fn deep_copy<T, U>(arr1: &mut U, arr2: &T) -> Result<(), ffi::Errors> 
 where 
-    T: ToShared,
-    U: ToSharedMut
+    T: ToSharedArray,
+    U: ToSharedArrayMut
 {
-    let mut shared_array1 = arr1.to_shared_mut();
-    let shared_array2 = arr2.to_shared();
+    let mut shared_array1 = arr1.to_shared_array_mut();
+    let shared_array2 = arr2.to_shared_array();
     let result = unsafe {ffi::deep_copy(&mut shared_array1, &shared_array2)};
     if result == ffi::Errors::NoErrors {
         Ok(())
@@ -193,22 +271,25 @@ where
     }
 }
 
-pub fn dot<T: ToShared<Dim = Ix1>>(arr1: &T, arr2: &T) -> SharedArrayView{
-    let shared_array1 = arr1.to_shared();
-    let shared_array2 = arr2.to_shared();
+pub fn dot<T: ToSharedArray<Dim = Ix1>>(arr1: &T, arr2: &T) -> SharedArrayView{
+    let shared_array1 = arr1.to_shared_array();
+    let shared_array2 = arr2.to_shared_array();
     unsafe {ffi::dot(&shared_array1, &shared_array2)}
 }
 
-pub fn matrix_vector_product<T2: ToShared<Dim = Ix2>, T1: ToShared<Dim = Ix1>>(arr1: &T2, arr2: &T1) -> SharedArrayView{
-    let shared_array1 = arr1.to_shared();
-    let shared_array2 = arr2.to_shared();
+pub fn matrix_vector_product<T2: ToSharedArray<Dim = Ix2>, T1: ToSharedArray<Dim = Ix1>>(arr1: &T2, arr2: &T1) -> SharedArrayView{
+    let shared_array1 = arr1.to_shared_array();
+    let shared_array2 = arr2.to_shared_array();
     unsafe {ffi::matrix_vector_product(&shared_array1, &shared_array2)}
 }
 
-pub fn matrix_product<T: ToShared<Dim = Ix2>>(arr1: &T, arr2: &T) -> SharedArrayView{
-    let shared_array1 = arr1.to_shared();
-    let shared_array2 = arr2.to_shared();
-    unsafe {ffi::matrix_product(&shared_array1, &shared_array2)}
+pub fn matrix_product<T>(arr1: &ndarray::ArrayView2<T>, arr2: &ndarray::ArrayView2<T>) -> ArrayBase<ViewRepr<&'static T>, Dim<IxDynImpl>>
+where
+    T: RustDataType,
+{
+    let shared_array1 = arr1.to_shared_array();
+    let shared_array2 = arr2.to_shared_array();
+    from_shared::<T>(unsafe {ffi::matrix_product(&shared_array1, &shared_array2)})
 }
 
 pub fn free_shared_array(ptr: *const f64) {
