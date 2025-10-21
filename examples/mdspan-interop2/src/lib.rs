@@ -293,7 +293,9 @@ where
 {
     let shared_array1 = arr1.to_shared_array();
     let shared_array2 = arr2.to_shared_array();
-    from_shared::<T>(unsafe {ffi::matrix_product(&shared_array1, &shared_array2)})
+    let shared_result = unsafe {ffi::matrix_product(&shared_array1, &shared_array2)};
+    println!("Datatype of result : {:?}", shared_result.data_type);
+    from_shared::<T>(shared_result)
 }
 
 // très unsafe, mais c'est pour free le ptr donc obligé et normal.

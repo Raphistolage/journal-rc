@@ -6,7 +6,8 @@
 #include <utility>
 #include <stdexcept>
 #include <cstdlib>
-
+#include <type_traits>
+		
 extern "C" {
 
     enum DataType : uint8_t {
@@ -133,11 +134,21 @@ SharedArrayView to_shared(std::mdspan<T, std::dextents<std::size_t, D>> fromMds,
         stride[i] = fromMds.stride(i);
     }
     Layout layout = Layout::LayoutStride;
+    DataType datatype = DataType::Unsigned;
+    if (std::is_unsigned_v<T> == false)
+    {
+        if (std::is_floating_point_v<T> == true)
+        {
+            datatype = DataType::Float;
+        } else {
+            datatype = DataType::Signed;
+        }
+    }
     // TODO : Une maniere de detecter si layout_left ou layout_right ?
     return SharedArrayView {
         fromMds.data_handle(),
         sizeof(T),
-        DataType::Unsigned, // TODO : pouvoir definir le datatype, choisir entre float, signed, unsigned.
+        datatype, 
         rank,
         shape,
         stride,
@@ -157,11 +168,21 @@ SharedArrayViewMut to_shared_mut(std::mdspan<T, std::dextents<std::size_t, D>> f
         stride[i] = fromMds.stride(i);
     }
     Layout layout = Layout::LayoutStride;
+    DataType datatype = DataType::Unsigned;
+    if (std::is_unsigned_v<T> == false)
+    {
+        if (std::is_floating_point_v<T> == true)
+        {
+            datatype = DataType::Float;
+        } else {
+            datatype = DataType::Signed;
+        }
+    }
     // TODO : Une maniere de detecter si layout_left ou layout_right ?
     return SharedArrayViewMut {
         fromMds.data_handle(),
         sizeof(T),
-        DataType::Unsigned, // TODO : pouvoir definir le datatype, choisir entre float, signed, unsigned.
+        datatype, 
         rank,
         shape,
         stride,
@@ -181,11 +202,21 @@ SharedArrayView to_shared(std::mdspan<T, std::dextents<std::size_t, D>> fromMds)
         stride[i] = fromMds.stride(i);
     }
     Layout layout = Layout::LayoutStride;
+    DataType datatype = DataType::Unsigned;
+    if (std::is_unsigned_v<T> == false)
+    {
+        if (std::is_floating_point_v<T> == true)
+        {
+            datatype = DataType::Float;
+        } else {
+            datatype = DataType::Signed;
+        }
+    }
     // TODO : Une maniere de detecter si layout_left ou layout_right ?
     return SharedArrayView {
         fromMds.data_handle(),
         sizeof(T),
-        DataType::Unsigned, // TODO : pouvoir definir le datatype, choisir entre float, signed, unsigned.
+        datatype, 
         rank,
         shape,
         stride,
@@ -205,11 +236,22 @@ SharedArrayViewMut to_shared_mut(std::mdspan<T, std::dextents<std::size_t, D>> f
         stride[i] = fromMds.stride(i);
     }
     Layout layout = Layout::LayoutStride;
+    DataType datatype = DataType::Unsigned;
+    if (std::is_unsigned_v<T> == false)
+    {
+        if (std::is_floating_point_v<T> == true)
+        {
+            datatype = DataType::Float;
+        } else {
+            datatype = DataType::Signed;
+        }
+    }
+    
     // TODO : Une maniere de detecter si layout_left ou layout_right ?
     return SharedArrayViewMut {
         fromMds.data_handle(),
         sizeof(T),
-        DataType::Unsigned, // TODO : pouvoir definir le datatype, choisir entre float, signed, unsigned.
+        datatype, 
         rank,
         shape,
         stride,
@@ -233,9 +275,8 @@ SharedArrayView templated_dot(const SharedArrayView &arrayView1, const SharedArr
         r += vec1[i]*vec2[i];
     }
 
-    // T* tmp = new T[1]; // sur la heap
     T* tmp = reinterpret_cast<T*>(std::malloc(sizeof(T)));
-    
+
     tmp[0] = r;
     const T* heap_result = tmp;
     auto result = std::mdspan(heap_result, 1);
@@ -251,7 +292,7 @@ SharedArrayView templated_matrix_vector_product(const SharedArrayView &arrayView
         throw std::runtime_error("Incompatible sizes of matrix and vector");
     }
 
-    // T* tmp = new T[mat.extent(0)]; // sur la heap pour que la valeur reste après la sortie de la fonction. Pourrait metre un Smart Pointer.
+    // sur la heap pour que la valeur reste après la sortie de la fonction. Pourrait metre un Smart Pointer.
     T* tmp = reinterpret_cast<T*>(std::malloc(mat.extent(0)*sizeof(T)));
 
     for (size_t i = 0; i < mat.extent(0); i++)
@@ -280,7 +321,7 @@ SharedArrayView templated_matrix_product(const SharedArrayView &arrayView1, cons
         throw std::runtime_error("Incompatible sizes of matrix and vector");
     }
 
-    // T* tmp = new T[mat1.extent(0)*mat2.extent(1)]; // sur la heap pour que la valeur reste après la sortie de la fonction. Pourrait metre un Smart Pointer.
+    // sur la heap pour que la valeur reste après la sortie de la fonction. Pourrait metre un Smart Pointer.
     T* tmp = reinterpret_cast<T*>(std::malloc(mat1.extent(0)*mat2.extent(1)*sizeof(T)));
 
     for (size_t i = 0; i < mat1.extent(0); i++)
