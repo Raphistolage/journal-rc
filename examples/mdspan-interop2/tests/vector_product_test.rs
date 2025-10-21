@@ -17,4 +17,9 @@ fn vector_product_test() {
 
     let result = mdspan_interop2::dot(&arr1, &arr2);
     println!("Result : {:?}", result);
+    
+
+    // mdspan_interop2::free_shared_array(result.as_ptr());
+
+    // println!("Resulting scalar after freeing pointer : {:?}", result_array);
 }

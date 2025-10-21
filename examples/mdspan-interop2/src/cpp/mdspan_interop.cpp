@@ -6,6 +6,7 @@
 #include <mdspan>
 #include <cassert>
 #include <utility>
+#include <cstdlib>
 
 #include "mdspan_interop.hpp"
 
@@ -274,7 +275,7 @@ extern "C" {
         
     }
     // cette fonction devra être appelé sur chaque ptr de data de sharedArray qui auront été instanciés depuis le côté C++
-    void free_shared_array(const double* ptr) {
-        delete[] ptr;
+    void free_shared_array(void* ptr) {
+        free(ptr);
     }
 }

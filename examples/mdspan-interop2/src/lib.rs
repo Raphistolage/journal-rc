@@ -95,7 +95,7 @@ mod ffi {
         pub fn dot(arrayView1: &SharedArrayView , arrayView2: &SharedArrayView ) -> SharedArrayView ;
         pub fn matrix_vector_product(arrayView1: &SharedArrayView , arrayView2: &SharedArrayView ) -> SharedArrayView ;
         pub fn matrix_product(arrayView1: &SharedArrayView , arrayView2: &SharedArrayView ) -> SharedArrayView ;
-        pub unsafe fn free_shared_array(ptr: *const f64);
+        pub unsafe fn free_shared_array(ptr: *const c_void);
     }
 }
 
@@ -296,8 +296,9 @@ where
     from_shared::<T>(unsafe {ffi::matrix_product(&shared_array1, &shared_array2)})
 }
 
-pub fn free_shared_array(ptr: *const f64) {
+// très unsafe, mais c'est pour free le ptr donc obligé et normal.
+pub fn free_shared_array<T>(ptr: *const T) {
     unsafe {
-        ffi::free_shared_array(ptr);
+        ffi::free_shared_array(ptr as *mut c_void);
     }
 }
