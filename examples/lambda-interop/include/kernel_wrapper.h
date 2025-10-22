@@ -17,20 +17,27 @@ namespace test {
             SYCLSpace,
         };
 
+        enum class ExecutionPolicy : uint8_t {
+            RangePolicy = 0,
+            MDRangePolicy = 1,
+            TeamPolicy = 2,
+        };
+
         constexpr int Dynamic = -1;
 
         struct Kernel {
-            void (*lambda)(int, int*);
-            int *capture;
+            void (*lambda)(int, int**);
+            int **capture;
+            int num_caputres;
             int size;
         };
 
         template <typename T, typename Func>
         struct Functor {
-            T* capture; // TODO : on limite à int pour l'instant pour éviter template.
+            T** capture; // TODO : on limite à int pour l'instant pour éviter template.
             int len;
             Func rustf;
-            Functor(Func func, T* capture, int len) : capture(capture), len(len), rustf(func) {}
+            Functor(Func func, T** capture, int len) : capture(capture), len(len), rustf(func) {}
             template <typename... Args>
             void operator() (Args... args) const { // TODO : pour l'instant on limite à un seul argument, trop compliqué avec les templates sinon
                 rustf(args..., capture);
@@ -61,7 +68,7 @@ namespace test {
         // void deep_copy(const RustViewWrapper& view1, const RustViewWrapper& view2);
         // void assert_equals(const RustViewWrapper& view1, const RustViewWrapper& view2);
         extern "C" {
-            void chose_kernel(/*RustViewWrapper *const arrayView,*/ Kernel kernel);
+            void chose_kernel(/*RustViewWrapper *const arrayView,*/ ExecutionPolicy exec_policy, Kernel kernel);
         }
     } 
 } 

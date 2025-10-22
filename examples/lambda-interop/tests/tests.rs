@@ -10,31 +10,31 @@ fn test_kokkos_views_equals() {
             // let host_view = ffi::create_view(ffi::MemSpace::HostSpace, "HostView".to_string(), vec![4,3,2,1]);
             // let device_view = ffi::create_view(ffi::MemSpace::CudaSpace, "DeviceView".to_string(), vec![21]);
             let mut data1 = [42i32; 24];
-            // let mut data2 = [42; 24];
+            let mut data2 = [43i32; 24];
+            let mut data3 = [54i32; 24];
 
-            
-            
-            // ffi::fill_view(&host_view, &data1);
-            // ffi::fill_view(&device_view, &data1);
-            // ffi::show_metadata(&host_view);
-            // ffi::show_metadata(&device_view);
-            // ffi::deep_copy(&host_view, &device_view);
-            // ffi::assert_equals(&device_view, &host_view);
+            let mut captures = [data1.as_mut_ptr(), data2.as_mut_ptr(), data3.as_mut_ptr()];
+            const NUM_CAPTURES: i32 = 3;
 
-            fn operator(i: i32, data: &mut[i32; 24]) {
+            fn operator(i: i32, data: &mut[&mut[i32; 24];NUM_CAPTURES as usize]) {
                 // data[i as usize] += 1;
-                data[i as usize] += 1;
+                data[0][i as usize] += 5;
+                data[1][i as usize] += 5;
+                data[2][i as usize] += 5;
             }
 
             let kernel = raw_ffi::Kernel {
                 lambda: operator as *mut c_void,
-                capture: data1.as_mut_ptr() as *mut i32,
-                size: 24,
+                capture: captures.as_mut_ptr() as *mut *mut i32,
+                num_captures: NUM_CAPTURES,
+                range: 24,
             };
 
-            raw_ffi::chose_kernel(/*&host_view,*/ kernel);
+            raw_ffi::chose_kernel(/*&host_view,*/ raw_ffi::ExecutionPolicy::RangePolicy, kernel);
 
             println!("Result array after kokkos operations : {:?}", data1);
+            println!("Result array after kokkos operations : {:?}", data2);
+            println!("Result array after kokkos operations : {:?}", data3);
         }
 
         ffi::kokkos_finalize();
