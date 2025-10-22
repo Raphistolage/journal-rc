@@ -304,3 +304,4 @@ pub fn free_shared_array<T>(ptr: *const T) {
         ffi::free_shared_array(ptr as *mut c_void);
     }
 }
+
