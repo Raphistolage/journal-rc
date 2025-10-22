@@ -59,11 +59,20 @@ pub mod raw_ffi {
     #[repr(C)]
     pub struct Kernel {
         pub lambda: *mut c_void,
-        pub capture: *mut i32,
-        pub size: i32,
+        pub capture: *mut *mut i32,
+        pub num_captures: i32,
+        pub range: i32,
     }
 
+    #[repr(u8)]
+    pub enum ExecutionPolicy {
+        RangePolicy = 0,
+        MDRangePolicy = 1,
+        TeamPolicy = 2,
+    }
+
+
     unsafe extern "C" {
-        pub unsafe fn chose_kernel(/*arrayView: &RustViewWrapper,*/ kernel: Kernel);
+        pub unsafe fn chose_kernel(/*arrayView: &RustViewWrapper,*/ exec_policy: ExecutionPolicy, kernel: Kernel);
     }
 }

@@ -320,9 +320,12 @@ namespace test {
         extern "C" {
 
             // On peut pas exposer une fonction templaté via FFI, donc chose_kernel va servir de dispatcher.
-            void chose_kernel(/*RustViewWrapper *const arrayView,*/ Kernel kernel) {
-                Functor f(kernel.lambda, kernel.capture, kernel.size);
-                exec_kernel<int, void(*)(int, int*)>(/*arrayView,*/ f, kernel.size);
+            void chose_kernel (/*RustViewWrapper *const arrayView,*/ ExecutionPolicy exec_policy, Kernel kernel) {
+                if (exec_policy == ExecutionPolicy::RangePolicy)
+                {    
+                    Functor f(kernel.lambda, kernel.capture, kernel.size);
+                    exec_kernel<int, void(*)(int, int**)>(/*arrayView,*/ f, kernel.size);
+                }
             }
 
 
