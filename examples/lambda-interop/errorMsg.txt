@@ -1,0 +1,24 @@
+warning: kokkos_interop2@0.1.0: Running build.rs!
+   Compiling kokkos_interop2 v0.1.0 (/home/raphael/Documents/StageCEA/journal-rc/examples/kokkos-interop2)
+warning: unused variable: `data1`
+  --> tests/tests.rs:11:17
+   |
+11 |             let data1 = [42.0f64; 24];
+   |                 ^^^^^ help: if this is intentional, prefix it with an underscore: `_data1`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `data2`
+  --> tests/tests.rs:12:17
+   |
+12 |             let data2 = [49.0f64; 22];
+   |                 ^^^^^ help: if this is intentional, prefix it with an underscore: `_data2`
+
+warning: `kokkos_interop2` (test "tests") generated 2 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.17s
+     Running tests/tests.rs (target/debug/deps/tests-f9fc4a6b74139745)
+Kokkos::OpenMP::initialize WARNING: OMP_PROC_BIND environment variable not set
+  In general, for best performance with OpenMP 4.0 or better set OMP_PROC_BIND=spread and OMP_PLACES=threads
+  For best performance with OpenMP 3.1 set OMP_PROC_BIND=true
+  For unit testing set OMP_PROC_BIND=false
+
