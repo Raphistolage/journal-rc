@@ -1,0 +1,13 @@
+[package]
+name = "journal-rc"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ndarray = "0.16.1"
+libc = "0.2.0"
+cxx = "1.0"
+
+[build-dependencies]
+cc = "1.0"
+cxx-build = "1.0"
