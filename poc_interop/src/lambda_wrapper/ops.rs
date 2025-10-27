@@ -81,4 +81,9 @@ mod tests {
         handle::kokkos_finalize();
     }
 
+    #[test]
+    fn matrix_prod() {
+        //not implemented.
+    }
+
 }

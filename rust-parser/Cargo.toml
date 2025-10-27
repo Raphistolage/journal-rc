@@ -1,0 +1,14 @@
+[package]
+name = "rust_parser"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+syn = { version = "2.0", features = ["full"] }
+quote = "1.0"
+
+[lib]
+proc-macro = true
+
+[build-dependencies]
+cc = "1.0"
