@@ -1,9 +1,8 @@
 #include <cstddef>
-#include <print>
 #include <vector>
 #include <iostream>
 #include <memory>
-#include <mdspan>
+#include <Kokkos_Core.hpp>
 #include <cassert>
 #include <utility>
 #include <cstdlib>
@@ -50,7 +49,7 @@ extern "C" {
                 {
                     for (size_t j = 0; j < shape1[1]; j++)
                     {
-                        arr1[i, j] = arr2[i, j];
+                        arr1(i, j) = arr2(i, j);
                     }
                 }
                 break;
@@ -69,7 +68,7 @@ extern "C" {
                     {
                         for (size_t k = 0; k < shape1[2]; k++)
                         {
-                            arr1[i,j,k] = arr2[i,j,k];
+                            arr1(i,j,k) = arr2(i,j,k);
                         }
                     }
                 }

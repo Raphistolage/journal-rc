@@ -1,4 +1,4 @@
-pub use crate::shared_view::handle::*;
+pub use crate::mdspan_interop::handle::*;
 use super::ffi;
 
 pub fn kokkos_finalize() {

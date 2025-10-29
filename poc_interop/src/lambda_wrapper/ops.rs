@@ -12,7 +12,7 @@ pub fn dot<'a, const N: usize>(res: & mut ndarray::ArrayViewMut1<'a, i32>, vec1:
 {
     let mut captures = [res as *mut ndarray::ArrayViewMut1<i32>, vec1 as *mut ndarray::ArrayViewMut1<i32>, vec2 as *mut ndarray::ArrayViewMut1<i32>];
 
-    let kernel = Kernel {
+    let kernel = types::Kernel {
         lambda: dot_operator as *mut c_void,
         capture: captures.as_mut_ptr() as *mut *mut ndarray::ArrayViewMut1<i32>,
         num_captures: 3,
@@ -34,7 +34,7 @@ pub fn matrix_product<'a>(res: & mut ndarray::ArrayViewMut2<'a, i32>, mat1: & mu
 {
     let mut captures = [res as *mut ndarray::ArrayViewMut2<i32>, mat1 as *mut ndarray::ArrayViewMut2<i32>, mat2 as *mut ndarray::ArrayViewMut2<i32>];
 
-    let kernel = Kernel2D {
+    let kernel = types::Kernel2D {
         lambda: mat_prod_operator as *mut c_void,
         capture: captures.as_mut_ptr() as *mut *mut ndarray::ArrayViewMut2<i32>,
         num_captures: 3,

@@ -2,7 +2,7 @@
 #include <string>
 #include <memory>
 #include <iostream>
-#include <mdspan>
+#include <Kokkos_Core.hpp>
 #include <utility>
 #include <stdexcept>
 #include <cstdlib>
@@ -86,18 +86,18 @@ extern "C" {
 }
 
 template <typename T, int D, std::size_t... Is>
-std::mdspan<const T, std::dextents<std::size_t, D>> from_shared_impl(const SharedArrayView &arrayView, std::index_sequence<Is...>) {
+Kokkos::mdspan<const T, Kokkos::dextents<std::size_t, D>> from_shared_impl(const SharedArrayView &arrayView, std::index_sequence<Is...>) {
     // if(arrayView.mem_space == MemSpace::HostSpace) {
         const size_t* shape = arrayView.shape;
         const T* typed_ptr = static_cast<const T*>(arrayView.ptr);
-        std::mdspan<const T, std::dextents<std::size_t, D>> casted_span = std::mdspan(typed_ptr, shape[Is]...);
+        Kokkos::mdspan<const T, Kokkos::dextents<std::size_t, D>> casted_span = Kokkos::mdspan(typed_ptr, shape[Is]...);
         return casted_span; 
     // }
     // TODO: Else, return une Kokkos::view sur device
 }
 
 template <int D, typename T = double>
-std::mdspan<const T, std::dextents<std::size_t, D>> from_shared(const SharedArrayView &arrayView) {
+Kokkos::mdspan<const T, Kokkos::dextents<std::size_t, D>> from_shared(const SharedArrayView &arrayView) {
     if (arrayView.rank != D) {
         throw std::runtime_error("Incompatible dimensions of cast and sharedArrayView");
     }
@@ -105,18 +105,18 @@ std::mdspan<const T, std::dextents<std::size_t, D>> from_shared(const SharedArra
 }
 
 template <typename T, int D, std::size_t... Is>
-std::mdspan<T, std::dextents<std::size_t, D>> from_shared_mut_impl(SharedArrayViewMut &arrayView, std::index_sequence<Is...>) {
+Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> from_shared_mut_impl(SharedArrayViewMut &arrayView, std::index_sequence<Is...>) {
     // if(arrayView.mem_space == MemSpace::HostSpace) {
         const size_t* shape = arrayView.shape;
         T* typed_ptr = static_cast<T*>(arrayView.ptr);
-        std::mdspan<T, std::dextents<std::size_t, D>> casted_span = std::mdspan(typed_ptr, shape[Is]...);
+        Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> casted_span = Kokkos::mdspan(typed_ptr, shape[Is]...);
         return casted_span;
     // }
     // TODO: Else, return une Kokkos::view sur device
 }
 
 template <int D, typename T = double>
-std::mdspan<T, std::dextents<std::size_t, D>> from_shared_mut(SharedArrayViewMut &arrayView) {
+Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> from_shared_mut(SharedArrayViewMut &arrayView) {
     if (arrayView.rank != D) {
         throw std::runtime_error("Incompatible dimensions of cast and sharedArrayView");
     }
@@ -124,7 +124,7 @@ std::mdspan<T, std::dextents<std::size_t, D>> from_shared_mut(SharedArrayViewMut
 }
 
 template <int D, typename T>
-SharedArrayView to_shared(std::mdspan<T, std::dextents<std::size_t, D>> fromMds, MemSpace memorySpace) {
+SharedArrayView to_shared(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds, MemSpace memorySpace) {
     int rank = fromMds.rank();
     size_t* shape = new size_t[7];
     ptrdiff_t* stride = new ptrdiff_t[7];
@@ -158,7 +158,7 @@ SharedArrayView to_shared(std::mdspan<T, std::dextents<std::size_t, D>> fromMds,
 }
 
 template <int D, typename T>
-SharedArrayViewMut to_shared_mut(std::mdspan<T, std::dextents<std::size_t, D>> fromMds, MemSpace memorySpace) {
+SharedArrayViewMut to_shared_mut(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds, MemSpace memorySpace) {
     int rank = fromMds.rank();
     size_t* shape = new size_t[7];
     ptrdiff_t* stride = new ptrdiff_t[7];
@@ -192,7 +192,7 @@ SharedArrayViewMut to_shared_mut(std::mdspan<T, std::dextents<std::size_t, D>> f
 }
 
 template <int D, typename T>
-SharedArrayView to_shared(std::mdspan<T, std::dextents<std::size_t, D>> fromMds) {
+SharedArrayView to_shared(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds) {
     int rank = fromMds.rank();
     size_t* shape = new size_t[7];
     ptrdiff_t* stride = new ptrdiff_t[7];
@@ -226,7 +226,7 @@ SharedArrayView to_shared(std::mdspan<T, std::dextents<std::size_t, D>> fromMds)
 }
 
 template <int D, typename T>
-SharedArrayViewMut to_shared_mut(std::mdspan<T, std::dextents<std::size_t, D>> fromMds) {
+SharedArrayViewMut to_shared_mut(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds) {
     int rank = fromMds.rank();
     size_t* shape = new size_t[7];
     ptrdiff_t* stride = new ptrdiff_t[7];
@@ -279,7 +279,7 @@ SharedArrayView templated_dot(const SharedArrayView &arrayView1, const SharedArr
 
     tmp[0] = r;
     const T* heap_result = tmp;
-    auto result = std::mdspan(heap_result, 1);
+    auto result = Kokkos::mdspan(heap_result, 1);
     return to_shared<1>(result, MemSpace::HostSpace);
 }
 
@@ -300,22 +300,20 @@ SharedArrayView templated_matrix_vector_product(const SharedArrayView &arrayView
         T r = 0;
         for (size_t j = 0; j < mat.extent(1); j++)
         {
-            r += mat[i,j]*vec[j];
+            r += mat(i,j)*vec[j];
         }
         tmp[i] = r;
     }
 
     const T* heap_result = tmp;
-    auto result = std::mdspan(heap_result, mat.extent(0));
+    auto result = Kokkos::mdspan(heap_result, mat.extent(0));
     return to_shared<1>(result);
 }
 
-template <typename T>
+template <typename T = double>
 SharedArrayView templated_matrix_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2) {
     auto mat1 = from_shared<2, T>(arrayView1);
     auto mat2 = from_shared<2, T>(arrayView2);
-
-    std::cout << "Type of mat : " << mat1[0,1] << " \n";
 
     if (mat1.extent(1) != mat2.extent(0)) {
         throw std::runtime_error("Incompatible sizes of matrix and vector");
@@ -324,20 +322,17 @@ SharedArrayView templated_matrix_product(const SharedArrayView &arrayView1, cons
     // sur la heap pour que la valeur reste après la sortie de la fonction. Pourrait metre un Smart Pointer.
     T* tmp = reinterpret_cast<T*>(std::malloc(mat1.extent(0)*mat2.extent(1)*sizeof(T)));
 
-    for (size_t i = 0; i < mat1.extent(0); i++)
-    {
-        for (size_t j = 0; j < mat2.extent(1); j++)
-        {
+    Kokkos::parallel_for("matrix_product", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0,0}, {mat1.extent(0), mat2.extent(1)}), KOKKOS_LAMBDA (const int i, const int j) {
             T r = 0;
             for (size_t k = 0; k < mat1.extent(1); k++)
             {
-                r += mat1[i,k]*mat2[k,j];
+                r += mat1(i,k)*mat2(k,j);
             }
             tmp[i*mat2.extent(1) + j] = r;
         }
-    }
+    );
 
     const T* heap_result = tmp;
-    auto result = std::mdspan(heap_result, mat1.extent(0), mat2.extent(1));
+    auto result = Kokkos::mdspan(heap_result, mat1.extent(0), mat2.extent(1));
     return to_shared<2>(result);   
 }
