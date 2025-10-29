@@ -2,32 +2,19 @@ fn main() {
     let kokkos_include = "/home/clissonr/kokkos-install/include";
     let kokkos_lib = "/home/clissonr/kokkos-install/lib64";
     
-    println!("cargo:warning=CC build part compiling kernel_wrapper ..."); 
-    cc::Build::new()
-        .cpp(true)
-        .file("src/cpp/lambda_wrapper.cpp")
-        .include("src/include")
-        .include(kokkos_include)  // KokkosKernels first
-        .compiler("g++")
-        .flag_if_supported("-std=c++20")
-        // .flag_if_supported("-stdlib=libc++")
-        .flag_if_supported("-O3")
-        .flag_if_supported("-fopenmp")    // Enable OpenMP
-        .compile("lambda_wrapper");
-
-    println!("cargo:warning=CC build part compiling mdspan_interop ..."); 
-    cc::Build::new()
-        .cpp(true)
-        .file("src/cpp/mdspan_interop.cpp")
-        .include("src/include")
-        .include(kokkos_include)  // KokkosKernels first
-        .compiler("g++")
-        .flag_if_supported("-std=c++20")
-        .flag_if_supported("-fPIC")
-        // .flag_if_supported("-stdlib=libc++")
-        .flag_if_supported("-O3")
-        .flag_if_supported("-fopenmp")    // Enable OpenMP
-        .compile("mdspan_interop");
+    // println!("cargo:warning=CC build part compiling mdspan_interop ..."); 
+    // cc::Build::new()
+    //     .cpp(true)
+    //     .file("src/cpp/mdspan_interop.cpp")
+    //     .include("src/include")
+    //     .include(kokkos_include)  // KokkosKernels first
+    //     .compiler("g++")
+    //     .flag_if_supported("-std=c++20")
+    //     .flag_if_supported("-fPIC")
+    //     // .flag_if_supported("-stdlib=libc++")
+    //     .flag_if_supported("-O3")
+    //     .flag_if_supported("-fopenmp")    // Enable OpenMP
+    //     .compile("mdspan_interop");
 
     println!("cargo:warning=Cxx build part running...");
     cxx_build::bridge("src/rust_view/ffi.rs")
@@ -49,11 +36,9 @@ fn main() {
     
     println!("cargo:rerun-if-changed=src/lib.rs");
 
-    println!("cargo:rerun-if-changed=src/cpp/kernel_wrapper.cpp");
     println!("cargo:rerun-if-changed=src/cpp/mdspan_interop.cpp");
     println!("cargo:rerun-if-changed=src/cpp/view_wrapper.cpp");
 
-    println!("cargo:rerun-if-changed=src/include/kernel_wrapper.hpp");
     println!("cargo:rerun-if-changed=src/include/mdspan_interop.hpp");
     println!("cargo:rerun-if-changed=src/include/view_wrapper.hpp");
 }

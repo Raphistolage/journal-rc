@@ -23,14 +23,18 @@ mod ffi {
         LayoutStride,
     }
 
-    pub struct RustViewWrapper {
+    pub struct OpaqueView {
         view: UniquePtr<IView>,
-        memSpace: MemSpace,
-        layout: Layout,
+
+        size: u32,
+
         rank: u32,
-        label: String,
-        extent: Vec<i32>,
-        span: u32,
+
+        shape: *const i32,
+
+        mem_space: MemSpace,
+
+        layout: Layout,
     }
 
     unsafe extern "C++" {
@@ -42,12 +46,11 @@ mod ffi {
         unsafe fn kokkos_initialize();
         unsafe fn kokkos_finalize();
 
-        unsafe fn create_view(memSpace: MemSpace, label: String, dimensions: Vec<i32>) -> RustViewWrapper;
-        // unsafe fn fill_view(view: &RustViewWrapper, data: &[f64]);
-        unsafe fn show_view(view: &RustViewWrapper);
-        unsafe fn show_metadata(view: &RustViewWrapper);
-        // unsafe fn deep_copy(view1: &RustViewWrapper, view2: &RustViewWrapper);
-        // unsafe fn assert_equals(view1: &RustViewWrapper, view2: &RustViewWrapper);
+        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<i32>, data: &mut [f64]) -> OpaqueView;
+        unsafe fn show_view(view: &OpaqueView);
+        unsafe fn show_metadata(view: &OpaqueView);
+        unsafe fn get(view: &OpaqueView, i: & [usize]) -> &'static f64;
+        // unsafe fn deep_copy(view1: &OpaqueView, view2: &OpaqueView);
     }
 
 }

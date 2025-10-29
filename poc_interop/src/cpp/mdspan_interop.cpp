@@ -10,6 +10,14 @@
 #include "mdspan_interop.hpp"
 
 extern "C" {
+    void kokkos_initialize() {
+        Kokkos::initialize();
+    }
+
+    void kokkos_finalize() {
+        Kokkos::finalize();
+    }
+
     Errors deep_copy(SharedArrayViewMut& arrayView1, const SharedArrayView& arrayView2) {
         int rank1 = arrayView1.rank;
         int rank2 = arrayView2.rank;
@@ -29,8 +37,8 @@ extern "C" {
                     std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
                     return Errors::IncompatibleShapes;
                 }
-                auto arr1 = from_shared_mut<1>(arrayView1);
-                auto arr2 = from_shared<1>(arrayView2);
+                auto arr1 = mdspan_from_shared_mut<1>(arrayView1);
+                auto arr2 = mdspan_from_shared<1>(arrayView2);
                 for (size_t i = 0; i < shape1[0]; i++)
                 {
                     arr1[i] = arr2[i];
@@ -43,8 +51,8 @@ extern "C" {
                     std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
                     return Errors::IncompatibleShapes;
                 }
-                auto arr1 = from_shared_mut<2>(arrayView1);
-                auto arr2 = from_shared<2>(arrayView2);
+                auto arr1 = mdspan_from_shared_mut<2>(arrayView1);
+                auto arr2 = mdspan_from_shared<2>(arrayView2);
                 for (size_t i = 0; i < shape1[0]; i++)
                 {
                     for (size_t j = 0; j < shape1[1]; j++)
@@ -60,8 +68,8 @@ extern "C" {
                     std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
                     return Errors::IncompatibleShapes;
                 }
-                auto arr1 = from_shared_mut<3>(arrayView1);
-                auto arr2 = from_shared<3>(arrayView2);
+                auto arr1 = mdspan_from_shared_mut<3>(arrayView1);
+                auto arr2 = mdspan_from_shared<3>(arrayView2);
                 for (size_t i = 0; i < shape1[0]; i++)
                 {
                     for (size_t j = 0; j < shape1[1]; j++)

@@ -55,8 +55,6 @@ pub struct SharedArrayViewMut {
 
     pub shape: *const usize,
 
-    pub stride: *const isize,
-
     pub mem_space: MemSpace,
 
     pub layout: Layout,
@@ -74,8 +72,6 @@ pub struct SharedArrayView{
     pub rank: i32,
 
     pub shape: *const usize,
-
-    pub stride: *const isize,
     
     pub mem_space: MemSpace,
 
