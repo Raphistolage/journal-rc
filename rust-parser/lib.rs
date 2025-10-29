@@ -50,7 +50,6 @@ fn best_effort_remove(path: &Path) {
 pub fn write(path: impl AsRef<Path>, content: &[u8]){
     let path = path.as_ref();
 
-    let mut create_dir_error = None;
     if fs::exists(path) {
         if let Ok(existing) = fs::read(path) {
             if existing == content {
@@ -61,7 +60,7 @@ pub fn write(path: impl AsRef<Path>, content: &[u8]){
         best_effort_remove(path);
     } else {
         let parent = path.parent().unwrap();
-        create_dir_error = fs::create_dir_all(parent).err();
+        _ = fs::create_dir_all(parent).err();
     }
 
     fs::write(path, content);
@@ -81,7 +80,7 @@ pub fn build(rust_source_file: impl AsRef<Path>, cpp_source_file: impl AsRef<Pat
 fn generate_bridge(rust_path: &Path) -> Result<GeneratedCode, syn::Error> {
     let source = match read_to_string(rust_path) {
         Ok(source) => source,
-        Err(err) => panic!("read_to_string error"),
+        Err(_) => panic!("read_to_string error"),
     };
     let source = source.as_str();
     let syntax: file::File = syn::parse_str(source)?;
