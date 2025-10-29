@@ -82,11 +82,21 @@ extern "C" {
     SharedArrayView dot(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2);
     SharedArrayView matrix_vector_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2);
     SharedArrayView matrix_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2);
+    void kokkos_initialize();
+    void kokkos_finalize();
     void free_shared_array(void* ptr);
 }
 
+template <typename T = double>
+Kokkos::View<const T**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>> view2D_from_shared(const SharedArrayView &arrayView) {
+    const size_t* shape = arrayView.shape;
+    const T* typed_ptr = static_cast<const T*>(arrayView.ptr);
+    Kokkos::View<const T**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>> casted_view(typed_ptr, shape[0], shape[1]);
+    return casted_view;
+}
+
 template <typename T, int D, std::size_t... Is>
-Kokkos::mdspan<const T, Kokkos::dextents<std::size_t, D>> from_shared_impl(const SharedArrayView &arrayView, std::index_sequence<Is...>) {
+Kokkos::mdspan<const T, Kokkos::dextents<std::size_t, D>> mdspan_from_shared_impl(const SharedArrayView &arrayView, std::index_sequence<Is...>) {
     // if(arrayView.mem_space == MemSpace::HostSpace) {
         const size_t* shape = arrayView.shape;
         const T* typed_ptr = static_cast<const T*>(arrayView.ptr);
@@ -97,15 +107,15 @@ Kokkos::mdspan<const T, Kokkos::dextents<std::size_t, D>> from_shared_impl(const
 }
 
 template <int D, typename T = double>
-Kokkos::mdspan<const T, Kokkos::dextents<std::size_t, D>> from_shared(const SharedArrayView &arrayView) {
+Kokkos::mdspan<const T, Kokkos::dextents<std::size_t, D>> mdspan_from_shared(const SharedArrayView &arrayView) {
     if (arrayView.rank != D) {
         throw std::runtime_error("Incompatible dimensions of cast and sharedArrayView");
     }
-    return from_shared_impl<T, D>(arrayView, std::make_index_sequence<D>{});
+    return mdspan_from_shared_impl<T, D>(arrayView, std::make_index_sequence<D>{});
 }
 
 template <typename T, int D, std::size_t... Is>
-Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> from_shared_mut_impl(SharedArrayViewMut &arrayView, std::index_sequence<Is...>) {
+Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> mdspan_from_shared_mut_impl(SharedArrayViewMut &arrayView, std::index_sequence<Is...>) {
     // if(arrayView.mem_space == MemSpace::HostSpace) {
         const size_t* shape = arrayView.shape;
         T* typed_ptr = static_cast<T*>(arrayView.ptr);
@@ -116,11 +126,11 @@ Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> from_shared_mut_impl(SharedA
 }
 
 template <int D, typename T = double>
-Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> from_shared_mut(SharedArrayViewMut &arrayView) {
+Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> mdspan_from_shared_mut(SharedArrayViewMut &arrayView) {
     if (arrayView.rank != D) {
         throw std::runtime_error("Incompatible dimensions of cast and sharedArrayView");
     }
-    return from_shared_mut_impl<T, D>(arrayView, std::make_index_sequence<D>{});
+    return mdspan_from_shared_mut_impl<T, D>(arrayView, std::make_index_sequence<D>{});
 }
 
 template <int D, typename T>
@@ -262,8 +272,8 @@ SharedArrayViewMut to_shared_mut(Kokkos::mdspan<T, Kokkos::dextents<std::size_t,
 
 template <typename T = double>
 SharedArrayView templated_dot(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2) {
-    auto vec1 = from_shared<1, T>(arrayView1);
-    auto vec2 = from_shared<1, T>(arrayView2);
+    auto vec1 = mdspan_from_shared<1, T>(arrayView1);
+    auto vec2 = mdspan_from_shared<1, T>(arrayView2);
 
     if (vec1.extent(0) != vec2.extent(0)) {
         throw std::runtime_error("Incompatible sizes of vectors");
@@ -285,14 +295,14 @@ SharedArrayView templated_dot(const SharedArrayView &arrayView1, const SharedArr
 
 template <typename T = double>
 SharedArrayView templated_matrix_vector_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2) {
-    auto mat = from_shared<2, T>(arrayView1);
-    auto vec = from_shared<1, T>(arrayView2);
+    auto mat = mdspan_from_shared<2, T>(arrayView1);
+    auto vec = mdspan_from_shared<1, T>(arrayView2);
 
     if (mat.extent(1) != vec.extent(0)) {
         throw std::runtime_error("Incompatible sizes of matrix and vector");
     }
 
-    // sur la heap pour que la valeur reste après la sortie de la fonction. Pourrait metre un Smart Pointer.
+    // sur la heap pour que la valeur reste après la sortie de la fonction
     T* tmp = reinterpret_cast<T*>(std::malloc(mat.extent(0)*sizeof(T)));
 
     for (size_t i = 0; i < mat.extent(0); i++)
@@ -312,27 +322,55 @@ SharedArrayView templated_matrix_vector_product(const SharedArrayView &arrayView
 
 template <typename T = double>
 SharedArrayView templated_matrix_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2) {
-    auto mat1 = from_shared<2, T>(arrayView1);
-    auto mat2 = from_shared<2, T>(arrayView2);
-
-    if (mat1.extent(1) != mat2.extent(0)) {
-        throw std::runtime_error("Incompatible sizes of matrix and vector");
+    if (arrayView1.shape[1] != arrayView2.shape[0]) {
+        throw std::runtime_error("Incompatible sizes of matrix and vector.");
+    } else if (arrayView1.rank != 2 || arrayView2.rank != 2) {
+        throw std::runtime_error("The arrayViews are not of rank 2.");
     }
 
-    // sur la heap pour que la valeur reste après la sortie de la fonction. Pourrait metre un Smart Pointer.
-    T* tmp = reinterpret_cast<T*>(std::malloc(mat1.extent(0)*mat2.extent(1)*sizeof(T)));
+    if (arrayView1.mem_space == arrayView2.mem_space && arrayView1.mem_space == MemSpace::HostSpace) {
+        auto mat1 = mdspan_from_shared<2, T>(arrayView1);
+        auto mat2 = mdspan_from_shared<2, T>(arrayView2);
+        
+        T* tmp = reinterpret_cast<T*>(std::malloc(mat1.extent(0)*mat2.extent(1)*sizeof(T)));
 
-    Kokkos::parallel_for("matrix_product", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0,0}, {mat1.extent(0), mat2.extent(1)}), KOKKOS_LAMBDA (const int i, const int j) {
-            T r = 0;
-            for (size_t k = 0; k < mat1.extent(1); k++)
-            {
-                r += mat1(i,k)*mat2(k,j);
+        Kokkos::parallel_for("host_matrix_product", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0,0}, {mat1.extent(0), mat2.extent(1)}), KOKKOS_LAMBDA (const int i, const int j) {
+                T r = 0;
+                for (size_t k = 0; k < mat1.extent(1); k++)
+                {
+                    r += mat1(i,k)*mat2(k,j);
+                }
+                tmp[i*mat2.extent(1) + j] = r;
             }
-            tmp[i*mat2.extent(1) + j] = r;
-        }
-    );
+        );
 
-    const T* heap_result = tmp;
-    auto result = Kokkos::mdspan(heap_result, mat1.extent(0), mat2.extent(1));
-    return to_shared<2>(result);   
+        const T* heap_result = tmp;
+        auto result = Kokkos::mdspan(heap_result, mat1.extent(0), mat2.extent(1));
+        return to_shared<2>(result);   
+
+    } else if (arrayView1.mem_space == arrayView2.mem_space && arrayView1.mem_space != MemSpace::HostSpace) {
+        auto mat1 = view2D_from_shared<T>(arrayView1);
+        auto mat2 = view2D_from_shared<T>(arrayView2);
+        
+        std::cout << "Device matrix product" << "\n";
+
+        T* tmp = reinterpret_cast<T*>(std::malloc(mat1.extent(0)*mat2.extent(1)*sizeof(T)));
+
+        Kokkos::parallel_for("device_matrix_product", Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0,0}, {mat1.extent(0), mat2.extent(1)}), KOKKOS_LAMBDA (const int i, const int j) {
+                T r = 0;
+                for (size_t k = 0; k < mat1.extent(1); k++)
+                {
+                    r += mat1(i,k)*mat2(k,j);
+                }
+                tmp[i*mat2.extent(1) + j] = r;
+            }
+        );
+
+        const T* heap_result = tmp;
+        auto result = Kokkos::mdspan(heap_result, mat1.extent(0), mat2.extent(1));
+        return to_shared<2>(result);   
+    } else {
+        throw std::runtime_error("Incompatible memSpaces of arrayViews");
+    }
+
 }

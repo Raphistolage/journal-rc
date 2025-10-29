@@ -5,7 +5,7 @@
 #include <iostream>
 
 namespace rust_view{
-    struct RustViewWrapper;
+    struct OpaqueView;
 
     enum class MemSpace : uint8_t {
         HostSpace,
@@ -21,6 +21,7 @@ namespace rust_view{
         virtual ~IView() = default; 
         // virtual void fill(rust::Slice<const double> data, MemSpace memSpace) = 0;
         virtual void show(MemSpace memSpace) = 0;     
+        virtual const double&  get(rust::slice<const size_t> i, bool is_host) = 0;
     };
 
 }
@@ -31,10 +32,11 @@ namespace rust_view {
     void kokkos_initialize();
     void kokkos_finalize();
 
-    RustViewWrapper create_view(MemSpace memSpace, rust::String label, rust::Vec<int> dimensions);
+    OpaqueView create_view(MemSpace memSpace, rust::Vec<int> dimensions,rust::Slice<double> data);
+    const double&  get(const OpaqueView& view, rust::Slice<const size_t> i);
     // void fill_view(const RustViewWrapper& view, rust::Slice<const double> data);
-    void show_view(const RustViewWrapper& view);
-    void show_metadata(const RustViewWrapper& view);
+    void show_view(const OpaqueView& view);
+    void show_metadata(const OpaqueView& view);
     // void deep_copy(const RustViewWrapper& view1, const RustViewWrapper& view2);
     // void assert_equals(const RustViewWrapper& view1, const RustViewWrapper& view2);
 } 
