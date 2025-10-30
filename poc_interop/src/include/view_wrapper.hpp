@@ -22,6 +22,7 @@ namespace rust_view{
         // virtual void fill(rust::Slice<const double> data, MemSpace memSpace) = 0;
         virtual void show(MemSpace memSpace) = 0;     
         virtual const double&  get(rust::slice<const size_t> i, bool is_host) = 0;
+        virtual void* get_view() = 0;
     };
 
 }
@@ -34,6 +35,7 @@ namespace rust_view {
 
     OpaqueView create_view(MemSpace memSpace, rust::Vec<int> dimensions,rust::Slice<double> data);
     const double&  get(const OpaqueView& view, rust::Slice<const size_t> i);
+    double yAx(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
     // void fill_view(const RustViewWrapper& view, rust::Slice<const double> data);
     void show_view(const OpaqueView& view);
     void show_metadata(const OpaqueView& view);
