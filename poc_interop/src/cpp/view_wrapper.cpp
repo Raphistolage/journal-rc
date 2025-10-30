@@ -5,6 +5,7 @@
 #include "journal-rc/src/rust_view/ffi.rs.h"
 
 namespace rust_view {
+    
     template <typename ViewType>
     struct ViewHolder : IView {
         ViewType view;
@@ -33,6 +34,10 @@ namespace rust_view {
         //         Kokkos::deep_copy(view, h_view);
         //     }
         // }
+
+        void* get_view() {
+            return &view;
+        }
 
         const double& get(rust::slice<const size_t> i, bool is_host) override {
             if (is_host) {
@@ -207,7 +212,7 @@ namespace rust_view {
                 std::move(view),
                 size,
                 rank,
-                dimensions.data(),
+                dimensions,
                 MemSpace::HostSpace,
                 Layout::LayoutRight,
             };
@@ -276,7 +281,7 @@ namespace rust_view {
                 std::move(view),
                 size,
                 rank,
-                dimensions.data(),
+                dimensions,
                 MemSpace::CudaSpace,
                 Layout::LayoutLeft,
             };
@@ -303,6 +308,46 @@ namespace rust_view {
         std::cout << "View's size : " << view.size << "\n\n\n";
     }
 
+
+    double yAx(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x) {
+        if (y.rank != 1 || A.rank != 2 || x.rank != 1) {
+            throw std::runtime_error("Bad ranks of views.");
+        } else if (A.shape[1] != x.shape[0] || A.shape[0] != y.shape[0]) {
+            std::cout << "Shapes A[1]: " << A.shape[1] << " x[0] : " << x.shape[0] << "  A[0] : " << A.shape[0] << "  y[0] : " << y.shape[0] << "\n";
+            throw std::runtime_error("Incompatible shapes.");
+        }
+
+        auto* y_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace>*>(y.view->get_view());
+        auto* a_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace>*>(A.view->get_view());
+        auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace>*>(x.view->get_view());
+
+        auto y_view = *y_view_ptr;
+        auto a_view = *a_view_ptr;
+        auto x_view = *x_view_ptr;
+
+        int N = A.shape[0];
+        int M = A.shape[1];
+
+        double result = 0;
+
+        Kokkos::parallel_reduce( N, KOKKOS_LAMBDA ( const int j, double &update ) {
+            double temp2 = 0;
+
+            for ( int i = 0; i < M; ++i ) {
+                temp2 += a_view( j, i ) * x_view( i );
+            }
+
+            update += y_view( j ) * temp2;
+        }, result );
+
+        // Kokkos::parallel_for( "init_y", Kokkos::RangePolicy<>(0,A.shape[0]), KOKKOS_LAMBDA ( const int i ) {
+        //     y_view(i) = 1;
+        //     }
+        // );
+
+        return result;
+
+    }
     
 
     // void deep_copy(const OpaqueView& view1, const OpaqueView& view2) {

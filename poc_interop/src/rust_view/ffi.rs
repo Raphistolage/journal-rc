@@ -30,7 +30,7 @@ mod ffi {
 
         rank: u32,
 
-        shape: *const i32,
+        shape: Vec<i32>,
 
         mem_space: MemSpace,
 
@@ -50,6 +50,7 @@ mod ffi {
         unsafe fn show_view(view: &OpaqueView);
         unsafe fn show_metadata(view: &OpaqueView);
         unsafe fn get(view: &OpaqueView, i: & [usize]) -> &'static f64;
+        unsafe fn yAx(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
         // unsafe fn deep_copy(view1: &OpaqueView, view2: &OpaqueView);
     }
 
