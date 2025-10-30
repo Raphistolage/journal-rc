@@ -51,8 +51,6 @@ extern "C" {
         int rank;
 
         const size_t* shape;
-
-        const ptrdiff_t* stride;
         
         MemSpace mem_space;
 
@@ -69,8 +67,6 @@ extern "C" {
         int rank;
 
         const size_t* shape;
-
-        const ptrdiff_t* stride;
         
         MemSpace mem_space;
 
@@ -82,6 +78,7 @@ extern "C" {
     SharedArrayView dot(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2);
     SharedArrayView matrix_vector_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2);
     SharedArrayView matrix_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2);
+    void mutable_matrix_product(SharedArrayViewMut &arrayView1, const SharedArrayView &arrayView2, const SharedArrayView &arrayView3);
     void kokkos_initialize();
     void kokkos_finalize();
     void free_shared_array(void* ptr);
@@ -137,11 +134,9 @@ template <int D, typename T>
 SharedArrayView to_shared(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds, MemSpace memorySpace) {
     int rank = fromMds.rank();
     size_t* shape = new size_t[7];
-    ptrdiff_t* stride = new ptrdiff_t[7];
     for (int i = 0; i < rank; i++)
     {
         shape[i] = fromMds.extent(i);
-        stride[i] = fromMds.stride(i);
     }
     Layout layout = Layout::LayoutStride;
     DataType datatype = DataType::Unsigned;
@@ -161,7 +156,6 @@ SharedArrayView to_shared(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fr
         datatype, 
         rank,
         shape,
-        stride,
         memorySpace,
         layout,
     };
@@ -171,11 +165,9 @@ template <int D, typename T>
 SharedArrayViewMut to_shared_mut(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds, MemSpace memorySpace) {
     int rank = fromMds.rank();
     size_t* shape = new size_t[7];
-    ptrdiff_t* stride = new ptrdiff_t[7];
     for (int i = 0; i < rank; i++)
     {
         shape[i] = fromMds.extent(i);
-        stride[i] = fromMds.stride(i);
     }
     Layout layout = Layout::LayoutStride;
     DataType datatype = DataType::Unsigned;
@@ -195,7 +187,6 @@ SharedArrayViewMut to_shared_mut(Kokkos::mdspan<T, Kokkos::dextents<std::size_t,
         datatype, 
         rank,
         shape,
-        stride,
         memorySpace,
         layout,
     };
@@ -205,11 +196,9 @@ template <int D, typename T>
 SharedArrayView to_shared(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds) {
     int rank = fromMds.rank();
     size_t* shape = new size_t[7];
-    ptrdiff_t* stride = new ptrdiff_t[7];
     for (int i = 0; i < rank; i++)
     {
         shape[i] = fromMds.extent(i);
-        stride[i] = fromMds.stride(i);
     }
     Layout layout = Layout::LayoutStride;
     DataType datatype = DataType::Unsigned;
@@ -229,7 +218,6 @@ SharedArrayView to_shared(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fr
         datatype, 
         rank,
         shape,
-        stride,
         MemSpace::HostSpace,
         layout,
     };
@@ -239,11 +227,9 @@ template <int D, typename T>
 SharedArrayViewMut to_shared_mut(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds) {
     int rank = fromMds.rank();
     size_t* shape = new size_t[7];
-    ptrdiff_t* stride = new ptrdiff_t[7];
     for (int i = 0; i < rank; i++)
     {
         shape[i] = fromMds.extent(i);
-        stride[i] = fromMds.stride(i);
     }
     Layout layout = Layout::LayoutStride;
     DataType datatype = DataType::Unsigned;
@@ -264,7 +250,6 @@ SharedArrayViewMut to_shared_mut(Kokkos::mdspan<T, Kokkos::dextents<std::size_t,
         datatype, 
         rank,
         shape,
-        stride,
         MemSpace::HostSpace,
         layout,
     };
@@ -323,7 +308,7 @@ SharedArrayView templated_matrix_vector_product(const SharedArrayView &arrayView
 template <typename T = double>
 SharedArrayView templated_matrix_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2) {
     if (arrayView1.shape[1] != arrayView2.shape[0]) {
-        throw std::runtime_error("Incompatible sizes of matrix and vector.");
+        throw std::runtime_error("Incompatible sizes of matrices.");
     } else if (arrayView1.rank != 2 || arrayView2.rank != 2) {
         throw std::runtime_error("The arrayViews are not of rank 2.");
     }
