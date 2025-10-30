@@ -8,5 +8,6 @@ unsafe extern "C" {
     pub fn dot(arrayView1: &SharedArrayView , arrayView2: &SharedArrayView ) -> SharedArrayView ;
     pub fn matrix_vector_product(arrayView1: &SharedArrayView , arrayView2: &SharedArrayView ) -> SharedArrayView ;
     pub fn matrix_product(arrayView1: &SharedArrayView , arrayView2: &SharedArrayView ) -> SharedArrayView ;
+    pub fn mutable_matrix_product(arrayView1: &SharedArrayViewMut , arrayView2: &SharedArrayView, arrayView3: &SharedArrayView);
     pub unsafe fn free_shared_array(ptr: *const c_void);
 }

@@ -107,7 +107,6 @@ where
     T: RustDataType
 {
     let rank = arr.ndim();
-    let stride = arr.strides().as_ptr();
     let shape= arr.shape().as_ptr();
     let data_ptr = arr.as_mut_ptr();
     // An ndarray is always on hostspace
@@ -117,7 +116,6 @@ where
         data_type: T::data_type(), 
         rank: rank as i32, 
         shape, 
-        stride, 
         mem_space: MemSpace::HostSpace, 
         layout: Layout::LayoutLeft
     }
@@ -129,7 +127,6 @@ where
     T: RustDataType
 {
     let rank = arr.ndim();
-    let stride  = arr.strides().as_ptr();
     let shape= arr.shape().as_ptr();
     let data_ptr = arr.as_ptr();
     // An ndarray is always on hostspace
@@ -139,7 +136,6 @@ where
         data_type: T::data_type(), 
         rank: rank as i32, 
         shape, 
-        stride, 
         mem_space: MemSpace::HostSpace, 
         layout: Layout::LayoutLeft
     }
@@ -151,12 +147,10 @@ pub fn from_shared(shared_array: SharedArrayView) -> ndarray::ArrayView<'static,
     }
 
     let shape: &[usize] = unsafe { from_raw_parts(shared_array.shape, shared_array.rank as usize) };
-    let stride: &[usize] = unsafe { from_raw_parts(shared_array.stride as *const usize , shared_array.rank as usize) }; // WARNING : C'est bizarre que ndarray::ArrayView.strides renvoi un &[isize], mais que en parametre shape.strides(&[usize])
-
     let len = shape.iter().product();
     let v = unsafe { from_raw_parts(shared_array.ptr as *const f64, len) };
 
-    ArrayView::from_shape(IxDyn(shape).strides(IxDyn(stride)), v).unwrap()
+    ArrayView::from_shape(IxDyn(shape), v).unwrap()
 }
 
 pub fn free_shared_array<T>(ptr: *const T) {

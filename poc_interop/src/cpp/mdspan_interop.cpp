@@ -281,6 +281,30 @@ extern "C" {
         }
         
     }
+
+    void mutable_matrix_product(SharedArrayViewMut &arrayView1, const SharedArrayView &arrayView2, const SharedArrayView &arrayView3) {
+        if (arrayView2.shape[1] != arrayView3.shape[0] || arrayView1.shape[0] != arrayView2.shape[0] || arrayView1.shape[1] != arrayView3.shape[1]) {
+            throw std::runtime_error("Incompatible sizes of matrices.");
+        } else if (arrayView1.rank != 2 || arrayView2.rank != 2 || arrayView3.rank != 2) {
+            throw std::runtime_error("The arrayViews are not of rank 2.");
+        }
+
+        if (arrayView1.mem_space == arrayView2.mem_space && arrayView2.mem_space == arrayView3.mem_space && arrayView1.mem_space == MemSpace::HostSpace) {
+            auto mat1 = mdspan_from_shared_mut<2, double>(arrayView1);
+            auto mat2 = mdspan_from_shared<2, double>(arrayView2);
+            auto mat3 = mdspan_from_shared<2, double>(arrayView2);
+
+            Kokkos::parallel_for("host_matrix_product", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0,0}, {mat2.extent(0), mat3.extent(1)}), KOKKOS_LAMBDA (const int i, const int j) {
+                    double r = 0;
+                    for (size_t k = 0; k < mat1.extent(1); k++)
+                    {
+                        r += mat2(i,k)*mat3(k,j);
+                    }
+                    mat1(i,j) = r;
+                }
+            ); 
+        }
+    }
     // cette fonction devra être appelé sur chaque ptr de data de sharedArray qui auront été instanciés depuis le côté C++
     void free_shared_array(void* ptr) {
         free(ptr);

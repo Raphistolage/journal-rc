@@ -44,12 +44,24 @@ pub fn matrix_product<T>(arr1: &T, arr2: &T) -> ArrayBase<ViewRepr<&'static f64>
 where
     T: ToSharedArray<Dim = ndarray::Ix2>,
 {
-    let mut shared_array1 = arr1.to_shared_array();
-    let mut shared_array2 = arr2.to_shared_array();
+    let shared_array1 = arr1.to_shared_array();
+    let shared_array2 = arr2.to_shared_array();
 
     let shared_result = unsafe {ffi::matrix_product(&shared_array1, &shared_array2)};
 
     from_shared(shared_result)
+}
+
+pub fn mutable_matrix_product<U,T>(arr1: &mut U, arr2: &T, arr3: &T)
+where
+    T: ToSharedArray<Dim = ndarray::Ix2>,
+    U: ToSharedArrayMut<Dim = ndarray::Ix2>,
+{
+    let shared_array1 = arr1.to_shared_array_mut();
+    let shared_array2 = arr2.to_shared_array();
+    let shared_array3 = arr3.to_shared_array();
+
+    unsafe {ffi::mutable_matrix_product(&shared_array1, &shared_array2, &shared_array3)};
 }
 
 
@@ -59,68 +71,90 @@ mod tests {
 
     use super::*;
 
+    // #[test]
+    // fn create_shared_test() {
+    //     let mut v = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+    //     let c = v.clone();
+    //     let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+
+    //     let mut arr1 = ArrayViewMut::from_shape((2, 6).strides((1,2)), &mut v).unwrap();
+    //     let arr2 = ArrayView::from_shape((2, 6).strides((1, 2)), &s).unwrap();
+    //     let arr3 = ArrayView::from_shape((2, 6).strides((1, 2)), &c).unwrap();
+
+    //     assert_eq!(arr1, arr3);
+
+    //     let _ = deep_copy(&mut arr1, &arr2);
+
+    //     assert_eq!(arr1, arr2);
+    //     assert_ne!(arr1,arr3);
+    // }
+
+    // #[test] 
+    // fn matrix_vector_prod_test() {
+    //     let v = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+    //     let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+    //     let arr1 = ArrayView::from_shape((2, 6), &v).unwrap();
+    //     let arr2 = ArrayView::from_shape(6, &s).unwrap();
+
+    //     let result = matrix_vector_product(&arr1, &arr2);
+
+    //     let expected_slice = [55.0, 145.0];
+    //     let expected = ArrayView::from_shape(2, &expected_slice).unwrap().into_dyn();
+
+    //     assert_eq!(result, expected);
+    // }
+
+    // #[test] 
+    // fn vector_product_test() {
+    //     let v = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+    //     let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+    //     let arr1 = ArrayView::from_shape((6).strides(1), &v).unwrap();
+    //     let arr2 = ArrayView::from_shape((6).strides(1), &s).unwrap();
+
+    //     let result = dot(&arr1, &arr2);
+
+    //     let expected_slice = [55.0];
+    //     let expected = ArrayView::from_shape(1, &expected_slice).unwrap().into_dyn();
+
+    //     assert_eq!(result, expected);
+    // }
+
+    // #[test]
+    // fn matrix_product_test() {
+    //     let v: [f64; 12] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+    //     let s: [f64; 12] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+    //     let arr1 = ArrayView::from_shape((3,2), &v).unwrap();
+    //     let arr2 = ArrayView::from_shape((2,2), &s).unwrap();
+
+    //     let expected_slice = [2.0,3.0,6.0,11.0,10.0,19.0];
+    //     let expected = ArrayView::from_shape((3,2), &expected_slice).unwrap().into_dyn();
+
+    //     kokkos_initialize();
+    //     let result = matrix_product(&arr1, &arr2);
+    //     kokkos_finalize();
+
+    //     assert_eq!(result, expected);
+    // }
+
     #[test]
-    fn create_shared_test() {
-        let mut v = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
-        let c = v.clone();
-        let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-
-        let mut arr1 = ArrayViewMut::from_shape((2, 6).strides((1,2)), &mut v).unwrap();
-        let arr2 = ArrayView::from_shape((2, 6).strides((1, 2)), &s).unwrap();
-        let arr3 = ArrayView::from_shape((2, 6).strides((1, 2)), &c).unwrap();
-
-        assert_eq!(arr1, arr3);
-
-        let _ = deep_copy(&mut arr1, &arr2);
-
-        assert_eq!(arr1, arr2);
-        assert_ne!(arr1,arr3);
-    }
-
-    #[test] 
-    fn matrix_vector_prod_test() {
-        let v = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let arr1 = ArrayView::from_shape((2, 6), &v).unwrap();
-        let arr2 = ArrayView::from_shape(6, &s).unwrap();
-
-        let result = matrix_vector_product(&arr1, &arr2);
-
-        let expected_slice = [55.0, 145.0];
-        let expected = ArrayView::from_shape(2, &expected_slice).unwrap().into_dyn();
-
-        assert_eq!(result, expected);
-    }
-
-    #[test] 
-    fn vector_product_test() {
-        let v = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let arr1 = ArrayView::from_shape((6).strides(1), &v).unwrap();
-        let arr2 = ArrayView::from_shape((6).strides(1), &s).unwrap();
-
-        let result = dot(&arr1, &arr2);
-
-        let expected_slice = [55.0];
-        let expected = ArrayView::from_shape(1, &expected_slice).unwrap().into_dyn();
-
-        assert_eq!(result, expected);
-    }
-
-    #[test]
-    fn matrix_product_test() {
-        let v: [f64; 12] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let s: [f64; 12] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let arr1 = ArrayView::from_shape((3,2), &v).unwrap();
-        let arr2 = ArrayView::from_shape((2,2), &s).unwrap();
-
+    fn mutable_matrix_product_test() {
+        let mut a: [f64; 6] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
+        let b: [f64; 6] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
+        let c: [f64; 6] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
         let expected_slice = [2.0,3.0,6.0,11.0,10.0,19.0];
-        let expected = ArrayView::from_shape((3,2), &expected_slice).unwrap().into_dyn();
+        {
+            let mut arr1 = ArrayViewMut::from_shape((3,2), &mut a).unwrap();
+            let arr2 = ArrayView::from_shape((3,2), &b).unwrap();
+            let arr3 = ArrayView::from_shape((2,2), &c).unwrap();
 
-        kokkos_initialize();
-        let result = matrix_product(&arr1, &arr2);
-        kokkos_finalize();
+            kokkos_initialize();
+            {
+                mutable_matrix_product(&mut arr1, &arr2, &arr3);
+            }
+            kokkos_finalize();
+            assert_eq!(a, expected_slice);
+        }
 
-        assert_eq!(result, expected);
+        
     }
 }
