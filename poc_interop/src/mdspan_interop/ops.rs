@@ -47,13 +47,8 @@ where
     let mut shared_array1 = arr1.to_shared_array();
     let mut shared_array2 = arr2.to_shared_array();
 
-// Test putting them on device.
-
-    shared_array1.mem_space = MemSpace::CudaSpace;
-    shared_array2.mem_space = MemSpace::CudaSpace;
-
     let shared_result = unsafe {ffi::matrix_product(&shared_array1, &shared_array2)};
-    println!("Datatype of result : {:?}", shared_result.data_type);
+
     from_shared(shared_result)
 }
 
@@ -94,19 +89,7 @@ mod tests {
         let expected_slice = [55.0, 145.0];
         let expected = ArrayView::from_shape(2, &expected_slice).unwrap().into_dyn();
 
-        let wrong_unexpected_slice = [55.0, 30.0];
-        let wrong_unexpected = ArrayView::from_shape(2, &wrong_unexpected_slice).unwrap().into_dyn();
-
-        let long_unexpected_slice = [55.0, 145.0, 155.0];
-        let long_unexpected = ArrayView::from_shape(3, &long_unexpected_slice).unwrap().into_dyn();
-
-        let short_unexpected_slice = [55.0];
-        let short_unexpected = ArrayView::from_shape(1, &short_unexpected_slice).unwrap().into_dyn();
-
         assert_eq!(result, expected);
-        assert_ne!(result, wrong_unexpected);
-        assert_ne!(result, long_unexpected);
-        assert_ne!(result, short_unexpected);
     }
 
     #[test] 
@@ -124,7 +107,6 @@ mod tests {
         assert_eq!(result, expected);
     }
 
-    // Test d'execution d'un kernel sur une variable qui a été initializée côté Rust.
     #[test]
     fn matrix_product_test() {
         let v: [f64; 12] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
@@ -135,25 +117,10 @@ mod tests {
         let expected_slice = [2.0,3.0,6.0,11.0,10.0,19.0];
         let expected = ArrayView::from_shape((3,2), &expected_slice).unwrap().into_dyn();
 
-        let bad_shape_unexpected = ArrayView::from_shape((2,3), &expected_slice).unwrap().into_dyn();
-
-        let wrong_unexpected_slice = [2.0,3.0,6.0,11.0,10.0,21.0];
-        let wrong_unexpected = ArrayView::from_shape((3,2), &wrong_unexpected_slice).unwrap().into_dyn();
-
-        let long_unexpected_slice = [2.0,3.0,6.0,11.0,10.0,19.0,21.0,23.0];
-        let long_unexpected = ArrayView::from_shape((4,2), &long_unexpected_slice).unwrap().into_dyn();
-
-        let short_unexpected_slice = [2.0,3.0,6.0,11.0];
-        let short_unexpected = ArrayView::from_shape((2,2), &short_unexpected_slice).unwrap().into_dyn();
-
         kokkos_initialize();
         let result = matrix_product(&arr1, &arr2);
         kokkos_finalize();
 
         assert_eq!(result, expected);
-        assert_ne!(result, wrong_unexpected);
-        assert_ne!(result, long_unexpected);
-        assert_ne!(result, short_unexpected);
-        assert_ne!(result, bad_shape_unexpected);
     }
 }
