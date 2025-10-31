@@ -94,90 +94,90 @@ mod tests {
         assert_ne!(arr1,arr3);
     }
 
-    // #[test] 
-    // fn matrix_vector_prod_test() {
-    //     let v = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-    //     let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-    //     let arr1 = ArrayView::from_shape((2, 6), &v).unwrap();
-    //     let arr2 = ArrayView::from_shape(6, &s).unwrap();
+    #[test] 
+    fn matrix_vector_prod_test() {
+        let v = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let arr1 = ArrayView::from_shape((2, 6), &v).unwrap();
+        let arr2 = ArrayView::from_shape(6, &s).unwrap();
 
-    //     let result = matrix_vector_product(&arr1, &arr2);
+        let result = matrix_vector_product(&arr1, &arr2);
 
-    //     let expected_slice = [55.0, 145.0];
-    //     let expected = ArrayView::from_shape(2, &expected_slice).unwrap().into_dyn();
+        let expected_slice = [55.0, 145.0];
+        let expected = ArrayView::from_shape(2, &expected_slice).unwrap().into_dyn();
 
-    //     assert_eq!(result, expected);
-    // }
+        assert_eq!(result, expected);
+    }
 
-    // #[test] 
-    // fn vector_product_test() {
-    //     let v = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-    //     let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-    //     let arr1 = ArrayView::from_shape((6).strides(1), &v).unwrap();
-    //     let arr2 = ArrayView::from_shape((6).strides(1), &s).unwrap();
+    #[test] 
+    fn vector_product_test() {
+        let v = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let arr1 = ArrayView::from_shape((6).strides(1), &v).unwrap();
+        let arr2 = ArrayView::from_shape((6).strides(1), &s).unwrap();
 
-    //     let result = dot(&arr1, &arr2);
+        let result = dot(&arr1, &arr2);
 
-    //     let expected_slice = [55.0];
-    //     let expected = ArrayView::from_shape(1, &expected_slice).unwrap().into_dyn();
+        let expected_slice = [55.0];
+        let expected = ArrayView::from_shape(1, &expected_slice).unwrap().into_dyn();
 
-    //     assert_eq!(result, expected);
-    // }
+        assert_eq!(result, expected);
+    }
 
-    // #[test]
-    // fn matrix_product_test() {
-    //     let v: [f64; 12] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-    //     let s: [f64; 12] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-    //     let arr1 = ArrayView::from_shape((3,2), &v).unwrap();
-    //     let arr2 = ArrayView::from_shape((2,2), &s).unwrap();
+    #[test]
+    fn matrix_product_test() {
+        let v: [f64; 12] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let s: [f64; 12] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let arr1 = ArrayView::from_shape((3,2), &v).unwrap();
+        let arr2 = ArrayView::from_shape((2,2), &s).unwrap();
 
-    //     let expected_slice = [2.0,3.0,6.0,11.0,10.0,19.0];
-    //     let expected = ArrayView::from_shape((3,2), &expected_slice).unwrap().into_dyn();
+        let expected_slice = [2.0,3.0,6.0,11.0,10.0,19.0];
+        let expected = ArrayView::from_shape((3,2), &expected_slice).unwrap().into_dyn();
 
-    //     kokkos_initialize();
-    //     let result = matrix_product(&arr1, &arr2);
-    //     kokkos_finalize();
+        kokkos_initialize();
+        let result = matrix_product(&arr1, &arr2);
+        kokkos_finalize();
 
-    //     assert_eq!(result, expected);
-    // }
+        assert_eq!(result, expected);
+    }
 
-    // #[test]
-    // fn mutable_matrix_product_test() {
-    //     let mut a: [f64; 6] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
-    //     let b: [f64; 6] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
-    //     let c: [f64; 6] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
-    //     let expected_slice = [2.0,3.0,6.0,11.0,10.0,19.0];
-    //     {
-    //         let mut arr1 = ArrayViewMut::from_shape((3,2), &mut a).unwrap();
-    //         let arr2 = ArrayView::from_shape((3,2), &b).unwrap();
-    //         let arr3 = ArrayView::from_shape((2,2), &c).unwrap();
+    #[test]
+    fn mutable_matrix_product_test() {
+        let mut a: [f64; 6] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
+        let b: [f64; 6] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
+        let c: [f64; 6] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
+        let expected_slice = [2.0,3.0,6.0,11.0,10.0,19.0];
+        {
+            let mut arr1 = ArrayViewMut::from_shape((3,2), &mut a).unwrap();
+            let arr2 = ArrayView::from_shape((3,2), &b).unwrap();
+            let arr3 = ArrayView::from_shape((2,2), &c).unwrap();
 
-    //         kokkos_initialize();
-    //         {
-    //             mutable_matrix_product(&mut arr1, &arr2, &arr3);
-    //         }
-    //         kokkos_finalize();
-    //         assert_eq!(a, expected_slice);
-    //     }
-    // }
+            kokkos_initialize();
+            {
+                mutable_matrix_product(&mut arr1, &arr2, &arr3);
+            }
+            kokkos_finalize();
+            assert_eq!(a, expected_slice);
+        }
+    }
 
-    // #[test]
-    // fn bad_modifier_test() {
-    //     let a: [f64; 6] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
-    //     let expected_slice = [1.0,2.0,3.0,4.0,5.0,6.0];
-    //     {
-    //         let arr1 = ArrayView::from_shape((3,2), &a).unwrap();
+    #[test]
+    fn bad_modifier_test() {
+        let a: [f64; 6] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
+        let expected_slice = [1.0,2.0,3.0,4.0,5.0,6.0];
+        {
+            let arr1 = ArrayView::from_shape((3,2), &a).unwrap();
 
-    //         kokkos_initialize();
-    //         {
-    //             bad_modifier(&arr1);
-    //         }
-    //         kokkos_finalize();
-    //         assert_eq!(a, expected_slice);
-    //         // This is bad, 'a' should not have been modified, but without Cxx there is no verification of function's signature compatibility, so here bad_modifier
-    //         // casts &arr1 into a &SharedArrayViewMut on C++ side, which allows to modify it.
-    //     }
-    // }
+            kokkos_initialize();
+            {
+                bad_modifier(&arr1);
+            }
+            kokkos_finalize();
+            assert_eq!(a, expected_slice);
+            // This is bad, 'a' should not have been modified, but without Cxx there is no verification of function's signature compatibility, so here bad_modifier
+            // casts &arr1 into a &SharedArrayViewMut on C++ side, which allows to modify it.
+        }
+    }
 
     #[test] 
     fn mat_reduce_test_cpp() {
