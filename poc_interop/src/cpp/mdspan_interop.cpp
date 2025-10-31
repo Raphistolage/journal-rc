@@ -10,14 +10,6 @@
 #include "mdspan_interop.hpp"
 
 extern "C" {
-    void kokkos_initialize() {
-        Kokkos::initialize();
-    }
-
-    void kokkos_finalize() {
-        Kokkos::finalize();
-    }
-
     Errors deep_copy(SharedArrayViewMut& arrayView1, const SharedArrayView& arrayView2) {
         int rank1 = arrayView1.rank;
         int rank2 = arrayView2.rank;
@@ -105,6 +97,7 @@ extern "C" {
             case 8:
                 return templated_dot<double>(arrayView1, arrayView2);
             default:
+                throw std::runtime_error("Unsupported data type.");
                 break;
             }
             break;
@@ -169,6 +162,7 @@ extern "C" {
             case 8:
                 return templated_matrix_vector_product<double>(arrayView1, arrayView2);
             default:
+                throw std::runtime_error("Unsupported data type.");
                 break;
             }
             break;
@@ -234,6 +228,7 @@ extern "C" {
             case 8:
                 return templated_matrix_product<double>(arrayView1, arrayView2);
             default:
+                throw std::runtime_error("Unsupported data type.");
                 break;
             }
             break;
