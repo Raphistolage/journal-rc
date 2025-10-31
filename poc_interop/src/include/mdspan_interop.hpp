@@ -8,38 +8,9 @@
 #include <cstdlib>
 #include <type_traits>
 		
+#include "types.hpp"
+
 extern "C" {
-
-    enum DataType : uint8_t {
-        Float = 1,
-        Unsigned = 2,
-        Signed = 3,
-    };
-
-    enum Errors : uint8_t{
-        NoErrors = 0,
-        IncompatibleRanks = 1,
-        IncompatibleShapes = 2,
-    };
-
-    enum MemSpace : uint8_t {
-        CudaSpace = 1,
-        CudaHostPinnedSpace = 2,
-        HIPSpace = 3,
-        HIPHostPinnedSpace = 4,
-        HIPManagedSpace = 5,
-        HostSpace = 6,
-        SharedSpace = 7,
-        SYCLDeviceUSMSpace = 8,
-        SYCLHostUSMSpace = 9,
-        SYCLSharedUSMSpace = 10,
-    };
-
-    enum Layout : uint8_t {
-        LayoutLeft,
-        LayoutRight,
-        LayoutStride,
-    };
 
     struct SharedArrayViewMut{
         void* ptr;
@@ -79,9 +50,18 @@ extern "C" {
     SharedArrayView matrix_vector_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2);
     SharedArrayView matrix_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2);
     void mutable_matrix_product(SharedArrayViewMut &arrayView1, const SharedArrayView &arrayView2, const SharedArrayView &arrayView3);
+    void bad_modifier(SharedArrayViewMut &arrayView);
     void kokkos_initialize();
     void kokkos_finalize();
     void free_shared_array(void* ptr);
+
+    //Cpp test, to call from rust.
+    void cpp_var_rust_func_test();
+    void cpp_var_rust_func_mutable_test();
+
+    // Rust side
+    double mat_reduce(SharedArrayView shared_arr);
+    void mat_add_one(SharedArrayViewMut shared_arr);
 }
 
 template <typename T = double>
@@ -131,38 +111,7 @@ Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> mdspan_from_shared_mut(Share
 }
 
 template <int D, typename T>
-SharedArrayView to_shared(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds, MemSpace memorySpace) {
-    int rank = fromMds.rank();
-    size_t* shape = new size_t[7];
-    for (int i = 0; i < rank; i++)
-    {
-        shape[i] = fromMds.extent(i);
-    }
-    Layout layout = Layout::LayoutStride;
-    DataType datatype = DataType::Unsigned;
-    if (std::is_unsigned_v<T> == false)
-    {
-        if (std::is_floating_point_v<T> == true)
-        {
-            datatype = DataType::Float;
-        } else {
-            datatype = DataType::Signed;
-        }
-    }
-    // TODO : Une maniere de detecter si layout_left ou layout_right ?
-    return SharedArrayView {
-        fromMds.data_handle(),
-        sizeof(T),
-        datatype, 
-        rank,
-        shape,
-        memorySpace,
-        layout,
-    };
-}
-
-template <int D, typename T>
-SharedArrayViewMut to_shared_mut(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds, MemSpace memorySpace) {
+SharedArrayViewMut to_shared_mut(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds, MemSpace mem_space = MemSpace::HostSpace) {
     int rank = fromMds.rank();
     size_t* shape = new size_t[7];
     for (int i = 0; i < rank; i++)
@@ -187,13 +136,13 @@ SharedArrayViewMut to_shared_mut(Kokkos::mdspan<T, Kokkos::dextents<std::size_t,
         datatype, 
         rank,
         shape,
-        memorySpace,
+        mem_space,
         layout,
     };
 }
 
 template <int D, typename T>
-SharedArrayView to_shared(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds) {
+SharedArrayView to_shared(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds, MemSpace mem_space = MemSpace::HostSpace) {
     int rank = fromMds.rank();
     size_t* shape = new size_t[7];
     for (int i = 0; i < rank; i++)
@@ -218,39 +167,7 @@ SharedArrayView to_shared(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fr
         datatype, 
         rank,
         shape,
-        MemSpace::HostSpace,
-        layout,
-    };
-}
-
-template <int D, typename T>
-SharedArrayViewMut to_shared_mut(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds) {
-    int rank = fromMds.rank();
-    size_t* shape = new size_t[7];
-    for (int i = 0; i < rank; i++)
-    {
-        shape[i] = fromMds.extent(i);
-    }
-    Layout layout = Layout::LayoutStride;
-    DataType datatype = DataType::Unsigned;
-    if (std::is_unsigned_v<T> == false)
-    {
-        if (std::is_floating_point_v<T> == true)
-        {
-            datatype = DataType::Float;
-        } else {
-            datatype = DataType::Signed;
-        }
-    }
-    
-    // TODO : Une maniere de detecter si layout_left ou layout_right ?
-    return SharedArrayViewMut {
-        fromMds.data_handle(),
-        sizeof(T),
-        datatype, 
-        rank,
-        shape,
-        MemSpace::HostSpace,
+        mem_space,
         layout,
     };
 }

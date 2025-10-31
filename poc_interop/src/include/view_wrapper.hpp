@@ -5,26 +5,16 @@
 #include <iostream>
 
 namespace rust_view{
+    #include "types.hpp"
+
     struct OpaqueView;
-
-    enum class MemSpace : uint8_t {
-        HostSpace,
-        DefaultExecSpace,
-        CudaSpace,
-        HIPSpace,
-        SYCLSpace,
-    };
-
-    constexpr int Dynamic = -1;
 
     struct IView {
         virtual ~IView() = default; 
-        // virtual void fill(rust::Slice<const double> data, MemSpace memSpace) = 0;
         virtual void show(MemSpace memSpace) = 0;     
         virtual const double&  get(rust::slice<const size_t> i, bool is_host) = 0;
         virtual void* get_view() = 0;
     };
-
 }
 
 #include "journal-rc/src/rust_view/ffi.rs.h"
@@ -35,10 +25,8 @@ namespace rust_view {
 
     OpaqueView create_view(MemSpace memSpace, rust::Vec<int> dimensions,rust::Slice<double> data);
     const double&  get(const OpaqueView& view, rust::Slice<const size_t> i);
-    double yAx(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
-    // void fill_view(const RustViewWrapper& view, rust::Slice<const double> data);
+    double y_ax(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
     void show_view(const OpaqueView& view);
     void show_metadata(const OpaqueView& view);
     // void deep_copy(const RustViewWrapper& view1, const RustViewWrapper& view2);
-    // void assert_equals(const RustViewWrapper& view1, const RustViewWrapper& view2);
 } 
