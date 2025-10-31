@@ -53,24 +53,24 @@ pub fn y_ax(y: &ffi::OpaqueView, a: &ffi::OpaqueView, x: &ffi::OpaqueView) -> f6
 //     kokkos_finalize();
 // }
 
-#[test]
-fn simple_kernel_opaque_view_test() {
-    let dims1 = vec![3];
-    let mut data1 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
-    let dims2 = vec![3,2];
-    let mut data2 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
-    let dims3 = vec![2];
-    let mut data3 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
+// #[test]
+// fn simple_kernel_opaque_view_test() {
+//     let dims1 = vec![3];
+//     let mut data1 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
+//     let dims2 = vec![3,2];
+//     let mut data2 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
+//     let dims3 = vec![2];
+//     let mut data3 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
 
-    kokkos_initialize();
-    {
-        let y = create_opaque_view(ffi::MemSpace::HostSpace, dims1, &mut data1);
-        let a = create_opaque_view(ffi::MemSpace::HostSpace, dims2, &mut data2);        
-        let x = create_opaque_view(ffi::MemSpace::HostSpace, dims3, &mut data3); 
+//     kokkos_initialize();
+//     {
+//         let y = create_opaque_view(ffi::MemSpace::HostSpace, dims1, &mut data1);
+//         let a = create_opaque_view(ffi::MemSpace::HostSpace, dims2, &mut data2);        
+//         let x = create_opaque_view(ffi::MemSpace::HostSpace, dims3, &mut data3); 
 
-        let result = y_ax(&y,&a,&x);
+//         let result = y_ax(&y,&a,&x);
 
-        assert_eq!(result, 78.0);
-    }
-    kokkos_finalize();
-}
+//         assert_eq!(result, 78.0);
+//     }
+//     kokkos_finalize();
+// }

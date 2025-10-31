@@ -26,6 +26,8 @@ extern "C" {
         MemSpace mem_space;
 
         Layout layout;
+
+        const bool is_mut;
     };
 
     struct SharedArrayView{
@@ -42,6 +44,8 @@ extern "C" {
         MemSpace mem_space;
 
         Layout layout;
+
+        const bool is_mut;
     };
 
     Errors deep_copy(SharedArrayViewMut &arrayView1, const SharedArrayView &arrayView2);
@@ -51,8 +55,7 @@ extern "C" {
     SharedArrayView matrix_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2);
     void mutable_matrix_product(SharedArrayViewMut &arrayView1, const SharedArrayView &arrayView2, const SharedArrayView &arrayView3);
     void bad_modifier(SharedArrayViewMut &arrayView);
-    void kokkos_initialize();
-    void kokkos_finalize();
+
     void free_shared_array(void* ptr);
 
     //Cpp test, to call from rust.
@@ -106,6 +109,8 @@ template <int D, typename T = double>
 Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> mdspan_from_shared_mut(SharedArrayViewMut &arrayView) {
     if (arrayView.rank != D) {
         throw std::runtime_error("Incompatible dimensions of cast and sharedArrayView");
+    } else if (!arrayView.is_mut) {
+        throw std::runtime_error("Tried casting an imutable SharedArrayView to a mutable mdspan");
     }
     return mdspan_from_shared_mut_impl<T, D>(arrayView, std::make_index_sequence<D>{});
 }
@@ -138,6 +143,7 @@ SharedArrayViewMut to_shared_mut(Kokkos::mdspan<T, Kokkos::dextents<std::size_t,
         shape,
         mem_space,
         layout,
+        true,
     };
 }
 
@@ -169,6 +175,7 @@ SharedArrayView to_shared(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fr
         shape,
         mem_space,
         layout,
+        false,
     };
 }
 

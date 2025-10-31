@@ -58,6 +58,8 @@ pub struct SharedArrayViewMut {
     pub mem_space: MemSpace,
 
     pub layout: Layout,
+
+    pub is_mut : bool,  // Only useful for C++ side.
 }
 
 #[derive(Debug)]
@@ -76,4 +78,6 @@ pub struct SharedArrayView{
     pub mem_space: MemSpace,
 
     pub layout: Layout,
+
+    pub is_mut : bool, // Only useful for C++ side.
 }

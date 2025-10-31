@@ -7,18 +7,7 @@ use ndarray::{IxDyn, ArrayView, ArrayViewMut};
 use super::ffi;
 use super::types::*;
 
-
-pub fn kokkos_initialize() {
-    unsafe {
-        ffi::kokkos_initialize();
-    }
-}
-
-pub fn kokkos_finalize() {
-    unsafe {
-        ffi::kokkos_finalize();
-    }
-}
+pub use crate::rust_view::{kokkos_finalize, kokkos_initialize};
 
 pub trait RustDataType {
     fn data_type() -> DataType;
@@ -117,7 +106,8 @@ where
         rank: rank as i32, 
         shape, 
         mem_space: MemSpace::HostSpace, 
-        layout: Layout::LayoutLeft
+        layout: Layout::LayoutLeft,
+        is_mut: true,
     }
 }
 
@@ -137,7 +127,8 @@ where
         rank: rank as i32, 
         shape, 
         mem_space: MemSpace::HostSpace, 
-        layout: Layout::LayoutLeft
+        layout: Layout::LayoutLeft,
+        is_mut: false,
     }
 }
 
