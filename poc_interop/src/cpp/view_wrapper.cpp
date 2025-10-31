@@ -15,26 +15,6 @@ namespace rust_view {
 
         ViewHolder(const ViewType& view) : view(view) {}
 
-        // void fill(rust::Slice<const double> data, MemSpace memSpace) override {
-        //     const double* mData = data.data();
-        //     size_t size = view.size();
-
-        //     if (memSpace == MemSpace::HostSpace) {
-        //         double* viewData = view.data(); // On passe en pointer pour pouvoir indexer sur une seule dimension peu importe le nombre de dim.
-        //         Kokkos::parallel_for("InitView", size, KOKKOS_LAMBDA (int i) {
-        //             viewData[i] = mData[i]; 
-        //         });
-        //     } else {
-        //         // Create mirror view for device access
-        //         auto h_view = Kokkos::create_mirror_view(view);
-        //         double* viewData = h_view.data();
-        //         Kokkos::parallel_for("InitView", size, KOKKOS_LAMBDA (int i) {
-        //             viewData[i] = mData[i]; 
-        //         });
-        //         Kokkos::deep_copy(view, h_view);
-        //     }
-        // }
-
         void* get_view() {
             return &view;
         }
@@ -288,10 +268,6 @@ namespace rust_view {
         }
     }     
 
-    // void fill_view(const OpaqueView& view, rust::Slice<const double> data) {
-    //     view.view->fill(data, view.memSpace);
-    // }
-
     void show_view(const OpaqueView& view) {
         view.view->show(view.mem_space);
     }
@@ -308,8 +284,7 @@ namespace rust_view {
         std::cout << "View's size : " << view.size << "\n\n\n";
     }
 
-
-    double yAx(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x) {
+    double y_ax(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x) {
         if (y.rank != 1 || A.rank != 2 || x.rank != 1) {
             throw std::runtime_error("Bad ranks of views.");
         } else if (A.shape[1] != x.shape[0] || A.shape[0] != y.shape[0]) {
@@ -340,13 +315,7 @@ namespace rust_view {
             update += y_view( j ) * temp2;
         }, result );
 
-        // Kokkos::parallel_for( "init_y", Kokkos::RangePolicy<>(0,A.shape[0]), KOKKOS_LAMBDA ( const int i ) {
-        //     y_view(i) = 1;
-        //     }
-        // );
-
         return result;
-
     }
     
 
@@ -378,85 +347,4 @@ namespace rust_view {
     //         return;
     //     }
     // }
-
-    // void assert_equals(const OpaqueView& view1, const OpaqueView& view2) {
-    //     if (view1.memSpace == MemSpace::HostSpace){
-    //         if(view2.memSpace == MemSpace::HostSpace) {
-    //             ViewHolder<Kokkos::View<double*, Kokkos::HostSpace>>* hostViewHolder1 = static_cast<ViewHolder<Kokkos::View<double*, Kokkos::HostSpace>>*>(view1.view.get());
-    //             auto& hView1 = hostViewHolder1->view;
-
-    //             ViewHolder<Kokkos::View<double*, Kokkos::HostSpace>>* hostViewHolder2 = static_cast<ViewHolder<Kokkos::View<double*, Kokkos::HostSpace>>*>(view2.view.get());
-    //             auto& hView2 = hostViewHolder2->view;
-
-    //             assert(hView1.extent(0) == hView2.extent(0));
-    //             std::cout << "Sizes are equal : " << hView1.extent(0) << " and " << hView2.extent(0) << " \n";
-
-    //             Kokkos::parallel_for("AssertEqual", hView1.extent(0), KOKKOS_LAMBDA (int i ){
-    //                 assert(hView1(i) == hView2(i));
-    //             });
-    //             std::cout << "Equal Assertion Successful \n";
-    //         } else {
-    //             ViewHolder<Kokkos::View<double*, Kokkos::HostSpace>>* hostViewHolder = static_cast<ViewHolder<Kokkos::View<double*, Kokkos::HostSpace>>*>(view1.view.get());
-    //             auto& hView1 = hostViewHolder->view;
-
-    //             ViewHolder<Kokkos::View<double*, Kokkos::DefaultExecutionSpace>>* deviceViewHolder = static_cast<ViewHolder<Kokkos::View<double*, Kokkos::DefaultExecutionSpace>>*>(view2.view.get());
-    //             auto& deviceView = deviceViewHolder->view;
-
-    //             //mirror view and deep copy to access the view stored on device.
-    //             auto hView2 = Kokkos::create_mirror_view(deviceView);
-    //             Kokkos::deep_copy(hView2, deviceView);
-
-    //             assert(hView1.extent(0) == hView2.extent(0));
-    //             std::cout << "Sizes are equal : " << hView1.extent(0) << " and " << hView2.extent(0) << " \n";
-
-    //             Kokkos::parallel_for("AssertEqual", hView1.extent(0), KOKKOS_LAMBDA (int i ){
-    //                 assert(hView1(i) == hView2(i));
-    //             });
-    //             std::cout << "Equal Assertion Successful \n";
-    //         }
-    //     } else {
-    //         if(view2.memSpace == MemSpace::HostSpace) {
-    //             ViewHolder<Kokkos::View<double*, Kokkos::DefaultExecutionSpace>>* deviceViewHolder = static_cast<ViewHolder<Kokkos::View<double*, Kokkos::DefaultExecutionSpace>>*>(view1.view.get());
-    //             auto& deviceView1 = deviceViewHolder->view;
-    //             //mirror view and deep copy to access the view stored on device.
-    //             auto hView1 = Kokkos::create_mirror_view(deviceView1);
-    //             Kokkos::deep_copy(hView1, deviceView1);
-
-    //             ViewHolder<Kokkos::View<double*, Kokkos::HostSpace>>* hostViewHolder = static_cast<ViewHolder<Kokkos::View<double*, Kokkos::HostSpace>>*>(view2.view.get());
-    //             auto& hView2 = hostViewHolder->view;
-
-    //             assert(hView1.extent(0) == hView2.extent(0));
-    //             std::cout << "Sizes are equal : " << hView1.extent(0) << " and " << hView2.extent(0) << " \n";
-
-    //             Kokkos::parallel_for("AssertEqual", hView1.extent(0), KOKKOS_LAMBDA (int i ){
-    //                 assert(hView1(i) == hView2(i));
-    //             });
-    //             std::cout << "Equal Assertion Successful " << hView1(0) << "  " << hView2(0) <<" \n";
-    //         } else {
-    //             ViewHolder<Kokkos::View<double*, Kokkos::DefaultExecutionSpace>>* deviceViewHolder1 = static_cast<ViewHolder<Kokkos::View<double*, Kokkos::DefaultExecutionSpace>>*>(view1.view.get());
-    //             auto& deviceView1 = deviceViewHolder1->view;
-    //             //mirror view and deep copy to access the view stored on device.
-    //             auto hView1 = Kokkos::create_mirror_view(deviceView1);
-    //             Kokkos::deep_copy(hView1, deviceView1);
-
-    //             ViewHolder<Kokkos::View<double*, Kokkos::DefaultExecutionSpace>>* deviceViewHolder2 = static_cast<ViewHolder<Kokkos::View<double*, Kokkos::DefaultExecutionSpace>>*>(view2.view.get());
-    //             auto& deviceView = deviceViewHolder2->view;
-    //             //mirror view and deep copy to access the view stored on device.
-    //             auto hView2 = Kokkos::create_mirror_view(deviceView);
-    //             Kokkos::deep_copy(hView2, deviceView);
-
-    //             assert(hView1.extent(0) == hView2.extent(0)); 
-    //             std::cout << "Sizes are equal : " << hView1.extent(0) << " and " << hView2.extent(0) << " \n";                   
-
-    //             Kokkos::parallel_for("AssertEqual", hView1.extent(0), KOKKOS_LAMBDA (int i ){
-    //                 assert(hView1(i) == hView2(i));
-    //             });
-    //             std::cout << "Equal Assertion Successful \n";
-    //         }
-    //     }
-    // }
-
-
-
-
 }

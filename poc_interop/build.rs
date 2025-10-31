@@ -16,15 +16,15 @@ fn main() {
         .flag_if_supported("-fopenmp")    // Enable OpenMP
         .compile("mdspan_interop");
 
-    // println!("cargo:warning=Cxx build part running...");
-    // cxx_build::bridge("src/rust_view/ffi.rs")
-    //     .file("src/cpp/view_wrapper.cpp")
-    //     .include("src/include")
-    //     .include(kokkos_include)  // KokkosKernels first
-    //     .flag_if_supported("-std=c++20")
-    //     .flag_if_supported("-O3")
-    //     .flag_if_supported("-fopenmp")    // Enable OpenMP
-    //     .compile("view_wrapper");
+    println!("cargo:warning=Cxx build part running...");
+    cxx_build::bridge("src/rust_view/ffi.rs")
+        .file("src/cpp/view_wrapper.cpp")
+        .include("src/include")
+        .include(kokkos_include)  // KokkosKernels first
+        .flag_if_supported("-std=c++20")
+        .flag_if_supported("-O3")
+        .flag_if_supported("-fopenmp")    // Enable OpenMP
+        .compile("view_wrapper");
 
     println!("cargo:rustc-link-search=native={}", kokkos_lib);
     
@@ -35,6 +35,8 @@ fn main() {
     println!("cargo:rustc-link-lib=lapack");
     
     println!("cargo:rerun-if-changed=src/lib.rs");
+
+    println!("cargo:rerun-if-changed=src/include/types.hpp");
 
     println!("cargo:rerun-if-changed=src/cpp/mdspan_interop.cpp");
     println!("cargo:rerun-if-changed=src/cpp/view_wrapper.cpp");

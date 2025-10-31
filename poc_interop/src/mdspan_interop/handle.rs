@@ -1,8 +1,8 @@
-use std::slice::from_raw_parts;
+use std::slice::{from_raw_parts, from_raw_parts_mut};
 use std::os::raw::{c_void};
 use std::mem::size_of;
 
-use ndarray::{IxDyn, ShapeBuilder, ArrayView};
+use ndarray::{IxDyn, ArrayView, ArrayViewMut};
 
 use super::ffi;
 use super::types::*;
@@ -152,6 +152,19 @@ pub fn from_shared(shared_array: SharedArrayView) -> ndarray::ArrayView<'static,
 
     ArrayView::from_shape(IxDyn(shape), v).unwrap()
 }
+
+pub fn from_shared_mut(shared_array: SharedArrayViewMut) -> ndarray::ArrayViewMut<'static, f64, ndarray::IxDyn> {
+    if shared_array.mem_space != MemSpace::HostSpace && shared_array.mem_space !=  MemSpace::CudaHostPinnedSpace && shared_array.mem_space != MemSpace::HIPHostPinnedSpace{
+        panic!("Cannot cast from a sharedArrayView that is not on host space.");
+    }
+
+    let shape: &[usize] = unsafe { from_raw_parts(shared_array.shape, shared_array.rank as usize) };
+    let len = shape.iter().product();
+    let v = unsafe { from_raw_parts_mut(shared_array.ptr as *mut f64, len) };
+
+    ArrayViewMut::from_shape(IxDyn(shape), v).unwrap()
+}
+
 
 pub fn free_shared_array<T>(ptr: *const T) {
     unsafe {

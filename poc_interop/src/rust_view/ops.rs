@@ -29,9 +29,9 @@ pub fn create_opaque_view(mem_space: ffi::MemSpace, dimensions: Vec<i32>, data: 
     }
 }
 
-pub fn yAx(y: &ffi::OpaqueView, a: &ffi::OpaqueView, x: &ffi::OpaqueView) -> f64 {
+pub fn y_ax(y: &ffi::OpaqueView, a: &ffi::OpaqueView, x: &ffi::OpaqueView) -> f64 {
     unsafe {
-        ffi::yAx(y,a,x)
+        ffi::y_ax(y,a,x)
     }
 }
 
@@ -68,7 +68,7 @@ fn simple_kernel_opaque_view_test() {
         let a = create_opaque_view(ffi::MemSpace::HostSpace, dims2, &mut data2);        
         let x = create_opaque_view(ffi::MemSpace::HostSpace, dims3, &mut data3); 
 
-        let result = yAx(&y,&a,&x);
+        let result = y_ax(&y,&a,&x);
 
         assert_eq!(result, 78.0);
     }

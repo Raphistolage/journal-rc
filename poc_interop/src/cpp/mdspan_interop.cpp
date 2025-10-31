@@ -305,6 +305,51 @@ extern "C" {
             ); 
         }
     }
+
+    void bad_modifier(SharedArrayViewMut &arrayView) {
+        if (arrayView.rank == 2 && arrayView.mem_space == MemSpace::HostSpace) {
+            auto mat1 = mdspan_from_shared_mut<2, double>(arrayView);
+
+            int N = mat1.extent(0);
+            int M = mat1.extent(1);
+
+            using mdrange_policy = Kokkos::MDRangePolicy< Kokkos::Rank<2> >;
+            Kokkos::parallel_for( "init_A", mdrange_policy({0,0}, {N,M}), KOKKOS_LAMBDA ( const int j , const int i ) {
+                    mat1(j,i) += 1;
+                }
+            );
+        }
+    }
+
+
+    void cpp_var_rust_func_test() {
+        double data[6] = {0.0,1.0,2.0,3.0,4.0,5.0};
+        double expected = 15.0;
+
+        auto arr = Kokkos::mdspan<double, Kokkos::dextents<size_t, 2>>(data, 2, 3); // 2x3 matrix.
+
+        SharedArrayView shared_arr = to_shared<2,double>(arr);
+
+        double result = mat_reduce(shared_arr);
+
+        assert(expected == result);
+    }
+
+    void cpp_var_rust_func_mutable_test() {
+        double data[6] = {0.0,1.0,2.0,3.0,4.0,5.0};
+        double expected[6] = {1.0,2.0,3.0,4.0,5.0,6.0};
+
+        auto arr = Kokkos::mdspan<double, Kokkos::dextents<size_t, 2>>(data, 2, 3); // 2x3 matrix.
+
+        SharedArrayViewMut shared_arr = to_shared_mut<2,double>(arr);
+
+        mat_add_one(shared_arr);
+        for (int i = 0; i < 6; i++)
+        {
+            assert(data[i] == expected[i]);
+        }
+    }
+
     // cette fonction devra être appelé sur chaque ptr de data de sharedArray qui auront été instanciés depuis le côté C++
     void free_shared_array(void* ptr) {
         free(ptr);
