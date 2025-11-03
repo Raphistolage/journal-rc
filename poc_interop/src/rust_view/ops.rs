@@ -1,5 +1,7 @@
 use super::ffi;
 use std::ops::Index;
+use crate::mdspan_interop::{SharedArrayView, SharedArrayViewMut};
+use crate::common_types::{MemSpace};
 
 impl Index<&[usize]> for ffi::OpaqueView {
     type Output = f64;
@@ -23,9 +25,21 @@ pub fn kokkos_finalize() {
     }
 }
 
-pub fn create_opaque_view(mem_space: ffi::MemSpace, dimensions: Vec<i32>, data: &mut [f64]) -> ffi::OpaqueView {
+pub fn view_to_shared(opaque_view: &ffi::OpaqueView) -> SharedArrayView {
     unsafe {
-        ffi::create_view(mem_space, dimensions, data)
+        ffi::view_to_shared_c(opaque_view)
+    }
+}
+
+pub fn view_to_shared_mut(opaque_view: &ffi::OpaqueView) -> SharedArrayViewMut {
+    unsafe {
+        ffi::view_to_shared_mut_c(opaque_view)
+    }
+}
+
+pub fn create_opaque_view(mem_space: MemSpace, dimensions: Vec<i32>, data: &mut [f64]) -> ffi::OpaqueView {
+    unsafe {
+        ffi::create_view(mem_space.into(), dimensions, data)
     }
 }
 
@@ -35,6 +49,11 @@ pub fn y_ax(y: &ffi::OpaqueView, a: &ffi::OpaqueView, x: &ffi::OpaqueView) -> f6
     }
 }
 
+pub fn y_ax_device(y: &ffi::OpaqueView, a: &ffi::OpaqueView, x: &ffi::OpaqueView) -> f64 {
+    unsafe {
+        ffi::y_ax_device(y,a,x)
+    }
+}
 
 // #[test]
 // fn create_opaque_view_test() {
@@ -43,7 +62,7 @@ pub fn y_ax(y: &ffi::OpaqueView, a: &ffi::OpaqueView, x: &ffi::OpaqueView) -> f6
 
 //     kokkos_initialize();
 //     {
-//         let opaque_view = create_opaque_view(ffi::MemSpace::CudaSpace, dims, &mut data);
+//         let opaque_view = create_opaque_view(MemSpace::CudaSpace, dims, &mut data);
 //         assert_eq!(opaque_view.rank, 2_u32);
 
 //         let value = opaque_view[&[1,2]];
@@ -64,9 +83,9 @@ pub fn y_ax(y: &ffi::OpaqueView, a: &ffi::OpaqueView, x: &ffi::OpaqueView) -> f6
 
 //     kokkos_initialize();
 //     {
-//         let y = create_opaque_view(ffi::MemSpace::HostSpace, dims1, &mut data1);
-//         let a = create_opaque_view(ffi::MemSpace::HostSpace, dims2, &mut data2);        
-//         let x = create_opaque_view(ffi::MemSpace::HostSpace, dims3, &mut data3); 
+//         let y = create_opaque_view(MemSpace::HostSpace, dims1, &mut data1);
+//         let a = create_opaque_view(MemSpace::HostSpace, dims2, &mut data2);        
+//         let x = create_opaque_view(MemSpace::HostSpace, dims3, &mut data3); 
 
 //         let result = y_ax(&y,&a,&x);
 

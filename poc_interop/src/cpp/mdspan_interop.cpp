@@ -10,11 +10,11 @@
 #include "mdspan_interop.hpp"
 
 extern "C" {
-    Errors deep_copy(SharedArrayViewMut& arrayView1, const SharedArrayView& arrayView2) {
-        int rank1 = arrayView1.rank;
-        int rank2 = arrayView2.rank;
-        const size_t* shape1 = arrayView1.shape;
-        const size_t* shape2 = arrayView2.shape;
+    Errors deep_copy(SharedArrayViewMut& shared__arr1, const SharedArrayView& shared_arr2) {
+        int rank1 = shared__arr1.rank;
+        int rank2 = shared_arr2.rank;
+        const size_t* shape1 = shared__arr1.shape;
+        const size_t* shape2 = shared_arr2.shape;
         
         if (rank1 != rank2){
             std::cout << "Both views should be of same rank. \n Deep copy aborted." << "\n";
@@ -29,8 +29,8 @@ extern "C" {
                     std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
                     return Errors::IncompatibleShapes;
                 }
-                auto arr1 = mdspan_from_shared_mut<1>(arrayView1);
-                auto arr2 = mdspan_from_shared<1>(arrayView2);
+                auto arr1 = mdspan_from_shared_mut<1>(shared__arr1);
+                auto arr2 = mdspan_from_shared<1>(shared_arr2);
                 for (size_t i = 0; i < shape1[0]; i++)
                 {
                     arr1[i] = arr2[i];
@@ -43,8 +43,8 @@ extern "C" {
                     std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
                     return Errors::IncompatibleShapes;
                 }
-                auto arr1 = mdspan_from_shared_mut<2>(arrayView1);
-                auto arr2 = mdspan_from_shared<2>(arrayView2);
+                auto arr1 = mdspan_from_shared_mut<2>(shared__arr1);
+                auto arr2 = mdspan_from_shared<2>(shared_arr2);
                 for (size_t i = 0; i < shape1[0]; i++)
                 {
                     for (size_t j = 0; j < shape1[1]; j++)
@@ -60,8 +60,8 @@ extern "C" {
                     std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
                     return Errors::IncompatibleShapes;
                 }
-                auto arr1 = mdspan_from_shared_mut<3>(arrayView1);
-                auto arr2 = mdspan_from_shared<3>(arrayView2);
+                auto arr1 = mdspan_from_shared_mut<3>(shared__arr1);
+                auto arr2 = mdspan_from_shared<3>(shared_arr2);
                 for (size_t i = 0; i < shape1[0]; i++)
                 {
                     for (size_t j = 0; j < shape1[1]; j++)
@@ -80,60 +80,60 @@ extern "C" {
         return Errors::NoErrors;
     }
 
-    SharedArrayView dot(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2) {
-        if (arrayView1.size != arrayView2.size || arrayView1.data_type != arrayView2.data_type)
+    SharedArrayView dot(const SharedArrayView &shared__arr1, const SharedArrayView &shared_arr2) {
+        if (shared__arr1.size != shared_arr2.size || shared__arr1.data_type != shared_arr2.data_type)
         {
             throw std::runtime_error("Incompatible data types inside vectors");
         }
 
-        switch (arrayView1.data_type)
+        switch (shared__arr1.data_type)
         {
         case DataType::Float:
-            switch (arrayView1.size)
+            switch (shared__arr1.size)
             {
             case 4:
-                return templated_dot<float>(arrayView1, arrayView2);
+                return templated_dot<float>(shared__arr1, shared_arr2);
                 break;
             case 8:
-                return templated_dot<double>(arrayView1, arrayView2);
+                return templated_dot<double>(shared__arr1, shared_arr2);
             default:
                 throw std::runtime_error("Unsupported data type.");
                 break;
             }
             break;
         case DataType::Unsigned:
-            switch (arrayView1.size)
+            switch (shared__arr1.size)
             {
             case 1:
-                return templated_dot<uint8_t>(arrayView1, arrayView2);
+                return templated_dot<uint8_t>(shared__arr1, shared_arr2);
                 break;
             case 2:
-                return templated_dot<uint16_t>(arrayView1, arrayView2);
+                return templated_dot<uint16_t>(shared__arr1, shared_arr2);
                 break;
             case 4:
-                return templated_dot<uint32_t>(arrayView1, arrayView2);
+                return templated_dot<uint32_t>(shared__arr1, shared_arr2);
                 break;
             case 8:
-                return templated_dot<uint64_t>(arrayView1, arrayView2);
+                return templated_dot<uint64_t>(shared__arr1, shared_arr2);
             default:
                 throw std::runtime_error("Unsupported data type.");
                 break;
             }
             break;
         case DataType::Signed:
-            switch (arrayView1.size)
+            switch (shared__arr1.size)
             {
             case 1:
-                return templated_dot<int8_t>(arrayView1, arrayView2);
+                return templated_dot<int8_t>(shared__arr1, shared_arr2);
                 break;
             case 2:
-                return templated_dot<int16_t>(arrayView1, arrayView2);
+                return templated_dot<int16_t>(shared__arr1, shared_arr2);
                 break;
             case 4:
-                return templated_dot<int32_t>(arrayView1, arrayView2);
+                return templated_dot<int32_t>(shared__arr1, shared_arr2);
                 break;
             case 8:
-                return templated_dot<int64_t>(arrayView1, arrayView2);
+                return templated_dot<int64_t>(shared__arr1, shared_arr2);
             default:
                 throw std::runtime_error("Unsupported data type.");
                 break;
@@ -145,60 +145,60 @@ extern "C" {
         }
     }
 
-    SharedArrayView matrix_vector_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2) {
-        if (arrayView1.size != arrayView2.size || arrayView1.data_type != arrayView2.data_type)
+    SharedArrayView matrix_vector_product(const SharedArrayView &shared__arr1, const SharedArrayView &shared_arr2) {
+        if (shared__arr1.size != shared_arr2.size || shared__arr1.data_type != shared_arr2.data_type)
         {
             throw std::runtime_error("Incompatible data types inside vector/matrix");
         }
 
-        switch (arrayView1.data_type)
+        switch (shared__arr1.data_type)
         {
         case DataType::Float:
-            switch (arrayView1.size)
+            switch (shared__arr1.size)
             {
             case 4:
-                return templated_matrix_vector_product<float>(arrayView1, arrayView2);
+                return templated_matrix_vector_product<float>(shared__arr1, shared_arr2);
                 break;
             case 8:
-                return templated_matrix_vector_product<double>(arrayView1, arrayView2);
+                return templated_matrix_vector_product<double>(shared__arr1, shared_arr2);
             default:
                 throw std::runtime_error("Unsupported data type.");
                 break;
             }
             break;
         case DataType::Unsigned:
-            switch (arrayView1.size)
+            switch (shared__arr1.size)
             {
             case 1:
-                return templated_matrix_vector_product<uint8_t>(arrayView1, arrayView2);
+                return templated_matrix_vector_product<uint8_t>(shared__arr1, shared_arr2);
                 break;
             case 2:
-                return templated_matrix_vector_product<uint16_t>(arrayView1, arrayView2);
+                return templated_matrix_vector_product<uint16_t>(shared__arr1, shared_arr2);
                 break;
             case 4:
-                return templated_matrix_vector_product<uint32_t>(arrayView1, arrayView2);
+                return templated_matrix_vector_product<uint32_t>(shared__arr1, shared_arr2);
                 break;
             case 8:
-                return templated_matrix_vector_product<uint64_t>(arrayView1, arrayView2);
+                return templated_matrix_vector_product<uint64_t>(shared__arr1, shared_arr2);
             default:
                 throw std::runtime_error("Unsupported data type.");
                 break;
             }
             break;
         case DataType::Signed:
-            switch (arrayView1.size)
+            switch (shared__arr1.size)
             {
             case 1:
-                return templated_matrix_vector_product<int8_t>(arrayView1, arrayView2);
+                return templated_matrix_vector_product<int8_t>(shared__arr1, shared_arr2);
                 break;
             case 2:
-                return templated_matrix_vector_product<int16_t>(arrayView1, arrayView2);
+                return templated_matrix_vector_product<int16_t>(shared__arr1, shared_arr2);
                 break;
             case 4:
-                return templated_matrix_vector_product<int32_t>(arrayView1, arrayView2);
+                return templated_matrix_vector_product<int32_t>(shared__arr1, shared_arr2);
                 break;
             case 8:
-                return templated_matrix_vector_product<int64_t>(arrayView1, arrayView2);
+                return templated_matrix_vector_product<int64_t>(shared__arr1, shared_arr2);
             default:
                 throw std::runtime_error("Unsupported data type.");
                 break;
@@ -211,60 +211,60 @@ extern "C" {
         
     }
     
-    SharedArrayView matrix_product(const SharedArrayView &arrayView1, const SharedArrayView &arrayView2) {
-        if (arrayView1.size != arrayView2.size || arrayView1.data_type != arrayView2.data_type)
+    SharedArrayView matrix_product(const SharedArrayView &shared__arr1, const SharedArrayView &shared_arr2) {
+        if (shared__arr1.size != shared_arr2.size || shared__arr1.data_type != shared_arr2.data_type)
         {
             throw std::runtime_error("Incompatible data types inside matrices");
         }
 
-        switch (arrayView1.data_type)
+        switch (shared__arr1.data_type)
         {
         case DataType::Float:
-            switch (arrayView1.size)
+            switch (shared__arr1.size)
             {
             case 4:
-                return templated_matrix_product<float>(arrayView1, arrayView2);
+                return templated_matrix_product<float>(shared__arr1, shared_arr2);
                 break;
             case 8:
-                return templated_matrix_product<double>(arrayView1, arrayView2);
+                return templated_matrix_product<double>(shared__arr1, shared_arr2);
             default:
                 throw std::runtime_error("Unsupported data type.");
                 break;
             }
             break;
         case DataType::Unsigned:
-            switch (arrayView1.size)
+            switch (shared__arr1.size)
             {
             case 1:
-                return templated_matrix_product<uint8_t>(arrayView1, arrayView2);
+                return templated_matrix_product<uint8_t>(shared__arr1, shared_arr2);
                 break;
             case 2:
-                return templated_matrix_product<uint16_t>(arrayView1, arrayView2);
+                return templated_matrix_product<uint16_t>(shared__arr1, shared_arr2);
                 break;
             case 4:
-                return templated_matrix_product<uint32_t>(arrayView1, arrayView2);
+                return templated_matrix_product<uint32_t>(shared__arr1, shared_arr2);
                 break;
             case 8:
-                return templated_matrix_product<uint64_t>(arrayView1, arrayView2);
+                return templated_matrix_product<uint64_t>(shared__arr1, shared_arr2);
             default:
                 throw std::runtime_error("Unsupported data type.");
                 break;
             }
             break;
         case DataType::Signed:
-            switch (arrayView1.size)
+            switch (shared__arr1.size)
             {
             case 1:
-                return templated_matrix_product<int8_t>(arrayView1, arrayView2);
+                return templated_matrix_product<int8_t>(shared__arr1, shared_arr2);
                 break;
             case 2:
-                return templated_matrix_product<int16_t>(arrayView1, arrayView2);
+                return templated_matrix_product<int16_t>(shared__arr1, shared_arr2);
                 break;
             case 4:
-                return templated_matrix_product<int32_t>(arrayView1, arrayView2);
+                return templated_matrix_product<int32_t>(shared__arr1, shared_arr2);
                 break;
             case 8:
-                return templated_matrix_product<int64_t>(arrayView1, arrayView2);
+                return templated_matrix_product<int64_t>(shared__arr1, shared_arr2);
             default:
                 throw std::runtime_error("Unsupported data type.");
                 break;
@@ -277,17 +277,17 @@ extern "C" {
         
     }
 
-    void mutable_matrix_product(SharedArrayViewMut &arrayView1, const SharedArrayView &arrayView2, const SharedArrayView &arrayView3) {
-        if (arrayView2.shape[1] != arrayView3.shape[0] || arrayView1.shape[0] != arrayView2.shape[0] || arrayView1.shape[1] != arrayView3.shape[1]) {
+    void mutable_matrix_product(SharedArrayViewMut &shared__arr1, const SharedArrayView &shared_arr2, const SharedArrayView &shared_arr3) {
+        if (shared_arr2.shape[1] != shared_arr3.shape[0] || shared__arr1.shape[0] != shared_arr2.shape[0] || shared__arr1.shape[1] != shared_arr3.shape[1]) {
             throw std::runtime_error("Incompatible sizes of matrices.");
-        } else if (arrayView1.rank != 2 || arrayView2.rank != 2 || arrayView3.rank != 2) {
+        } else if (shared__arr1.rank != 2 || shared_arr2.rank != 2 || shared_arr3.rank != 2) {
             throw std::runtime_error("The arrayViews are not of rank 2.");
         }
 
-        if (arrayView1.mem_space == arrayView2.mem_space && arrayView2.mem_space == arrayView3.mem_space && arrayView1.mem_space == MemSpace::HostSpace) {
-            auto mat1 = mdspan_from_shared_mut<2, double>(arrayView1);
-            auto mat2 = mdspan_from_shared<2, double>(arrayView2);
-            auto mat3 = mdspan_from_shared<2, double>(arrayView2);
+        if (shared__arr1.mem_space == shared_arr2.mem_space && shared_arr2.mem_space == shared_arr3.mem_space && shared__arr1.mem_space == MemSpace::HostSpace) {
+            auto mat1 = mdspan_from_shared_mut<2, double>(shared__arr1);
+            auto mat2 = mdspan_from_shared<2, double>(shared_arr2);
+            auto mat3 = mdspan_from_shared<2, double>(shared_arr2);
 
             Kokkos::parallel_for("host_matrix_product", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0,0}, {mat2.extent(0), mat3.extent(1)}), KOKKOS_LAMBDA (const int i, const int j) {
                     double r = 0;
@@ -301,9 +301,9 @@ extern "C" {
         }
     }
 
-    void bad_modifier(SharedArrayViewMut &arrayView) {
-        if (arrayView.rank == 2 && arrayView.mem_space == MemSpace::HostSpace) {
-            auto mat1 = mdspan_from_shared_mut<2, double>(arrayView);
+    void bad_modifier(SharedArrayViewMut &shared_arr) {
+        if (shared_arr.rank == 2 && shared_arr.mem_space == MemSpace::HostSpace) {
+            auto mat1 = mdspan_from_shared_mut<2, double>(shared_arr);
 
             int N = mat1.extent(0);
             int M = mat1.extent(1);

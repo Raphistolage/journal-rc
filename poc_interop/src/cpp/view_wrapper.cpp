@@ -84,36 +84,44 @@ namespace rust_view {
             }
         }
 
-        void show(MemSpace memSpace) override {
-            size_t size = view.size();
-            if (memSpace == MemSpace::HostSpace){
-                double* viewData = view.data();
-                std::cout << "ViewWrapper contents (size=" << size << "): [";
-                for (size_t i = 0; i < size; i++) {
-                    std::cout << viewData[i];
-                    if (i%view.extent(0) < view.extent(0) - 1) {
-                        std::cout << ", ";
-                    } else {
-                        std::cout << "]\n";
-                        std::cout << "[";
-                    }
-                }
-            } else {
-                // Create mirror view for device access
-                auto h_view = Kokkos::create_mirror_view(view);
-                double* viewData = h_view.data();
-                std::cout << "ViewWrapper contents (size=" << size << "): [";
-                for (size_t i = 0; i < size; i++) {
-                    std::cout << viewData[i];
-                    if (i%h_view.extent(0) < h_view.extent(0) - 1) {
-                        std::cout << ", ";
-                    } else {
-                        std::cout << "]\n";
-                        std::cout << "[";
-                    }
-                }
-                std::cout << "]" << std::endl;
+        SharedArrayView view_to_shared() override {
+            auto host_mirror = Kokkos::create_mirror_view(view);
+            int rank = view.rank();
+            size_t* shape = new size_t[rank];
+            for (int i = 0; i < rank; i++)
+            {
+                shape[i] = view.extent(i);
             }
+            return SharedArrayView{
+                host_mirror.data(),
+                8,
+                DataType::Float,
+                rank,
+                shape,
+                MemSpace::HostSpace,
+                Layout::LayoutRight,
+                false,
+            };
+        }
+
+        SharedArrayViewMut view_to_shared_mut() override {
+            auto host_mirror = Kokkos::create_mirror_view(view);
+            int rank = view.rank();
+            size_t* shape = new size_t[rank];
+            for (int i = 0; i < rank; i++)
+            {
+                shape[i] = view.extent(i);
+            }
+            return SharedArrayViewMut{
+                host_mirror.data(),
+                8,
+                DataType::Float,
+                rank,
+                shape,
+                MemSpace::HostSpace,
+                Layout::LayoutRight,
+                true,
+            };
         }
     };
 
@@ -134,6 +142,19 @@ namespace rust_view {
             std::cout << "Kokkos is not initialized." << std::endl;
         }
     }
+}
+
+extern "C" {
+    SharedArrayView view_to_shared_c(const rust_view::OpaqueView* opaqueView) {
+        return opaqueView->view->view_to_shared();  
+    }
+
+    SharedArrayViewMut view_to_shared_mut_c(const rust_view::OpaqueView* opaqueView) {
+        return opaqueView->view->view_to_shared_mut();  
+    }
+}
+
+namespace rust_view {
 
     const double&  get(const OpaqueView& view, rust::Slice<const size_t> i) {
         if (view.mem_space == MemSpace::HostSpace) {
@@ -268,33 +289,47 @@ namespace rust_view {
         }
     }     
 
-    void show_view(const OpaqueView& view) {
-        view.view->show(view.mem_space);
-    }
-
-    void show_metadata(const OpaqueView& view) {
-        show_view(view);
-        std::cout << "View's rank : " << view.rank << "\n";
-        std::cout << "View's shape : ";
-        for (size_t i = 0; i < view.rank; i++)
-        {
-            std::cout << view.shape[i] << " ";
-        }
-        std::cout << "\n";
-        std::cout << "View's size : " << view.size << "\n\n\n";
-    }
-
     double y_ax(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x) {
         if (y.rank != 1 || A.rank != 2 || x.rank != 1) {
             throw std::runtime_error("Bad ranks of views.");
         } else if (A.shape[1] != x.shape[0] || A.shape[0] != y.shape[0]) {
-            std::cout << "Shapes A[1]: " << A.shape[1] << " x[0] : " << x.shape[0] << "  A[0] : " << A.shape[0] << "  y[0] : " << y.shape[0] << "\n";
             throw std::runtime_error("Incompatible shapes.");
         }
 
         auto* y_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace>*>(y.view->get_view());
         auto* a_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace>*>(A.view->get_view());
         auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace>*>(x.view->get_view());
+
+        auto y_view = *y_view_ptr;
+        auto a_view = *a_view_ptr;
+        auto x_view = *x_view_ptr;
+
+        int N = A.shape[0];
+        int M = A.shape[1];
+
+        double result = 0;
+
+        Kokkos::parallel_reduce( N, KOKKOS_LAMBDA ( const int j, double &update ) {
+            double temp2 = 0;
+            for ( int i = 0; i < M; ++i ) {
+                temp2 += a_view( j, i ) * x_view( i );
+            }
+            update += y_view( j ) * temp2;
+        }, result );
+
+        return result;
+    }
+
+    double y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x) {
+        if (y.rank != 1 || A.rank != 2 || x.rank != 1) {
+            throw std::runtime_error("Bad ranks of views.");
+        } else if (A.shape[1] != x.shape[0] || A.shape[0] != y.shape[0]) {
+            throw std::runtime_error("Incompatible shapes.");
+        }
+
+        auto* y_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(y.view->get_view());
+        auto* a_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(A.view->get_view());
+        auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(x.view->get_view());
 
         auto y_view = *y_view_ptr;
         auto a_view = *a_view_ptr;
