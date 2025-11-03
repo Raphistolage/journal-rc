@@ -3,12 +3,12 @@ use super::handle::{from_shared,from_shared_mut};
 use std::os::raw::{c_void};
 
 unsafe extern "C" {
-    pub fn deep_copy(arrayView1: &mut SharedArrayViewMut, arrayView2: &SharedArrayView) -> Errors;
-    pub fn dot(arrayView1: &SharedArrayView , arrayView2: &SharedArrayView ) -> SharedArrayView ;
-    pub fn matrix_vector_product(arrayView1: &SharedArrayView , arrayView2: &SharedArrayView ) -> SharedArrayView ;
-    pub fn matrix_product(arrayView1: &SharedArrayView , arrayView2: &SharedArrayView ) -> SharedArrayView ;
-    pub fn mutable_matrix_product(arrayView1: &SharedArrayViewMut , arrayView2: &SharedArrayView, arrayView3: &SharedArrayView);
-    pub fn bad_modifier(arrayView: &SharedArrayView);
+    pub fn deep_copy(shared_arr1: &mut SharedArrayViewMut, shared_arr2: &SharedArrayView) -> Errors;
+    pub fn dot(shared_arr1: &SharedArrayView , shared_arr2: &SharedArrayView ) -> SharedArrayView ;
+    pub fn matrix_vector_product(shared_arr1: &SharedArrayView , shared_arr2: &SharedArrayView ) -> SharedArrayView ;
+    pub fn matrix_product(shared_arr1: &SharedArrayView , shared_arr2: &SharedArrayView ) -> SharedArrayView ;
+    pub fn mutable_matrix_product(shared_arr1: &SharedArrayViewMut , shared_arr2: &SharedArrayView, shared_arr3: &SharedArrayView);
+    pub fn bad_modifier(shared_arr: &SharedArrayView);
     pub unsafe fn free_shared_array(ptr: *const c_void);
 
     // Cpp tests

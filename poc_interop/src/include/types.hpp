@@ -27,9 +27,44 @@ extern "C" {
     };
 
     enum Layout : uint8_t {
-        LayoutLeft,
-        LayoutRight,
-        LayoutStride,
+        LayoutLeft = 0,
+        LayoutRight = 1,
+        LayoutStride = 2,
     };
 
+    struct SharedArrayViewMut{
+        void* ptr;
+
+        int size;
+
+        DataType data_type;
+
+        int rank;
+
+        const size_t* shape;
+        
+        MemSpace mem_space;
+
+        Layout layout;
+
+        const bool is_mut;
+    };
+
+    struct SharedArrayView{
+        const void* ptr;
+
+        int size;
+
+        DataType data_type;
+
+        int rank;
+
+        const size_t* shape;
+        
+        MemSpace mem_space;
+
+        Layout layout;
+
+        const bool is_mut;
+    };
 }
