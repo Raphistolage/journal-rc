@@ -1,6 +1,7 @@
 use super::ffi;
 use std::ops::Index;
-use crate::mdspan_interop::{SharedArrayView, SharedArrayViewMut};
+use std::slice;
+use crate::SharedArrayView::{SharedArrayView, SharedArrayViewMut};
 use crate::common_types::{MemSpace};
 
 impl Index<&[usize]> for ffi::OpaqueView {
@@ -25,21 +26,36 @@ pub fn kokkos_finalize() {
     }
 }
 
-pub fn view_to_shared(opaque_view: &ffi::OpaqueView) -> SharedArrayView {
+pub fn opaque_view_to_shared(opaque_view: &ffi::OpaqueView) -> SharedArrayView {
     unsafe {
         ffi::view_to_shared_c(opaque_view)
     }
 }
 
-pub fn view_to_shared_mut(opaque_view: &ffi::OpaqueView) -> SharedArrayViewMut {
+pub fn opaque_view_to_shared_mut(opaque_view: &ffi::OpaqueView) -> SharedArrayViewMut {
     unsafe {
         ffi::view_to_shared_mut_c(opaque_view)
     }
 }
 
-pub fn create_opaque_view(mem_space: MemSpace, dimensions: Vec<i32>, data: &mut [f64]) -> ffi::OpaqueView {
+pub fn shared_arr_to_opaque_view(shared_arr: &SharedArrayViewMut) -> ffi::OpaqueView {
+    let mem_space = shared_arr.mem_space;
+    let mut dimensions: Vec<usize> = Vec::new();
+    let mut len: usize = 1;
+    let shape_slice: &[usize] = unsafe { std::slice::from_raw_parts(shared_arr.shape, shared_arr.rank as usize)};
+
+    for i in 0..shared_arr.rank {
+        dimensions.push(shape_slice[i as usize]);
+        len *= shape_slice[i as usize];
+    }
+    let slice = unsafe {slice::from_raw_parts(shared_arr.ptr as *const f64, len)};
+    create_opaque_view(mem_space, dimensions, slice)
+}
+
+pub fn create_opaque_view(mem_space: MemSpace, dimensions: Vec<usize>, data: impl Into<Vec<f64>>) -> ffi::OpaqueView {
+    let vec_data: Vec<f64> = data.into();
     unsafe {
-        ffi::create_view(mem_space.into(), dimensions, data)
+        ffi::create_view(mem_space.into(), dimensions, vec_data)
     }
 }
 

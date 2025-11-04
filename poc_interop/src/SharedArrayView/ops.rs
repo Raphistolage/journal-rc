@@ -46,8 +46,12 @@ pub fn matrix_product<T>(arr1: &T, arr2: &T) -> ArrayBase<ViewRepr<&'static f64>
 where
     T: ToSharedArray<Dim = ndarray::Ix2>,
 {
-    let shared_arr1 = arr1.to_shared_array();
-    let shared_arr2 = arr2.to_shared_array();
+    let mut shared_arr1 = arr1.to_shared_array();
+    let mut shared_arr2 = arr2.to_shared_array();
+
+    // On veut sur Device
+    shared_arr1.mem_space = MemSpace::CudaSpace.into();
+    shared_arr2.mem_space = MemSpace::CudaSpace.into();
 
     let shared_result = unsafe {ffi::matrix_product(&shared_arr1, &shared_arr2)};
 
@@ -78,18 +82,18 @@ mod tests {
 
     use super::*;
 
-    // #[test]
-    // fn init_tests() {
-    //     kokkos_initialize();
-    //     create_shared_test();
-    //     matrix_vector_prod_test();
-    //     matrix_product_test();
-    //     vector_product_test();
-    //     mutable_matrix_product_test();
-    //     mat_reduce_test_cpp();
-    //     mat_add_one_cpp_test();
-    //     kokkos_finalize();
-    // } 
+    #[test]
+    fn init_tests() {
+        kokkos_initialize();
+        create_shared_test();
+        matrix_vector_prod_test();
+        matrix_product_test();
+        // vector_product_test();
+        // mutable_matrix_product_test();
+        // mat_reduce_test_cpp();
+        // mat_add_one_cpp_test();
+        kokkos_finalize();
+    } 
 
     fn create_shared_test() {
         let mut v = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];

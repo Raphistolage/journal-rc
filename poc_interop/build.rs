@@ -7,20 +7,19 @@ fn main() {
         .cpp(true)
         .file("src/cpp/mdspan_interop.cpp")
         .include("src/include")
-        .include(kokkos_include)  // KokkosKernels first
+        .include(kokkos_include)  
         .compiler("g++")
         .flag_if_supported("-std=c++20")
         .flag_if_supported("-fPIC")
-        // .flag_if_supported("-stdlib=libc++")
         .flag_if_supported("-O3")
         .flag_if_supported("-fopenmp")    // Enable OpenMP
         .compile("mdspan_interop");
 
     println!("cargo:warning=Cxx build part running...");
-    cxx_build::bridge("src/rust_view/ffi.rs")
+    cxx_build::bridge("src/OpaqueView/ffi.rs")
         .file("src/cpp/view_wrapper.cpp")
         .include("src/include")
-        .include(kokkos_include)  // KokkosKernels first
+        .include(kokkos_include)
         .flag_if_supported("-std=c++20")
         .flag_if_supported("-O3")
         .flag_if_supported("-fopenmp")    // Enable OpenMP

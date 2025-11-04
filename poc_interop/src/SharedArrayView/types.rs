@@ -10,7 +10,7 @@ pub enum Errors {
     IncompatibleShapes = 2,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 #[repr(C)]
 pub struct SharedArrayViewMut {
     pub ptr: *mut c_void,
@@ -30,7 +30,7 @@ pub struct SharedArrayViewMut {
     pub is_mut : bool,  // Only useful for C++ side.
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 #[repr(C)]
 pub struct SharedArrayView{
     pub ptr: *const c_void,

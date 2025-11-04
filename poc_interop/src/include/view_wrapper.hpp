@@ -20,13 +20,13 @@ namespace rust_view{
     };
 }
 
-#include "journal-rc/src/rust_view/ffi.rs.h"
+#include "poc_interop/src/rust_view/ffi.rs.h"
 
 namespace rust_view {
     void kokkos_initialize();
     void kokkos_finalize();
 
-    OpaqueView create_view(MemSpace memSpace, rust::Vec<int> dimensions, rust::Slice<double> data);
+    OpaqueView create_view(MemSpace memSpace, rust::Vec<size_t> dimensions, rust::Vec<double> data);
     const double&  get(const OpaqueView& view, rust::Slice<const size_t> i);
     double y_ax(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
     double y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
