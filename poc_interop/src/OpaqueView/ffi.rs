@@ -33,7 +33,7 @@ mod ffi {
 
         rank: u32,
 
-        shape: Vec<i32>,
+        shape: Vec<usize>,
 
         mem_space: MemSpace,
 
@@ -49,7 +49,7 @@ mod ffi {
         unsafe fn kokkos_initialize();
         unsafe fn kokkos_finalize();
 
-        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<i32>, data: &mut [f64]) -> OpaqueView;
+        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<f64>) -> OpaqueView;
         unsafe fn get(opaque_view: &OpaqueView, i: & [usize]) -> &'static f64;
         unsafe fn y_ax(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
         unsafe fn y_ax_device(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
@@ -59,7 +59,7 @@ mod ffi {
 
 pub use ffi::*;
 
-use crate::mdspan_interop::{SharedArrayView, SharedArrayViewMut};
+use crate::SharedArrayView::{SharedArrayView, SharedArrayViewMut};
 
 impl From<ffi::MemSpace> for crate::common_types::MemSpace {
     fn from(mem_space: ffi::MemSpace) -> Self {
@@ -85,7 +85,7 @@ impl From<crate::common_types::Layout> for ffi::Layout {
     }
 }
 
-// Warning not ffi-safe, mais en réalité ca l'est, c'est handled par Cxx à la compil.
+// Warning not ffi-safe, mais en réalité ca l'est, opaqueView est handled par Cxx à la compil.
 unsafe extern "C" {
     pub fn view_to_shared_c(opaque_view: &ffi::OpaqueView) -> SharedArrayView;
     pub fn view_to_shared_mut_c(opaque_view: &ffi::OpaqueView) -> SharedArrayViewMut;

@@ -7,7 +7,7 @@ use ndarray::{IxDyn, ArrayView, ArrayViewMut};
 use super::ffi;
 use super::types::*;
 
-pub use crate::rust_view::{kokkos_finalize, kokkos_initialize};
+pub use crate::OpaqueView::{kokkos_finalize, kokkos_initialize};
 
 pub trait RustDataType {
     fn data_type() -> DataType;
@@ -106,7 +106,7 @@ where
         rank: rank as i32, 
         shape, 
         mem_space: MemSpace::HostSpace, 
-        layout: Layout::LayoutLeft,
+        layout: Layout::LayoutRight,
         is_mut: true,
     }
 }
@@ -117,7 +117,7 @@ where
     T: RustDataType
 {
     let rank = arr.ndim();
-    let shape= arr.shape().as_ptr();
+    let shape = arr.shape().as_ptr();
     let data_ptr = arr.as_ptr();
     // An ndarray is always on hostspace
     SharedArrayView {
@@ -127,7 +127,7 @@ where
         rank: rank as i32, 
         shape, 
         mem_space: MemSpace::HostSpace, 
-        layout: Layout::LayoutLeft,
+        layout: Layout::LayoutRight,
         is_mut: false,
     }
 }

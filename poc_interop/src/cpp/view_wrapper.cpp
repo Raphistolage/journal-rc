@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "view_wrapper.hpp"
-#include "journal-rc/src/rust_view/ffi.rs.h"
+#include "poc_interop/src/rust_view/ffi.rs.h"
 
 namespace rust_view {
     
@@ -165,7 +165,7 @@ namespace rust_view {
 
     }
 
-    OpaqueView create_view(MemSpace memSpace, rust::Vec<int> dimensions, rust::Slice<double> data) {
+    OpaqueView create_view(MemSpace memSpace, rust::Vec<size_t> dimensions, rust::Vec<double> data) {
         uint32_t rank = dimensions.size();
         if (rank < 1 || rank>7) {
             std::cout << "Rank must be between 1 and 7. \n";
@@ -180,33 +180,61 @@ namespace rust_view {
         if (memSpace == MemSpace::HostSpace) {
             std::unique_ptr<IView> view;
             switch(rank) {
-                case 1:
+                case 1: {
+                    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0]);
+                    Kokkos::View<double*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0]);
+                    Kokkos::deep_copy(owning_view, host_view);
                     view = std::make_unique<ViewHolder<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-                        data.data(), dimensions[0]);
+                        owning_view);
+                }
                     break;
-                case 2:
+                case 2: {
+                    Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1]);
+                    Kokkos::View<double**, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1]);
+                    Kokkos::deep_copy(owning_view, host_view);
                     view = std::make_unique<ViewHolder<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-                        data.data(), dimensions[0], dimensions[1]);
+                        owning_view);            
+                }
                     break;
-                case 3:
+                case 3: {
+                    Kokkos::View<double***, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2]);
+                    Kokkos::View<double***, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
+                    Kokkos::deep_copy(owning_view, host_view);
                     view = std::make_unique<ViewHolder<Kokkos::View<double***, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-                        data.data(), dimensions[0], dimensions[1], dimensions[2]);
+                        owning_view);
+                }
                     break;
-                case 4:
+                case 4: {
+                    Kokkos::View<double****, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
+                    Kokkos::View<double****, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
+                    Kokkos::deep_copy(owning_view, host_view);
                     view = std::make_unique<ViewHolder<Kokkos::View<double****, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-                        data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
+                        owning_view);
+                }
                     break;
-                case 5:
+                case 5: {
+                    Kokkos::View<double*****, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
+                    Kokkos::View<double*****, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
+                    Kokkos::deep_copy(owning_view, host_view);
                     view = std::make_unique<ViewHolder<Kokkos::View<double*****, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-                        data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
+                        owning_view);
+                }
                     break;
-                case 6:
+                case 6: {
+                    Kokkos::View<double******, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
+                    Kokkos::View<double******, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
+                    Kokkos::deep_copy(owning_view, host_view);
                     view = std::make_unique<ViewHolder<Kokkos::View<double******, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-                        data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
+                        owning_view);
+                }
                     break;
-                case 7:
+                case 7: {
+                    Kokkos::View<double*******, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
+                    Kokkos::View<double*******, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
+                    Kokkos::deep_copy(owning_view, host_view);
                     view = std::make_unique<ViewHolder<Kokkos::View<double*******, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-                        data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
+                        owning_view);
+                }
                     break;
             }
             return OpaqueView {
@@ -344,6 +372,7 @@ namespace rust_view {
             double temp2 = 0;
 
             for ( int i = 0; i < M; ++i ) {
+                
                 temp2 += a_view( j, i ) * x_view( i );
             }
 
