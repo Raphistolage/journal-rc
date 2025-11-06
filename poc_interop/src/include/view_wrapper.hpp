@@ -5,7 +5,7 @@
 #include <iostream>
 #include "types.hpp"
 
-namespace rust_view{
+namespace opaque_view{
     using ::MemSpace;
     using ::Layout;
 
@@ -20,9 +20,9 @@ namespace rust_view{
     };
 }
 
-#include "poc_interop/src/rust_view/ffi.rs.h"
+#include "poc_interop/src/OpaqueView/ffi.rs.h"
 
-namespace rust_view {
+namespace opaque_view {
     void kokkos_initialize();
     void kokkos_finalize();
 
@@ -34,6 +34,6 @@ namespace rust_view {
 }
 
 extern "C" {
-    SharedArrayView view_to_shared_c(const rust_view::OpaqueView* opaqueView);
-    SharedArrayViewMut view_to_shared_mut_c(const rust_view::OpaqueView* opaqueView);
+    SharedArrayView view_to_shared_c(const opaque_view::OpaqueView* opaqueView);
+    SharedArrayViewMut view_to_shared_mut_c(const opaque_view::OpaqueView* opaqueView);
 }

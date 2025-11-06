@@ -2,9 +2,9 @@
 #include <iostream>
 
 #include "view_wrapper.hpp"
-#include "poc_interop/src/rust_view/ffi.rs.h"
+#include "poc_interop/src/OpaqueView/ffi.rs.h"
 
-namespace rust_view {
+namespace opaque_view {
     
     template <typename ViewType>
     struct ViewHolder : IView {
@@ -145,16 +145,16 @@ namespace rust_view {
 }
 
 extern "C" {
-    SharedArrayView view_to_shared_c(const rust_view::OpaqueView* opaqueView) {
+    SharedArrayView view_to_shared_c(const opaque_view::OpaqueView* opaqueView) {
         return opaqueView->view->view_to_shared();  
     }
 
-    SharedArrayViewMut view_to_shared_mut_c(const rust_view::OpaqueView* opaqueView) {
+    SharedArrayViewMut view_to_shared_mut_c(const opaque_view::OpaqueView* opaqueView) {
         return opaqueView->view->view_to_shared_mut();  
     }
 }
 
-namespace rust_view {
+namespace opaque_view {
 
     const double&  get(const OpaqueView& view, rust::Slice<const size_t> i) {
         if (view.mem_space == MemSpace::HostSpace) {

@@ -1,4 +1,4 @@
-#[cxx::bridge(namespace = "rust_view")]
+#[cxx::bridge(namespace = "opaque_view")]
 mod ffi {
 
     #[derive(Debug)]
