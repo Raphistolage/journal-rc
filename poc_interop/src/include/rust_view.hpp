@@ -281,7 +281,7 @@ namespace rust_view {
             return *static_cast<const T*>(view.view->get(i, false));
         }
     }  
-    // double y_ax(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
-    // double y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
+    double y_ax(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
+    double y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
     // void deep_copy(const RustViewWrapper& view1, const RustViewWrapper& view2);
 }

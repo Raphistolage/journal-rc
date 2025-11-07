@@ -135,8 +135,8 @@ mod ffi {
         unsafe fn get(opaque_view: &OpaqueView, i: & [usize]) -> &'static i16;
         #[rust_name = "get_i8"]
         unsafe fn get(opaque_view: &OpaqueView, i: & [usize]) -> &'static i8;
-        // unsafe fn y_ax(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
-        // unsafe fn y_ax_device(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
+        unsafe fn y_ax(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
+        unsafe fn y_ax_device(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
     }
 }
 

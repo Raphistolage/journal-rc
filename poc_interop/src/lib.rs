@@ -2,6 +2,50 @@ pub mod common_types;
 // pub mod OpaqueView;
 // pub mod SharedArrayView;
 pub mod RustView;
+pub use RustView::{kokkos_finalize, kokkos_initialize, y_ax_device};
+
+
+
+
+// #[test]
+// fn create_various_type_test() {
+    
+//     kokkos_initialize();
+//     {
+//         let vec1: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+//         let view1 = RustView::Host::Dim1::<f64>::from_vec(&[5], vec1);
+
+//         // let crash = view1[&[5]]; Throws an out of scope indexing.
+
+//         assert_eq!(view1[&[2]], 3.0_f64);
+
+//         let vec2: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+//         let view2 = RustView::Device::Dim1::<f64>::from_vec(&[5], vec2);
+
+//         assert_eq!(view2[&[2]], 3.0_f64);
+//     }
+//     kokkos_finalize();
+// }
+
+#[test]
+fn y_ax_test() {
+    kokkos_initialize();
+
+    {
+        let vec1: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+        let y = RustView::Device::Dim1::<f64>::from_vec(&[5], vec1);
+        let vec2: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
+        let a = RustView::Device::Dim2::<f64>::from_vec(&[5,2], vec2);
+        let vec3: Vec<f64> = vec![1.0, 2.0];
+        let x = RustView::Device::Dim1::<f64>::from_vec(&[2], vec3);
+
+        let result = y_ax_device(&y, &a, &x);
+
+        assert_eq!(result, 315.0);
+    }
+
+    kokkos_finalize();
+}
 
 // use crate::rust_view::*;
 // use crate::mdspan_interop::*;
