@@ -11,6 +11,10 @@ impl<T: 'static> Dim6<T> {
         let v = v.into();
         Self(create_opaque_view(crate::common_types::MemSpace::CudaSpace, vec![dim[0], dim[1], dim[2], dim[3], dim[4], dim[5]], v).unwrap(), std::marker::PhantomData)
     }
+    
+    pub fn get(&self) -> &OpaqueView {
+        &self.0
+    }
 }
 
 impl Index<&[usize; 6]> for Dim6<u8> {

@@ -1,6 +1,7 @@
 use super::ffi;
 use super::ffi::{OpaqueView};
 use std::any::TypeId;
+use crate::RustView::{Host, Device};
 use crate::common_types::{MemSpace};
 
 pub fn kokkos_initialize() {
@@ -62,6 +63,18 @@ pub fn create_opaque_view<T: 'static>(mem_space: MemSpace, dimensions: Vec<usize
             println!("This type of data is not supported");
             None
         }
+    }
+}
+
+pub fn y_ax(y: &Host::Dim1::<f64>, a: &Host::Dim2::<f64>, x: &Host::Dim1::<f64>) -> f64 {
+    unsafe {
+        ffi::y_ax(y.get(),a.get(),x.get())
+    }
+}
+
+pub fn y_ax_device(y: &Device::Dim1::<f64>, a: &Device::Dim2::<f64>, x: &Device::Dim1::<f64>) -> f64 {
+    unsafe {
+        ffi::y_ax_device(y.get(),a.get(),x.get())
     }
 }
 
