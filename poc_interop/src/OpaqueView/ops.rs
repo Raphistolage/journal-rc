@@ -16,19 +16,6 @@ pub struct RustViewI64(ffi::OpaqueView);
 pub struct RustViewF32(ffi::OpaqueView);
 pub struct RustViewF64(ffi::OpaqueView);
 
-pub enum RustView {
-    U8(RustViewU8),
-    U16(RustViewU16),
-    U32(RustViewU32),
-    U64(RustViewU64),
-    I8(RustViewI8),
-    I16(RustViewI16),
-    I32(RustViewI32),
-    I64(RustViewI64),
-    F32(RustViewF32),
-    F64(RustViewF64),
-}
-
 impl Index<&[usize]> for RustViewU8 {
     type Output = u8;
 
@@ -154,7 +141,7 @@ pub fn opaque_view_to_shared_mut(opaque_view: &ffi::OpaqueView) -> SharedArrayVi
     }
 }
 
-pub fn shared_arr_to_opaque_view(shared_arr: &SharedArrayViewMut) -> RustView {
+pub fn shared_arr_to_opaque_view(shared_arr: &SharedArrayViewMut) -> RustViewF64 {
     let mem_space = shared_arr.mem_space;
     let mut dimensions: Vec<usize> = Vec::new();
     let mut len: usize = 1;
@@ -165,56 +152,67 @@ pub fn shared_arr_to_opaque_view(shared_arr: &SharedArrayViewMut) -> RustView {
         len *= shape_slice[i as usize];
     }
     let slice = unsafe {slice::from_raw_parts(shared_arr.ptr as *const f64, len)};
-    create_opaque_view(mem_space, dimensions, slice).unwrap()
+    create_opaque_view_f64(mem_space, dimensions, slice)
 }
 
-pub fn create_opaque_view<T: 'static>(mem_space: MemSpace, dimensions: Vec<usize>, data: impl Into<Vec<T>>) -> Option<RustView> {
-    let type_id = TypeId::of::<T>();
-    match type_id {
-        id if id == TypeId::of::<f64>() =>  unsafe { 
-            let vec_data: Vec<f64> = std::mem::transmute(data.into());
-            Some(RustView::F64(RustViewF64(ffi::create_view_f64(mem_space.into(), dimensions, vec_data))))
-        },
-        id if id == TypeId::of::<f32>() =>  unsafe { 
-            let vec_data: Vec<f32> = std::mem::transmute(data.into());
-            Some(RustView::F32(RustViewF32(ffi::create_view_f32(mem_space.into(), dimensions, vec_data))))
-        },
-        id if id == TypeId::of::<u64>() =>  unsafe { 
-            let vec_data: Vec<u64> = std::mem::transmute(data.into());
-            Some(RustView::U64(RustViewU64(ffi::create_view_u64(mem_space.into(), dimensions, vec_data))))
-        },
-        id if id == TypeId::of::<u32>() =>  unsafe { 
-            let vec_data: Vec<u32> = std::mem::transmute(data.into());
-            Some(RustView::U32(RustViewU32(ffi::create_view_u32(mem_space.into(), dimensions, vec_data))))
-        },
-        id if id == TypeId::of::<u16>() =>  unsafe { 
-            let vec_data: Vec<u16> = std::mem::transmute(data.into());
-            Some(RustView::U16(RustViewU16(ffi::create_view_u16(mem_space.into(), dimensions, vec_data))))
-        },
-        id if id == TypeId::of::<u8>() =>  unsafe { 
-            let vec_data: Vec<u8> = std::mem::transmute(data.into());
-            Some(RustView::U8(RustViewU8(ffi::create_view_u8(mem_space.into(), dimensions, vec_data))))
-        },
-        id if id == TypeId::of::<i64>() =>  unsafe { 
-            let vec_data: Vec<i64> = std::mem::transmute(data.into());
-            Some(RustView::I64(RustViewI64(ffi::create_view_i64(mem_space.into(), dimensions, vec_data))))
-        },
-        id if id == TypeId::of::<i32>() =>  unsafe { 
-            let vec_data: Vec<i32> = std::mem::transmute(data.into());
-            Some(RustView::I32(RustViewI32(ffi::create_view_i32(mem_space.into(), dimensions, vec_data))))
-        },
-        id if id == TypeId::of::<i16>() =>  unsafe { 
-            let vec_data: Vec<i16> = std::mem::transmute(data.into());
-            Some(RustView::I16(RustViewI16(ffi::create_view_i16(mem_space.into(), dimensions, vec_data))))
-        },
-        id if id == TypeId::of::<i8>() =>  unsafe { 
-            let vec_data: Vec<i8> = std::mem::transmute(data.into());
-            Some(RustView::I8(RustViewI8(ffi::create_view_i8(mem_space.into(), dimensions, vec_data))))
-        },
-        _ => {
-            println!("This type of data is not supported");
-            None
-        }
+pub fn create_opaque_view_f64(mem_space: MemSpace, dimensions: Vec<usize>, data: impl Into<Vec<f64>>) -> RustViewF64 {
+    let vec_data: Vec<f64> = data.into();
+    unsafe {
+        RustViewF64(ffi::create_view_f64(mem_space.into(), dimensions, vec_data))
+    }
+}
+pub fn create_opaque_view_f32(mem_space: MemSpace, dimensions: Vec<usize>, data: impl Into<Vec<f32>>) -> RustViewF32 {
+    let vec_data: Vec<f32> = data.into();
+    unsafe {
+        RustViewF32(ffi::create_view_f32(mem_space.into(), dimensions, vec_data))
+    }
+}
+pub fn create_opaque_view_u64(mem_space: MemSpace, dimensions: Vec<usize>, data: impl Into<Vec<u64>>) -> RustViewU64 {
+    let vec_data: Vec<u64> = data.into();
+    unsafe {
+        RustViewU64(ffi::create_view_u64(mem_space.into(), dimensions, vec_data))
+    }
+}
+pub fn create_opaque_view_u32(mem_space: MemSpace, dimensions: Vec<usize>, data: impl Into<Vec<u32>>) -> RustViewU32 {
+    let vec_data: Vec<u32> = data.into();
+    unsafe {
+        RustViewU32(ffi::create_view_u32(mem_space.into(), dimensions, vec_data))
+    }
+}
+pub fn create_opaque_view_u16(mem_space: MemSpace, dimensions: Vec<usize>, data: impl Into<Vec<u16>>) -> RustViewU16 {
+    let vec_data: Vec<u16> = data.into();
+    unsafe {
+        RustViewU16(ffi::create_view_u16(mem_space.into(), dimensions, vec_data))
+    }
+}
+pub fn create_opaque_view_u8(mem_space: MemSpace, dimensions: Vec<usize>, data: impl Into<Vec<u8>>) -> RustViewU8 {
+    let vec_data: Vec<u8> = data.into();
+    unsafe {
+        RustViewU8(ffi::create_view_u8(mem_space.into(), dimensions, vec_data))
+    }
+}
+pub fn create_opaque_view_i64(mem_space: MemSpace, dimensions: Vec<usize>, data: impl Into<Vec<i64>>) -> RustViewI64 {
+    let vec_data: Vec<i64> = data.into();
+    unsafe {
+        RustViewI64(ffi::create_view_i64(mem_space.into(), dimensions, vec_data))
+    }
+}
+pub fn create_opaque_view_i32(mem_space: MemSpace, dimensions: Vec<usize>, data: impl Into<Vec<i32>>) -> RustViewI32 {
+    let vec_data: Vec<i32> = data.into();
+    unsafe {
+        RustViewI32(ffi::create_view_i32(mem_space.into(), dimensions, vec_data))
+    }
+}
+pub fn create_opaque_view_i16(mem_space: MemSpace, dimensions: Vec<usize>, data: impl Into<Vec<i16>>) -> RustViewI16 {
+    let vec_data: Vec<i16> = data.into();
+    unsafe {
+        RustViewI16(ffi::create_view_i16(mem_space.into(), dimensions, vec_data))
+    }
+}
+pub fn create_opaque_view_i8(mem_space: MemSpace, dimensions: Vec<usize>, data: impl Into<Vec<i8>>) -> RustViewI8 {
+    let vec_data: Vec<i8> = data.into();
+    unsafe {
+        RustViewI8(ffi::create_view_i8(mem_space.into(), dimensions, vec_data))
     }
 }
 
@@ -230,91 +228,22 @@ pub fn y_ax_device(y: &ffi::OpaqueView, a: &ffi::OpaqueView, x: &ffi::OpaqueView
     }
 }
 
-#[test]
-fn create_opaque_view_test() {
-    let dims = vec![2,3];
-    let mut data: [u32; 9] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+// #[test]
+// fn create_opaque_view_test() {
+//     let dims = vec![2,3];
+//     let mut data: [u8; 9] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-    kokkos_initialize();
-    {
-        let opaque_view = create_opaque_view(MemSpace::CudaSpace, dims, &mut data).unwrap();
+//     kokkos_initialize();
+//     {
+//         let opaque_view = create_opaque_view_u8(MemSpace::CudaSpace, dims, &mut data);
+//         assert_eq!(opaque_view.0.rank, 2_u32);
 
-        match opaque_view {
-            RustView::F64(v) => {
-                assert_eq!(v.0.rank, 2_u32);
-
-                let value = v[&[1,2]];
-                assert_eq!(value, 6_f64);
-                assert_ne!(value, 7_f64);
-            },
-            RustView::F32(v) => {
-                assert_eq!(v.0.rank, 2_u32);
-
-                let value = v[&[1,2]];
-                assert_eq!(value, 6_f32);
-                assert_ne!(value, 7_f32);
-            },
-            RustView::U64(v) => {
-                assert_eq!(v.0.rank, 2_u32);
-
-                let value = v[&[1,2]];
-                assert_eq!(value, 6_u64);
-                assert_ne!(value, 7_u64);
-            },
-            RustView::U32(v) => {
-                assert_eq!(v.0.rank, 2_u32);
-
-                let value = v[&[1,2]];
-                assert_eq!(value, 6_u32);
-                assert_ne!(value, 7_u32);
-            },
-            RustView::U16(v) => {
-                assert_eq!(v.0.rank, 2_u32);
-
-                let value = v[&[1,2]];
-                assert_eq!(value, 6_u16);
-                assert_ne!(value, 7_u16);
-            },
-            RustView::U8(v) => {
-                assert_eq!(v.0.rank, 2_u32);
-
-                let value = v[&[1,2]];
-                assert_eq!(value, 6_u8);
-                assert_ne!(value, 7_u8);
-            },
-            RustView::I64(v) => {
-                assert_eq!(v.0.rank, 2_u32);
-
-                let value = v[&[1,2]];
-                assert_eq!(value, 6_i64);
-                assert_ne!(value, 7_i64);
-            },
-            RustView::I32(v) => {
-                assert_eq!(v.0.rank, 2_u32);
-
-                let value = v[&[1,2]];
-                assert_eq!(value, 6_i32);
-                assert_ne!(value, 7_i32);
-            },
-            RustView::I16(v) => {
-                assert_eq!(v.0.rank, 2_u32);
-
-                let value = v[&[1,2]];
-                assert_eq!(value, 6_i16);
-                assert_ne!(value, 7_i16);
-            },
-            RustView::I8(v) => {
-                assert_eq!(v.0.rank, 2_u32);
-
-                let value = v[&[1,2]];
-                assert_eq!(value, 6_i8);
-                assert_ne!(value, 7_i8);
-            },
-        }
-
-    }
-    kokkos_finalize();
-}
+//         let value = opaque_view[&[1,2]];
+//         assert_eq!(value, 6_u8);
+//         assert_ne!(value, 7_u8);
+//     }
+//     kokkos_finalize();
+// }
 
 // #[test]
 // fn simple_kernel_opaque_view_test() {

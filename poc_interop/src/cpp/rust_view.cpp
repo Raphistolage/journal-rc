@@ -23,20 +23,4 @@ namespace rust_view {
             std::cout << "Kokkos is not initialized." << std::endl;
         }
     }
-
-    const double& get_f64(const OpaqueView& view, rust::Slice<const size_t> i) {
-        if (view.mem_space == MemSpace::HostSpace) {
-            return view.view->get_f64(i, true);
-        } else {
-            return view.view->get_f64(i, false);
-        }
-    }     
-
-    const int& get_i32(const OpaqueView& view, rust::Slice<const size_t> i) {
-        if (view.mem_space == MemSpace::HostSpace) {
-            return view.view->get_i32(i, true);
-        } else {
-            return view.view->get_i32(i, false);
-        }
-    }
 }

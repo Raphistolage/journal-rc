@@ -11,8 +11,7 @@ namespace rust_view{
 
     struct IView {
         virtual ~IView() = default;     
-        virtual const double&  get_f64(rust::slice<const size_t> i, bool is_host) = 0;
-        virtual const int&  get_i32(rust::slice<const size_t> i, bool is_host) = 0;
+        virtual const void*  get(rust::slice<const size_t> i, bool is_host) = 0;
         virtual void* get_view() = 0;
     };
 }
@@ -31,7 +30,7 @@ namespace rust_view {
             return &view;
         }
 
-        const double& get_f64(rust::slice<const size_t> i, bool is_host) override {
+        const void* get(rust::slice<const size_t> i, bool is_host) override {
             if (is_host) {
                 if (i.size() != view.rank()) {
                     throw std::runtime_error("Bad indexing");
@@ -46,19 +45,19 @@ namespace rust_view {
                 }
 
                 if constexpr (ViewType::rank() == 1) {
-                    return view(i[0]);
+                    return &view(i[0]);
                 } else if constexpr (ViewType::rank() == 2) {
-                    return view(i[0], i[1]);
+                    return &view(i[0], i[1]);
                 } else if constexpr (ViewType::rank() == 3) {
-                    return view(i[0], i[1], i[2]);
+                    return &view(i[0], i[1], i[2]);
                 } else if constexpr (ViewType::rank() == 4) {
-                    return view(i[0], i[1], i[2], i[3]);
+                    return &view(i[0], i[1], i[2], i[3]);
                 } else if constexpr (ViewType::rank() == 5) {
-                    return view(i[0], i[1], i[2], i[3], i[4]);
+                    return &view(i[0], i[1], i[2], i[3], i[4]);
                 } else if constexpr (ViewType::rank() == 6) {
-                    return view(i[0], i[1], i[2], i[3], i[4], i[5]);
+                    return &view(i[0], i[1], i[2], i[3], i[4], i[5]);
                 } else if constexpr (ViewType::rank() == 7) {
-                    return view(i[0], i[1], i[2], i[3], i[4], i[5], i[6]);
+                    return &view(i[0], i[1], i[2], i[3], i[4], i[5], i[6]);
                 } else {
                     throw std::runtime_error("Bad indexing");
                 }
@@ -77,84 +76,19 @@ namespace rust_view {
                 }
 
                 if constexpr (ViewType::rank() == 1) {
-                    return host_view(i[0]);
+                    return &host_view(i[0]);
                 } else if constexpr (ViewType::rank() == 2) {
-                    return host_view(i[0], i[1]);
+                    return &host_view(i[0], i[1]);
                 } else if constexpr (ViewType::rank() == 3) {
-                    return host_view(i[0], i[1], i[2]);
+                    return &host_view(i[0], i[1], i[2]);
                 } else if constexpr (ViewType::rank() == 4) {
-                    return host_view(i[0], i[1], i[2], i[3]);
+                    return &host_view(i[0], i[1], i[2], i[3]);
                 } else if constexpr (ViewType::rank() == 5) {
-                    return host_view(i[0], i[1], i[2], i[3], i[4]);
+                    return &host_view(i[0], i[1], i[2], i[3], i[4]);
                 } else if constexpr (ViewType::rank() == 6) {
-                    return host_view(i[0], i[1], i[2], i[3], i[4], i[5]);
+                    return &host_view(i[0], i[1], i[2], i[3], i[4], i[5]);
                 } else if constexpr (ViewType::rank() == 7) {
-                    return host_view(i[0], i[1], i[2], i[3], i[4], i[5], i[6]);
-                } else {
-                    throw std::runtime_error("Bad indexing");
-                }
-            }
-        }
-
-        const int& get_i32(rust::slice<const size_t> i, bool is_host) override {
-            if (is_host) {
-                if (i.size() != view.rank()) {
-                    throw std::runtime_error("Bad indexing");
-                }
-                
-                for (size_t j = 0; j < view.rank(); j++)
-                {
-                    if (i[j] >= view.extent(j))
-                    {
-                        throw std::runtime_error("Out of scope indexing");
-                    }
-                }
-
-                if constexpr (ViewType::rank() == 1) {
-                    return view(i[0]);
-                } else if constexpr (ViewType::rank() == 2) {
-                    return view(i[0], i[1]);
-                } else if constexpr (ViewType::rank() == 3) {
-                    return view(i[0], i[1], i[2]);
-                } else if constexpr (ViewType::rank() == 4) {
-                    return view(i[0], i[1], i[2], i[3]);
-                } else if constexpr (ViewType::rank() == 5) {
-                    return view(i[0], i[1], i[2], i[3], i[4]);
-                } else if constexpr (ViewType::rank() == 6) {
-                    return view(i[0], i[1], i[2], i[3], i[4], i[5]);
-                } else if constexpr (ViewType::rank() == 7) {
-                    return view(i[0], i[1], i[2], i[3], i[4], i[5], i[6]);
-                } else {
-                    throw std::runtime_error("Bad indexing");
-                }
-            } else {
-                auto host_view = Kokkos::create_mirror_view(view);
-                if (i.size() != host_view.rank()) {
-                    throw std::runtime_error("Bad indexing");
-                }
-                
-                for (size_t j = 0; j < host_view.rank(); j++)
-                {
-                    if (i[j] >= host_view.extent(j))
-                    {
-                        throw std::runtime_error("Out of scope indexing");
-                    }
-                }
-
-                if constexpr (ViewType::rank() == 1) {
-                    return host_view(i[0]);
-                } else if constexpr (ViewType::rank() == 2) {
-                    return host_view(i[0], i[1]);
-                } else if constexpr (ViewType::rank() == 3) {
-                    return host_view(i[0], i[1], i[2]);
-                } else if constexpr (ViewType::rank() == 4) {
-                    return host_view(i[0], i[1], i[2], i[3]);
-                } else if constexpr (ViewType::rank() == 5) {
-                    return host_view(i[0], i[1], i[2], i[3], i[4]);
-                } else if constexpr (ViewType::rank() == 6) {
-                    return host_view(i[0], i[1], i[2], i[3], i[4], i[5]);
-                } else if constexpr (ViewType::rank() == 7) {
-                    return host_view(i[0], i[1], i[2], i[3], i[4], i[5], i[6]);
+                    return &host_view(i[0], i[1], i[2], i[3], i[4], i[5], i[6]);
                 } else {
                     throw std::runtime_error("Bad indexing");
                 }
@@ -338,8 +272,15 @@ namespace rust_view {
             };
         }
     }
-    const double&  get_f64(const OpaqueView& view, rust::Slice<const size_t> i);
-    const int&  get_i32(const OpaqueView& view, rust::Slice<const size_t> i);
+    
+    template <typename T>
+    const T& get(const OpaqueView& view, rust::Slice<const size_t> i) {
+        if (view.mem_space == MemSpace::HostSpace) {
+            return *static_cast<const T*>(view.view->get(i, true));
+        } else {
+            return *static_cast<const T*>(view.view->get(i, false));
+        }
+    }  
     // double y_ax(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
     // double y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
     // void deep_copy(const RustViewWrapper& view1, const RustViewWrapper& view2);

@@ -1,7 +1,7 @@
 pub mod common_types;
-pub mod OpaqueView;
-pub mod SharedArrayView;
-// pub mod RustView;
+// pub mod OpaqueView;
+// pub mod SharedArrayView;
+pub mod RustView;
 
 // use crate::rust_view::*;
 // use crate::mdspan_interop::*;

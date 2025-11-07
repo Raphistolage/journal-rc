@@ -96,10 +96,45 @@ mod ffi {
 
         #[rust_name = "create_view_f64"]
         unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<f64>) -> OpaqueView;
+        #[rust_name = "create_view_f32"]
+        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<f32>) -> OpaqueView;
+        #[rust_name = "create_view_u64"]
+        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<u64>) -> OpaqueView;
+        #[rust_name = "create_view_u32"]
+        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<u32>) -> OpaqueView;
+        #[rust_name = "create_view_u16"]
+        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<u16>) -> OpaqueView;
+        #[rust_name = "create_view_u8"]
+        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<u8>) -> OpaqueView;
+        #[rust_name = "create_view_i64"]
+        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<i64>) -> OpaqueView;
         #[rust_name = "create_view_i32"]
         unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<i32>) -> OpaqueView;
-        unsafe fn get_f64(opaque_view: &OpaqueView, i: & [usize]) -> &'static f64;
-        unsafe fn get_i32(opaque_view: &OpaqueView, i: & [usize]) -> &'static i32;
+        #[rust_name = "create_view_i16"]
+        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<i16>) -> OpaqueView;
+        #[rust_name = "create_view_i8"]
+        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<i8>) -> OpaqueView;
+
+        #[rust_name = "get_f64"]
+        unsafe fn get(opaque_view: &OpaqueView, i: & [usize]) -> &'static f64;
+        #[rust_name = "get_f32"]
+        unsafe fn get(opaque_view: &OpaqueView, i: & [usize]) -> &'static f32;
+        #[rust_name = "get_u64"]
+        unsafe fn get(opaque_view: &OpaqueView, i: & [usize]) -> &'static u64;
+        #[rust_name = "get_u32"]
+        unsafe fn get(opaque_view: &OpaqueView, i: & [usize]) -> &'static u32;
+        #[rust_name = "get_u16"]
+        unsafe fn get(opaque_view: &OpaqueView, i: & [usize]) -> &'static u16;
+        #[rust_name = "get_u8"]
+        unsafe fn get(opaque_view: &OpaqueView, i: & [usize]) -> &'static u8;
+        #[rust_name = "get_i64"]
+        unsafe fn get(opaque_view: &OpaqueView, i: & [usize]) -> &'static i64;
+        #[rust_name = "get_i32"]
+        unsafe fn get(opaque_view: &OpaqueView, i: & [usize]) -> &'static i32;
+        #[rust_name = "get_i16"]
+        unsafe fn get(opaque_view: &OpaqueView, i: & [usize]) -> &'static i16;
+        #[rust_name = "get_i8"]
+        unsafe fn get(opaque_view: &OpaqueView, i: & [usize]) -> &'static i8;
         // unsafe fn y_ax(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
         // unsafe fn y_ax_device(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
     }
