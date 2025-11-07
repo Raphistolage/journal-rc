@@ -3,7 +3,7 @@ use super::ffi::{OpaqueView};
 use std::ops::Index;
 use crate::common_types::{MemSpace};
 
-impl Index<&[usize]> for RustViewF64 {
+impl Index<&[usize]> for RustViewF64D1 {
     type Output = f64;
 
     fn index(&self, i: & [usize]) -> &Self::Output {
@@ -14,7 +14,7 @@ impl Index<&[usize]> for RustViewF64 {
 }
 
 
-impl Index<&[usize]> for RustViewI32 {
+impl Index<&[usize]> for RustViewI32D1 {
     type Output = i32;
 
     fn index(&self, i: & [usize]) -> &Self::Output {
@@ -38,32 +38,53 @@ pub fn kokkos_finalize() {
     }
 }
 
-pub struct RustViewU8(OpaqueView);
-pub struct RustViewU16(OpaqueView);
-pub struct RustViewU32(OpaqueView);
-pub struct RustViewU64(OpaqueView);
-pub struct RustViewU128(OpaqueView);
-pub struct RustViewI8(OpaqueView);
-pub struct RustViewI16(OpaqueView);
-pub struct RustViewI32(OpaqueView);
-pub struct RustViewI64(OpaqueView);
-pub struct RustViewI128(OpaqueView);
-pub struct RustViewF32(OpaqueView);
-pub struct RustViewF64(OpaqueView);
-pub struct RustViewF128(OpaqueView);
+// AI -----------------------------------
+macro_rules! generate_rust_views {
+    ( @inner [$($type:ident),*] [] ) => {};
+    
+    ( @inner [$($type:ident),*] [$dim:ident $($rest_dim:ident)*] ) => {
+        $(
+            paste::paste! {
+                pub struct [<RustView $type $dim>](OpaqueView);
+            }
+        )*
+        generate_rust_views!(@inner [$($type),*] [$($rest_dim)*]);
+    };
+    
+    ( $($type:ident),* ; $($dim:ident),* ) => {
+        generate_rust_views!(@inner [$($type),*] [$($dim)*]);
+    };
+}
+
+generate_rust_views!(U8, U16, U32, I32, F64;D1);
+// ----------------------------------------
+
+// pub struct RustViewU8(OpaqueView);
+// pub struct RustViewU16(OpaqueView);
+// pub struct RustViewU32(OpaqueView);
+// pub struct RustViewU64(OpaqueView);
+// pub struct RustViewU128(OpaqueView);
+// pub struct RustViewI8(OpaqueView);
+// pub struct RustViewI16(OpaqueView);
+// pub struct RustViewI32(OpaqueView);
+// pub struct RustViewI64(OpaqueView);
+// pub struct RustViewI128(OpaqueView);
+// pub struct RustViewF32(OpaqueView);
+// pub struct RustViewF64(OpaqueView);
+// pub struct RustViewF128(OpaqueView);
 
 
-pub fn create_opaque_view_f64(mem_space: MemSpace, dimensions: Vec<usize>, data: impl Into<Vec<f64>>) -> RustViewF64 {
+pub fn create_opaque_view_f64(mem_space: MemSpace, dimensions: Vec<usize>, data: impl Into<Vec<f64>>) -> RustViewF64D1 {
     let vec_data: Vec<f64> = data.into();
     unsafe {
-        RustViewF64(ffi::create_view_f64(mem_space.into(), dimensions, vec_data))
+        RustViewF64D1(ffi::create_view_f64(mem_space.into(), dimensions, vec_data))
     }
 }
 
-pub fn create_opaque_view_i32(mem_space: MemSpace, dimensions: Vec<usize>, data: impl Into<Vec<i32>>) -> RustViewI32 {
+pub fn create_opaque_view_i32(mem_space: MemSpace, dimensions: Vec<usize>, data: impl Into<Vec<i32>>) -> RustViewI32D1 {
     let vec_data: Vec<i32> = data.into();
     unsafe {
-        RustViewI32(ffi::create_view_i32(mem_space.into(), dimensions, vec_data))
+        RustViewI32D1(ffi::create_view_i32(mem_space.into(), dimensions, vec_data))
     }
 }
 
@@ -76,14 +97,14 @@ fn create_opaque_view_test() {
 
     kokkos_initialize();
     {
-        let opaque_view_f64: RustViewF64 = create_opaque_view_f64(MemSpace::HostSpace, dims1, &mut dataf64);
+        let opaque_view_f64: RustViewF64D1 = create_opaque_view_f64(MemSpace::HostSpace, dims1, &mut dataf64);
         assert_eq!(opaque_view_f64.0.rank, 2_u32);
 
         let value = opaque_view_f64[&[1,2]];
         assert_eq!(value, 6.0_f64);
         assert_ne!(value, 7.0_f64);
 
-        let opaque_view_i32: RustViewI32 = create_opaque_view_i32(MemSpace::HostSpace, dims2, &mut datai32);
+        let opaque_view_i32: RustViewI32D1 = create_opaque_view_i32(MemSpace::HostSpace, dims2, &mut datai32);
         assert_eq!(opaque_view_i32.0.rank, 2_u32);
 
         let value = opaque_view_i32[&[1,2]];
