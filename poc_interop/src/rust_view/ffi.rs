@@ -40,51 +40,6 @@ mod ffi {
         layout: Layout,
     }
 
-    // enum ViewLayout {
-    //     LayoutLeft(UniquePtr<IView>),
-    //     LayoutRight(UniquePtr<IView>),
-    //     LayoutStride(UniquePtr<IView>),
-    // }
-
-    // enum ViewMemSpace {
-    //     CudaSpace(ViewLayout),
-    //     CudaHostPinnedSpace(ViewLayout),
-    //     HIPSpace(ViewLayout),
-    //     HIPHostPinnedSpace(ViewLayout),
-    //     HIPManagedSpace(ViewLayout),
-    //     HostSpace(ViewLayout),
-    //     SharedSpace(ViewLayout),
-    //     SYCLDeviceUSMSpace(ViewLayout),
-    //     SYCLHostUSMSpace(ViewLayout),
-    //     SYCLSharedUSMSpace(ViewLayout),
-    // }
-
-    // enum ViewDim {
-    //     D1(ViewMemSpace),
-    //     D2(ViewMemSpace),
-    //     D3(ViewMemSpace),
-    //     D4(ViewMemSpace),
-    //     D5(ViewMemSpace),
-    //     D6(ViewMemSpace),
-    //     D7(ViewMemSpace),
-    // }
-
-    // enum RustView {
-    //     U8(ViewDim),
-    //     U16(ViewDim),
-    //     U32(ViewDim),
-    //     U64(ViewDim),
-    //     U128(ViewDim),
-    //     I8(ViewDim),
-    //     I16(ViewDim),
-    //     I32(ViewDim),
-    //     I64(ViewDim),
-    //     I128(ViewDim),
-    //     F32(ViewDim),
-    //     F64(ViewDim),
-    //     F128(ViewDim),
-    // }
-
     unsafe extern "C++" {
         include!("rust_view.hpp");
         type IView;
@@ -95,25 +50,25 @@ mod ffi {
         unsafe fn kokkos_finalize();
 
         #[rust_name = "create_view_f64"]
-        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<f64>) -> OpaqueView;
+        unsafe fn create_view(dimensions: Vec<usize>, memSpace: MemSpace, layout: Layout,  data: Vec<f64>) -> OpaqueView;
         #[rust_name = "create_view_f32"]
-        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<f32>) -> OpaqueView;
+        unsafe fn create_view(dimensions: Vec<usize>, memSpace: MemSpace, layout: Layout,  data: Vec<f32>) -> OpaqueView;
         #[rust_name = "create_view_u64"]
-        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<u64>) -> OpaqueView;
+        unsafe fn create_view(dimensions: Vec<usize>, memSpace: MemSpace, layout: Layout,  data: Vec<u64>) -> OpaqueView;
         #[rust_name = "create_view_u32"]
-        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<u32>) -> OpaqueView;
+        unsafe fn create_view(dimensions: Vec<usize>, memSpace: MemSpace, layout: Layout,  data: Vec<u32>) -> OpaqueView;
         #[rust_name = "create_view_u16"]
-        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<u16>) -> OpaqueView;
+        unsafe fn create_view(dimensions: Vec<usize>, memSpace: MemSpace, layout: Layout,  data: Vec<u16>) -> OpaqueView;
         #[rust_name = "create_view_u8"]
-        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<u8>) -> OpaqueView;
+        unsafe fn create_view(dimensions: Vec<usize>, memSpace: MemSpace, layout: Layout,  data: Vec<u8>) -> OpaqueView;
         #[rust_name = "create_view_i64"]
-        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<i64>) -> OpaqueView;
+        unsafe fn create_view(dimensions: Vec<usize>, memSpace: MemSpace, layout: Layout,  data: Vec<i64>) -> OpaqueView;
         #[rust_name = "create_view_i32"]
-        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<i32>) -> OpaqueView;
+        unsafe fn create_view(dimensions: Vec<usize>, memSpace: MemSpace, layout: Layout,  data: Vec<i32>) -> OpaqueView;
         #[rust_name = "create_view_i16"]
-        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<i16>) -> OpaqueView;
+        unsafe fn create_view(dimensions: Vec<usize>, memSpace: MemSpace, layout: Layout,  data: Vec<i16>) -> OpaqueView;
         #[rust_name = "create_view_i8"]
-        unsafe fn create_view(memSpace: MemSpace, dimensions: Vec<usize>, data: Vec<i8>) -> OpaqueView;
+        unsafe fn create_view(dimensions: Vec<usize>, memSpace: MemSpace, layout: Layout,  data: Vec<i8>) -> OpaqueView;
 
         #[rust_name = "get_f64"]
         unsafe fn get(opaque_view: &OpaqueView, i: & [usize]) -> &'static f64;
@@ -135,6 +90,7 @@ mod ffi {
         unsafe fn get(opaque_view: &OpaqueView, i: & [usize]) -> &'static i16;
         #[rust_name = "get_i8"]
         unsafe fn get(opaque_view: &OpaqueView, i: & [usize]) -> &'static i8;
+
         unsafe fn y_ax(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
         unsafe fn y_ax_device(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
     }

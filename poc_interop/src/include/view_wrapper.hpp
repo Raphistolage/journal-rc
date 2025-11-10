@@ -309,7 +309,6 @@ namespace opaque_view {
         } else {
             return *static_cast<const T*>(view.view->get(i, false));
         }
-
     }  
 }
 

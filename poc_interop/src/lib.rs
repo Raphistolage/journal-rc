@@ -1,9 +1,9 @@
 pub mod common_types;
 // pub mod OpaqueView;
 // pub mod SharedArrayView;
-pub mod RustView;
-pub use RustView::{kokkos_finalize, kokkos_initialize, y_ax_device};
-
+pub mod rust_view;
+pub use rust_view::{kokkos_finalize, kokkos_initialize, y_ax_cuda};
+use rust_view::*;
 
 
 
@@ -32,18 +32,26 @@ fn y_ax_test() {
     kokkos_initialize();
 
     {
-        let vec1: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
-        let y = RustView::Device::Dim1::<f64>::from_vec(&[5], vec1);
-        let vec2: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
-        let a = RustView::Device::Dim2::<f64>::from_vec(&[5,2], vec2);
-        let vec3: Vec<f64> = vec![1.0, 2.0];
-        let x = RustView::Device::Dim1::<f64>::from_vec(&[2], vec3);
+        let space = CudaSpace{};
+        let layout = LayoutRight{};
 
-        let result = y_ax_device(&y, &a, &x);
+        let vec1: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+        let dim1 = Dim1::new(&[5]);
+        let y = RustView::<f64, Dim1, CudaSpace, LayoutRight>::from_vec(&dim1, &space, &layout, vec1);
+
+        let vec2: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
+        let dim2 = Dim2::new(&[5,2]);
+        let a = RustView::<f64, Dim2, CudaSpace, LayoutRight>::from_vec(&dim2, &space, &layout, vec2);
+
+        let vec3: Vec<f64> = vec![1.0, 2.0];
+        let dim3 = Dim1::new(&[2]);
+        let x = RustView::<f64, Dim1, CudaSpace, LayoutRight>::from_vec(&dim3, &space, &layout, vec3);
+
+        let result = y_ax_cuda(&y, &a, &x);
 
         assert_eq!(result, 315.0);
     }
-
+    
     kokkos_finalize();
 }
 
