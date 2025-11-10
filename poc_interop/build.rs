@@ -26,7 +26,7 @@ fn main() {
     //     .compile("opaque_view");
 
     println!("cargo:warning=Cxx build part running...");
-    cxx_build::bridge("src/RustView/ffi.rs")
+    cxx_build::bridge("src/rust_view/ffi.rs")
         .file("src/cpp/rust_view.cpp")
         .include("src/include")
         .include(kokkos_include)
