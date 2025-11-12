@@ -1,4 +1,6 @@
-pub trait Dimension {
+use std::fmt::Debug;
+
+pub trait Dimension: Debug {
     const NDIM: u8;
 
     fn ndim(&self) -> u8;
@@ -15,6 +17,7 @@ pub trait Dimension {
     }
 }
 
+#[derive(Debug)]
 pub struct Dim1 {
     shape: [usize; 1],
 }
@@ -49,6 +52,7 @@ impl Dimension for Dim1 {
     }
 }
 
+#[derive(Debug)]
 pub struct Dim2 {
     shape: [usize; 2],
 }
@@ -83,6 +87,7 @@ impl Dimension for Dim2 {
     }
 }
 
+#[derive(Debug)]
 pub struct Dim3 {
     shape: [usize; 3]
 }
@@ -117,6 +122,7 @@ impl Dimension for Dim3 {
     }
 }
 
+#[derive(Debug)]
 pub struct Dim4 {
     shape: [usize; 4]
 }
@@ -151,6 +157,7 @@ impl Dimension for Dim4 {
     }
 }
 
+#[derive(Debug)]
 pub struct Dim5 {
     shape: [usize; 5]
 }
@@ -185,6 +192,7 @@ impl Dimension for Dim5 {
     }
 }
 
+#[derive(Debug)]
 pub struct Dim6 {
     shape: [usize; 6]
 }
@@ -219,6 +227,7 @@ impl Dimension for Dim6 {
     }
 }
 
+#[derive(Debug)]
 pub struct Dim7 {
     shape: [usize; 7]
 }

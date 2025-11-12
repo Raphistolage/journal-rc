@@ -1,18 +1,30 @@
+use std::fmt::Debug;
+
 use crate::common_types::MemSpace;
 
-pub trait MemorySpace {
+pub trait MemorySpace: Default + Debug {
     fn to_space(&self) -> MemSpace;
 }
 
+#[derive(Default, Debug)]
 pub struct CudaSpace ();
+#[derive(Default, Debug)]
 pub struct CudaHostPinnedSpace ();
+#[derive(Default, Debug)]
 pub struct HIPSpace ();
+#[derive(Default, Debug)]
 pub struct HIPHostPinnedSpace ();
+#[derive(Default, Debug)]
 pub struct HIPManagedSpace ();
+#[derive(Default, Debug)]
 pub struct HostSpace ();
+#[derive(Default, Debug)]
 pub struct SharedSpace ();
+#[derive(Default, Debug)]
 pub struct SYCLDeviceUSMSpace ();
+#[derive(Default, Debug)]
 pub struct SYCLHostUSMSpace ();
+#[derive(Default, Debug)]
 pub struct SYCLSharedUSMSpace ();
 
 

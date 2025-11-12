@@ -1,6 +1,8 @@
 use super::ffi;
 use super::ffi::{OpaqueView};
 use std::any::TypeId;
+use crate::MemorySpace;
+use crate::Dimension;
 use crate::rust_view::dim::{Dim1, Dim2};
 use crate::rust_view::{CudaSpace, HostSpace, LayoutLeft, LayoutRight, LayoutType, RustView};
 use crate::common_types::{MemSpace, Layout};
@@ -73,56 +75,8 @@ pub fn y_ax(y: &RustView::<f64, Dim1, HostSpace, LayoutRight>, a: &RustView::<f6
     }
 }
 
-pub fn y_ax_cuda<L: LayoutType>(y: &RustView::<f64, Dim1, CudaSpace, L>, a: &RustView::<f64, Dim2, CudaSpace, L>, x: &RustView::<f64, Dim1, CudaSpace, L>) -> f64 {
+pub fn y_ax_cuda<L1: LayoutType, L2: LayoutType, L3: LayoutType>(y: &RustView::<f64, Dim1, CudaSpace, L1>, a: &RustView::<f64, Dim2, CudaSpace, L2>, x: &RustView::<f64, Dim1, CudaSpace, L3>) -> f64 {
     unsafe {
         ffi::y_ax_device(y.get(),a.get(),x.get())
     }
 }
-
-// #[test]
-// fn create_opaque_view_test() {
-//     let dims1 = vec![2,3];
-//     let dims2 = vec![2,3];
-//     let mut dataf64 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
-//     let mut datai32 = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-
-//     kokkos_initialize();
-//     {
-//         let opaque_view_f64: RustViewF64D1 = create_opaque_view_f64(MemSpace::HostSpace, dims1, &mut dataf64);
-//         assert_eq!(opaque_view_f64.0.rank, 2_u32);
-
-//         let value = opaque_view_f64[&[1,2]];
-//         assert_eq!(value, 6.0_f64);
-//         assert_ne!(value, 7.0_f64);
-
-//         let opaque_view_i32: RustViewI32D1 = create_opaque_view_i32(MemSpace::HostSpace, dims2, &mut datai32);
-//         assert_eq!(opaque_view_i32.0.rank, 2_u32);
-
-//         let value = opaque_view_i32[&[1,2]];
-//         assert_eq!(value, 6_i32);
-//         assert_ne!(value, 7_i32);
-//     }
-//     kokkos_finalize();
-// }
-
-// #[test]
-// fn simple_kernel_opaque_view_test() {
-//     let dims1 = vec![3];
-//     let mut data1 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
-//     let dims2 = vec![3,2];
-//     let mut data2 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
-//     let dims3 = vec![2];
-//     let mut data3 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
-
-//     kokkos_initialize();
-//     {
-//         let y = create_opaque_view(MemSpace::HostSpace, dims1, &mut data1);
-//         let a = create_opaque_view(MemSpace::HostSpace, dims2, &mut data2);        
-//         let x = create_opaque_view(MemSpace::HostSpace, dims3, &mut data3); 
-
-//         let result = y_ax(&y,&a,&x);
-
-//         assert_eq!(result, 78.0);
-//     }
-//     kokkos_finalize();
-// }
