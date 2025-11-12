@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include "rust_view.hpp"
-#include "poc_interop/src/RustView/ffi.rs.h"
+#include "poc_interop/src/rust_view/ffi.rs.h"
 
 namespace rust_view {
 
@@ -26,6 +26,7 @@ namespace rust_view {
 
     double y_ax(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x) {
         if (y.rank != 1 || A.rank != 2 || x.rank != 1) {
+            std::cout << "Ranks : y : " << y.rank << " A: " << A.rank << " x: " << x.rank <<" \n";
             throw std::runtime_error("Bad ranks of views.");
         } else if (A.shape[1] != x.shape[0] || A.shape[0] != y.shape[0]) {
             throw std::runtime_error("Incompatible shapes.");
@@ -33,7 +34,7 @@ namespace rust_view {
 
         auto* y_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace>*>(y.view->get_view());
         auto* a_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace>*>(A.view->get_view());
-        auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace>*>(x.view->get_view());
+        auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace>*>(x.view->get_view());
 
         auto y_view = *y_view_ptr;
         auto a_view = *a_view_ptr;
@@ -57,6 +58,7 @@ namespace rust_view {
 
     double y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x) {
         if (y.rank != 1 || A.rank != 2 || x.rank != 1) {
+            std::cout << "Ranks : y : " << y.rank << " A: " << A.rank << " x: " << x.rank <<" \n";
             throw std::runtime_error("Bad ranks of views.");
         } else if (A.shape[1] != x.shape[0] || A.shape[0] != y.shape[0]) {
             throw std::runtime_error("Incompatible shapes.");
