@@ -17,7 +17,6 @@ impl<T: 'static, D: Dimension, M: MemorySpace, L: LayoutType> RustView<T, D, M, 
         let v = v.into();
         let mem_space = M::default();
         let layout = L::default();
-
         Self(create_opaque_view(shapes.to_vec(), mem_space.to_space(), layout.to_layout(), v).unwrap(), std::marker::PhantomData, std::marker::PhantomData, std::marker::PhantomData, std::marker::PhantomData)
     }
 

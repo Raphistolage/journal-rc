@@ -1,10 +1,8 @@
 use super::ffi;
 use super::ffi::{OpaqueView};
 use std::any::TypeId;
-use crate::MemorySpace;
-use crate::Dimension;
 use crate::rust_view::dim::{Dim1, Dim2};
-use crate::rust_view::{CudaSpace, HostSpace, LayoutLeft, LayoutRight, LayoutType, RustView};
+use crate::rust_view::{CudaSpace, HostSpace, LayoutRight, LayoutType, RustView};
 use crate::common_types::{MemSpace, Layout};
 
 pub fn kokkos_initialize() {

@@ -1,24 +1,11 @@
 # Rust ↔ C++ Interoperability
 
-This repository contains examples exploring different approaches to Rust-C++ interoperability, with focus on high-performance computing libraries.
+This repository contains examples exploring different approaches to Rust-Kokkos interoperability, in particular how to manipulate Kokkos::view from Rust and pass it to kernels.
 
-## Overview
-
-This small project investigates various patterns and techniques for bridging Rust and C++ code, particularly for:
-- Linear algebra libraries (Armadillo)
-- Parallel computing frameworks (Kokkos)
-- Memory management strategies
-- Performance considerations
-
-## Examples
-- **[Armadillo Basic](examples/armadillo-basic/)** - Simple linear algebra operations using Armadillo
-- **[Kokkos Advanced](examples/kokkos-advanced/)** - Parallel computing with Kokkos views and kernels
-- **[Simple Wrapper](examples/simple-wrapper/)** - Basic C wrapper patterns and techniques
+The most practical implementation for now is in the rust_view module, with the RustView struct.
 
 ## Requirements
 
 - Rust (latest stable)
 - C++ compiler with C++17/20 support
 - CMake
-- Kokkos (for kokkos-advanced example)
-- Armadillo (for armadillo-basic example)
