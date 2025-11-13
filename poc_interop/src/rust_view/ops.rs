@@ -30,38 +30,38 @@ pub fn create_opaque_view<T: 'static>(dimensions: Vec<usize>, mem_space: MemSpac
             let vec_data: Vec<f32> = std::mem::transmute(data.into());
             Some(ffi::create_view_f32(dimensions,mem_space.into(), layout.into(), vec_data))
         },
-        id if id == TypeId::of::<u64>() =>  unsafe { 
-            let vec_data: Vec<u64> = std::mem::transmute(data.into());
-            Some(ffi::create_view_u64(dimensions,mem_space.into(), layout.into(), vec_data))
-        },
-        id if id == TypeId::of::<u32>() =>  unsafe { 
-            let vec_data: Vec<u32> = std::mem::transmute(data.into());
-            Some(ffi::create_view_u32(dimensions,mem_space.into(), layout.into(), vec_data))
-        },
-        id if id == TypeId::of::<u16>() =>  unsafe { 
-            let vec_data: Vec<u16> = std::mem::transmute(data.into());
-            Some(ffi::create_view_u16(dimensions,mem_space.into(), layout.into(), vec_data))
-        },
-        id if id == TypeId::of::<u8>() =>  unsafe { 
-            let vec_data: Vec<u8> = std::mem::transmute(data.into());
-            Some(ffi::create_view_u8(dimensions,mem_space.into(), layout.into(), vec_data))
-        },
-        id if id == TypeId::of::<i64>() =>  unsafe { 
-            let vec_data: Vec<i64> = std::mem::transmute(data.into());
-            Some(ffi::create_view_i64(dimensions,mem_space.into(), layout.into(), vec_data))
-        },
+        // id if id == TypeId::of::<u64>() =>  unsafe { 
+        //     let vec_data: Vec<u64> = std::mem::transmute(data.into());
+        //     Some(ffi::create_view_u64(dimensions,mem_space.into(), layout.into(), vec_data))
+        // },
+        // id if id == TypeId::of::<u32>() =>  unsafe { 
+        //     let vec_data: Vec<u32> = std::mem::transmute(data.into());
+        //     Some(ffi::create_view_u32(dimensions,mem_space.into(), layout.into(), vec_data))
+        // },
+        // id if id == TypeId::of::<u16>() =>  unsafe { 
+        //     let vec_data: Vec<u16> = std::mem::transmute(data.into());
+        //     Some(ffi::create_view_u16(dimensions,mem_space.into(), layout.into(), vec_data))
+        // },
+        // id if id == TypeId::of::<u8>() =>  unsafe { 
+        //     let vec_data: Vec<u8> = std::mem::transmute(data.into());
+        //     Some(ffi::create_view_u8(dimensions,mem_space.into(), layout.into(), vec_data))
+        // },
+        // id if id == TypeId::of::<i64>() =>  unsafe { 
+        //     let vec_data: Vec<i64> = std::mem::transmute(data.into());
+        //     Some(ffi::create_view_i64(dimensions,mem_space.into(), layout.into(), vec_data))
+        // },
         id if id == TypeId::of::<i32>() =>  unsafe { 
             let vec_data: Vec<i32> = std::mem::transmute(data.into());
             Some(ffi::create_view_i32(dimensions,mem_space.into(), layout.into(), vec_data))
         },
-        id if id == TypeId::of::<i16>() =>  unsafe { 
-            let vec_data: Vec<i16> = std::mem::transmute(data.into());
-            Some(ffi::create_view_i16(dimensions,mem_space.into(), layout.into(), vec_data))
-        },
-        id if id == TypeId::of::<i8>() =>  unsafe { 
-            let vec_data: Vec<i8> = std::mem::transmute(data.into());
-            Some(ffi::create_view_i8(dimensions,mem_space.into(), layout.into(), vec_data))
-        },
+        // id if id == TypeId::of::<i16>() =>  unsafe { 
+        //     let vec_data: Vec<i16> = std::mem::transmute(data.into());
+        //     Some(ffi::create_view_i16(dimensions,mem_space.into(), layout.into(), vec_data))
+        // },
+        // id if id == TypeId::of::<i8>() =>  unsafe { 
+        //     let vec_data: Vec<i8> = std::mem::transmute(data.into());
+        //     Some(ffi::create_view_i8(dimensions,mem_space.into(), layout.into(), vec_data))
+        // },
         _ => {
             println!("This type of data is not supported");
             None

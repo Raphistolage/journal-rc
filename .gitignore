@@ -1,4 +1,3 @@
-examples/*/target/
-examples/*/Cargo.lock
 target/
 .vscode/
+kokkos-*
