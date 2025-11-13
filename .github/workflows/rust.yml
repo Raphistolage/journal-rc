@@ -22,4 +22,5 @@ jobs:
       working-directory: ./poc_interop
       run: cargo build --verbose
     - name: Run tests
+      working-directory: ./poc_interop
       run: cargo test --verbose
