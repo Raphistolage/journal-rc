@@ -21,33 +21,42 @@ mod tests {
         kokkos_finalize();
     }
 
+    #[test]
+    #[ignore = "Will crash"]
+    fn out_of_scope_indexing_test() {
+        kokkos_initialize();
+        {
+        let vec1: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+
+        let view1 = RustView::<f64, Dim1, HostSpace, LayoutRight>::from_vec(&[5], vec1);
+
+        assert_eq!(unsafe { ffi::get_f64(view1.get(), &[6]) }, &7.0_f64);
+        }
+        kokkos_finalize();
+    }
+
     fn create_various_type_test() {
         let vec1: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
-        let dim1 = Dim1::new(&[5]);
-        let view1 = RustView::<f64, Dim1, HostSpace, LayoutRight>::from_vec(&dim1, vec1);
 
-        // let crash = view1[&[5]]; Throws an out of scope indexing.
+        let view1 = RustView::<f64, Dim1, HostSpace, LayoutRight>::from_vec(&[5], vec1);
 
         assert_eq!(unsafe { ffi::get_f64(view1.get(), &[2]) }, &3.0_f64);
 
         let vec2: Vec<i32> = vec![1, 2, 3, 4, 5, 6];
-        let view2 = RustView::<i32, Dim1, HostSpace, LayoutRight>::from_vec(&dim1, vec2);
+        let view2 = RustView::<i32, Dim1, HostSpace, LayoutRight>::from_vec(&[5], vec2);
 
         assert_eq!(unsafe { ffi::get_i32(view2.get(), &[2]) }, &3_i32);
     }
 
     fn y_ax_test() {
         let vec1: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
-        let dim1 = Dim1::new(&[5]);
-        let y = RustView::<f64, Dim1, CudaSpace, LayoutRight>::from_vec(&dim1, vec1);
+        let y = RustView::<f64, Dim1, CudaSpace, LayoutRight>::from_vec(&[5], vec1);
 
         let vec2: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
-        let dim2 = Dim2::new(&[5, 2]);
-        let a = RustView::<f64, Dim2, CudaSpace, LayoutRight>::from_vec(&dim2, vec2);
+        let a = RustView::<f64, Dim2, CudaSpace, LayoutRight>::from_vec(&[5, 2], vec2);
 
         let vec3: Vec<f64> = vec![1.0, 2.0];
-        let dim3 = Dim1::new(&[2]);
-        let x = RustView::<f64, Dim1, CudaSpace, LayoutLeft>::from_vec(&dim3, vec3);
+        let x = RustView::<f64, Dim1, CudaSpace, LayoutLeft>::from_vec(&[2], vec3);
 
         let result = y_ax_cuda(&y, &a, &x);
 
@@ -84,11 +93,10 @@ mod tests {
 
     fn dot_product_test() {
         let vec1: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
-        let dim1 = Dim1::new(&[6]);
-        let y = RustView::<f64, Dim1, HostSpace, LayoutRight>::from_vec(&dim1, vec1);
+        let y = RustView::<f64, Dim1, HostSpace, LayoutRight>::from_vec(&[6], vec1);
 
         let vec3: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
-        let x = RustView::<f64, Dim1, HostSpace, LayoutRight>::from_vec(&dim1, vec3);
+        let x = RustView::<f64, Dim1, HostSpace, LayoutRight>::from_vec(&[6], vec3);
 
         let result = dot(&x, &y);
 
@@ -97,12 +105,10 @@ mod tests {
 
     fn matrix_product_test() {
         let vec1: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
-        let dim1 = Dim2::new(&[2,3]);
-        let mat1 = RustView::<f64, Dim2, HostSpace, LayoutRight>::from_vec(&dim1, vec1);
+        let mat1 = RustView::<f64, Dim2, HostSpace, LayoutRight>::from_vec(&[2,3], vec1);
 
         let vec2: Vec<f64> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
-        let dim2 = Dim2::new(&[3,2]);
-        let mat2 = RustView::<f64, Dim2, HostSpace, LayoutRight>::from_vec(&dim2, vec2);
+        let mat2 = RustView::<f64, Dim2, HostSpace, LayoutRight>::from_vec(&[3,2], vec2);
 
         let mut mat3 = RustView::<f64, Dim2, HostSpace, LayoutRight>::zeros(&Dim2::new(&[2,2]));
 

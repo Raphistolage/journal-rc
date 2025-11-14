@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-pub trait Dimension: Debug {
+pub trait Dimension: Debug + Into<Vec<usize>> {
     const NDIM: u8;
 
     fn ndim(&self) -> u8;
@@ -37,6 +37,12 @@ impl From<Dim1> for Vec<usize> {
     }
 }
 
+impl From<&[usize; 1]> for Dim1 {
+    fn from(value: &[usize; 1]) -> Self {
+        Dim1 { shape: *value }
+    }
+}
+
 impl Dimension for Dim1 {
     const NDIM: u8 = 1;
 
@@ -67,6 +73,12 @@ impl Dim2 {
 impl From<Dim2> for Vec<usize> {
     fn from(value: Dim2) -> Self {
         value.shapes().into()
+    }
+}
+
+impl From<&[usize; 2]> for Dim2 {
+    fn from(value: &[usize; 2]) -> Self {
+        Dim2 { shape: *value }
     }
 }
 
@@ -103,6 +115,12 @@ impl From<Dim3> for Vec<usize> {
     }
 }
 
+impl From<&[usize; 3]> for Dim3 {
+    fn from(value: &[usize; 3]) -> Self {
+        Dim3 { shape: *value }
+    }
+}
+
 impl Dimension for Dim3 {
     const NDIM: u8 = 3;
 
@@ -133,6 +151,12 @@ impl Dim4 {
 impl From<Dim4> for Vec<usize> {
     fn from(value: Dim4) -> Self {
         value.shapes().into()
+    }
+}
+
+impl From<&[usize; 4]> for Dim4 {
+    fn from(value: &[usize; 4]) -> Self {
+        Dim4 { shape: *value }
     }
 }
 
@@ -169,6 +193,12 @@ impl From<Dim5> for Vec<usize> {
     }
 }
 
+impl From<&[usize; 5]> for Dim5 {
+    fn from(value: &[usize; 5]) -> Self {
+        Dim5 { shape: *value }
+    }
+}
+
 impl Dimension for Dim5 {
     const NDIM: u8 = 5;
 
@@ -202,6 +232,12 @@ impl From<Dim6> for Vec<usize> {
     }
 }
 
+impl From<&[usize; 6]> for Dim6 {
+    fn from(value: &[usize; 6]) -> Self {
+        Dim6 { shape: *value }
+    }
+}
+
 impl Dimension for Dim6 {
     const NDIM: u8 = 6;
 
@@ -232,6 +268,12 @@ impl Dim7 {
 impl From<Dim7> for Vec<usize> {
     fn from(value: Dim7) -> Self {
         value.shapes().into()
+    }
+}
+
+impl From<&[usize; 7]> for Dim7 {
+    fn from(value: &[usize; 7]) -> Self {
+        Dim7 { shape: *value }
     }
 }
 

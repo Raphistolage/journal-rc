@@ -1,6 +1,6 @@
 fn main() {
     let kokkos_include = "./../kokkos-install/include";
-    let kokkos_lib = "./../kokkos-install/lib";
+    let kokkos_lib = "./../kokkos-install/lib64";
 
     // println!("cargo:warning=CC build part compiling mdspan_interop ...");
     // cc::Build::new()
@@ -42,6 +42,7 @@ fn main() {
     println!("cargo:rustc-link-lib=gomp");
 
     // Only rerun build script when these files change
+    println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=src/rust_view/ffi.rs");
     println!("cargo:rerun-if-changed=src/cpp/rust_view.cpp");
     println!("cargo:rerun-if-changed=src/include/rust_view.hpp");
