@@ -120,6 +120,16 @@ mod ffi {
 
 pub use ffi::*;
 
+use templated_macro::templated;
+
+#[templated]
+unsafe fn get<T>(opaque_view: &OpaqueView, i: &[usize]) -> &'static T {
+    unimplemented!()
+}
+
+include!(concat!(env!("OUT_DIR"), "/my_func_ffi.rs"));
+
+
 impl From<ffi::MemSpace> for crate::common_types::MemSpace {
     fn from(mem_space: ffi::MemSpace) -> Self {
         unsafe { std::mem::transmute(mem_space) }

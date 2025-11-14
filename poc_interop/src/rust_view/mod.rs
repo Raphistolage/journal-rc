@@ -20,12 +20,13 @@ pub struct RustView<T: 'static, D: Dimension, M: MemorySpace, L: LayoutType>(
 );
 
 impl<T: 'static, D: Dimension, M: MemorySpace, L: LayoutType> RustView<T, D, M, L> {
-    pub fn from_vec(shapes: &D, v: impl Into<Vec<T>>) -> Self {
+    pub fn from_vec<U: Into<D>>(shapes: U, v: impl Into<Vec<T>>) -> Self {
         let v = v.into();
         let mem_space = M::default();
         let layout = L::default();
+        let dim: D = shapes.into();
         Self(
-            create_opaque_view(shapes.to_vec(), mem_space.to_space(), layout.to_layout(), v)
+            create_opaque_view(dim.into(), mem_space.to_space(), layout.to_layout(), v)
                 .unwrap(),
             std::marker::PhantomData,
             std::marker::PhantomData,
