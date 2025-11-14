@@ -1,5 +1,4 @@
-#[derive(Debug, Clone, Copy)]
-#[derive(PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(u8)]
 pub enum MemSpace {
     CudaSpace = 1,
@@ -14,8 +13,7 @@ pub enum MemSpace {
     SYCLSharedUSMSpace = 10,
 }
 
-#[derive(Debug, Clone, Copy)]
-#[derive(PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(u8)]
 pub enum Layout {
     LayoutLeft = 0,
@@ -23,9 +21,8 @@ pub enum Layout {
     LayoutStride = 2,
 }
 
-#[derive(Debug, Clone, Copy)]
-#[derive(PartialEq)]
-#[repr(u8)] 
+#[derive(Debug, Clone, Copy, PartialEq)]
+#[repr(u8)]
 pub enum DataType {
     Float = 1,
     Unsigned = 2,

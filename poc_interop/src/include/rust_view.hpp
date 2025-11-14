@@ -479,6 +479,34 @@ namespace rust_view {
         }
     }
 
+
+    template <typename T>
+    T dot(const OpaqueView& x, const OpaqueView& y) {
+        if (y.rank != 1 || x.rank != 1) {
+            std::cout << "Ranks : y : " << y.rank << " x: " << x.rank <<" \n";
+            throw std::runtime_error("Bad ranks of views.");
+        } else if (x.shape[0] != y.shape[0]) {
+            throw std::runtime_error("Incompatible shapes.");
+        }
+
+        auto* y_view_ptr = static_cast<Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace>*>(y.view->get_view());
+        auto* x_view_ptr = static_cast<Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace>*>(x.view->get_view());
+
+        auto y_view = *y_view_ptr;
+        auto x_view = *x_view_ptr;
+
+        int N = x.shape[0];
+
+        T result = 0;
+
+        Kokkos::parallel_reduce( N, KOKKOS_LAMBDA ( const int j, T &update ) {
+            update += y_view( j ) * x_view( j );
+        }, result );
+
+        return result;
+    }
+
+    void matrix_product(const OpaqueView& A, const OpaqueView& B, OpaqueView& C);
     double y_ax(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
     double y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
     // void deep_copy(const RustViewWrapper& view1, const RustViewWrapper& view2);
