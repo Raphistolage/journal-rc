@@ -5,13 +5,12 @@ pub trait Dimension: Debug {
 
     fn ndim(&self) -> u8;
     /// Compute the size of the dimension (number of elements)
-    fn size(&self) -> usize
-    {
+    fn size(&self) -> usize {
         self.slice().iter().product()
     }
 
     fn slice(&self) -> &[usize];
-    
+
     fn to_vec(&self) -> Vec<usize> {
         self.slice().to_vec()
     }
@@ -23,10 +22,8 @@ pub struct Dim1 {
 }
 
 impl Dim1 {
-    pub fn new(shape: &[usize; 1]) -> Self{
-        Dim1 {
-            shape: *shape
-        }
+    pub fn new(shape: &[usize; 1]) -> Self {
+        Dim1 { shape: *shape }
     }
 
     pub fn shapes(&self) -> &[usize; 1] {
@@ -58,10 +55,8 @@ pub struct Dim2 {
 }
 
 impl Dim2 {
-    pub fn new(shape: &[usize; 2]) -> Self{
-        Dim2 {
-            shape: *shape
-        }
+    pub fn new(shape: &[usize; 2]) -> Self {
+        Dim2 { shape: *shape }
     }
 
     pub fn shapes(&self) -> &[usize; 2] {
@@ -89,14 +84,12 @@ impl Dimension for Dim2 {
 
 #[derive(Debug)]
 pub struct Dim3 {
-    shape: [usize; 3]
+    shape: [usize; 3],
 }
 
 impl Dim3 {
-    pub fn new(shape: &[usize; 3]) -> Self{
-        Dim3 {
-            shape: *shape
-        }
+    pub fn new(shape: &[usize; 3]) -> Self {
+        Dim3 { shape: *shape }
     }
 
     pub fn shapes(&self) -> &[usize; 3] {
@@ -124,14 +117,12 @@ impl Dimension for Dim3 {
 
 #[derive(Debug)]
 pub struct Dim4 {
-    shape: [usize; 4]
+    shape: [usize; 4],
 }
 
 impl Dim4 {
-    pub fn new(shape: &[usize; 4]) -> Self{
-        Dim4 {
-            shape: *shape
-        }
+    pub fn new(shape: &[usize; 4]) -> Self {
+        Dim4 { shape: *shape }
     }
 
     pub fn shapes(&self) -> &[usize; 4] {
@@ -159,14 +150,12 @@ impl Dimension for Dim4 {
 
 #[derive(Debug)]
 pub struct Dim5 {
-    shape: [usize; 5]
+    shape: [usize; 5],
 }
 
 impl Dim5 {
-    pub fn new(shape: &[usize; 5]) -> Self{
-        Dim5 {
-            shape: *shape
-        }
+    pub fn new(shape: &[usize; 5]) -> Self {
+        Dim5 { shape: *shape }
     }
 
     pub fn shapes(&self) -> &[usize; 5] {
@@ -194,14 +183,12 @@ impl Dimension for Dim5 {
 
 #[derive(Debug)]
 pub struct Dim6 {
-    shape: [usize; 6]
+    shape: [usize; 6],
 }
 
 impl Dim6 {
-    pub fn new(shape: &[usize; 6]) -> Self{
-        Dim6 {
-            shape: *shape
-        }
+    pub fn new(shape: &[usize; 6]) -> Self {
+        Dim6 { shape: *shape }
     }
 
     pub fn shapes(&self) -> &[usize; 6] {
@@ -229,14 +216,12 @@ impl Dimension for Dim6 {
 
 #[derive(Debug)]
 pub struct Dim7 {
-    shape: [usize; 7]
+    shape: [usize; 7],
 }
 
 impl Dim7 {
-    pub fn new(shape: &[usize; 7]) -> Self{
-        Dim7 {
-            shape: *shape
-        }
+    pub fn new(shape: &[usize; 7]) -> Self {
+        Dim7 { shape: *shape }
     }
 
     pub fn shapes(&self) -> &[usize; 7] {

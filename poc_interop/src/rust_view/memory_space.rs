@@ -7,26 +7,25 @@ pub trait MemorySpace: Default + Debug {
 }
 
 #[derive(Default, Debug)]
-pub struct CudaSpace ();
+pub struct CudaSpace();
 #[derive(Default, Debug)]
-pub struct CudaHostPinnedSpace ();
+pub struct CudaHostPinnedSpace();
 #[derive(Default, Debug)]
-pub struct HIPSpace ();
+pub struct HIPSpace();
 #[derive(Default, Debug)]
-pub struct HIPHostPinnedSpace ();
+pub struct HIPHostPinnedSpace();
 #[derive(Default, Debug)]
-pub struct HIPManagedSpace ();
+pub struct HIPManagedSpace();
 #[derive(Default, Debug)]
-pub struct HostSpace ();
+pub struct HostSpace();
 #[derive(Default, Debug)]
-pub struct SharedSpace ();
+pub struct SharedSpace();
 #[derive(Default, Debug)]
-pub struct SYCLDeviceUSMSpace ();
+pub struct SYCLDeviceUSMSpace();
 #[derive(Default, Debug)]
-pub struct SYCLHostUSMSpace ();
+pub struct SYCLHostUSMSpace();
 #[derive(Default, Debug)]
-pub struct SYCLSharedUSMSpace ();
-
+pub struct SYCLSharedUSMSpace();
 
 impl MemorySpace for CudaSpace {
     fn to_space(&self) -> MemSpace {

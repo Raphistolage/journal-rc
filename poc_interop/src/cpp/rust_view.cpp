@@ -53,6 +53,8 @@ namespace rust_view {
             update += y_view( j ) * temp2;
         }, result );
 
+        Kokkos::fence();
+
         return result;
     }
 
@@ -88,6 +90,36 @@ namespace rust_view {
             update += y_view( j ) * temp2;
         }, result );
 
+        Kokkos::fence();
+
         return result;
     }
+
+    void matrix_product(const OpaqueView& A, const OpaqueView& B, OpaqueView& C) {
+        if (A.rank != 2 || B.rank != 2 || C.rank != 2) {
+            std::cout << "Ranks : B : " << B.rank << " A: " << A.rank <<" \n";
+            throw std::runtime_error("Bad ranks of views.");
+        } else if (A.shape[1] != B.shape[0] || C.shape[0] != A.shape[0] || C.shape[1] != B.shape[1]) {
+            throw std::runtime_error("Incompatible shapes.");
+        }
+
+        auto* A_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace>*>(A.view->get_view());
+        auto* B_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace>*>(B.view->get_view());
+        auto* C_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace>*>(C.view->get_view());
+
+        auto& A_view = *A_view_ptr;
+        auto& B_view = *B_view_ptr;
+        auto& C_view = *C_view_ptr;
+
+        Kokkos::parallel_for("host_matrix_product", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0,0}, {A_view.extent(0), B_view.extent(1)}), KOKKOS_LAMBDA (const int i, const int j) {
+                double r = 0;
+                for (size_t k = 0; k < A_view.extent(1); k++)
+                {
+                    r += A_view(i,k)*B_view(k,j);
+                }
+                C_view(i,j) = r;
+            }
+        );
+    }
+
 }
