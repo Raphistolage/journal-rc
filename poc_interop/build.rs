@@ -1,6 +1,9 @@
 fn main() {
     let kokkos_include = "./../kokkos-install/include";
+    #[cfg(feature = "lib64")]
     let kokkos_lib = "./../kokkos-install/lib64";
+    #[cfg(feature = "lib")]
+    let kokkos_lib = "./../kokkos-install/lib";
 
     // println!("cargo:warning=CC build part compiling mdspan_interop ...");
     // cc::Build::new()

@@ -1,15 +1,13 @@
 // Made by AI, Claude Sonnet 4.5
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{Expr, FnArg, ItemFn, Pat, parse_macro_input, punctuated};
+use syn::{Expr, FnArg, ItemFn, Pat, Token, parse::Parser, parse_macro_input, punctuated::{self, Punctuated}};
 use std::path::{Path};
 
 #[proc_macro_attribute]
-pub fn templated(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn templated(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let input_fn: ItemFn = parse_macro_input!(item as ItemFn);
     let fn_name = input_fn.sig.ident.to_string();
-
-    let args = parse_macro_input!(attr as punctuated::Punctuated<Expr, syn::Token![,]>);
 
     // Compute output filename inside OUT_DIR
     let out_dir = std::env::var("OUT_DIR").expect("OUT_DIR not set");
