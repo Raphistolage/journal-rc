@@ -1,3 +1,5 @@
 target/
 .vscode/
 kokkos-*
+templated_macro/Cargo.lock
+poc_interop/Cargo.lock
