@@ -14,16 +14,8 @@ extern "C" {
     };
 
     enum MemSpace : uint8_t {
-        CudaSpace = 1,
-        CudaHostPinnedSpace = 2,
-        HIPSpace = 3,
-        HIPHostPinnedSpace = 4,
-        HIPManagedSpace = 5,
-        HostSpace = 6,
-        SharedSpace = 7,
-        SYCLDeviceUSMSpace = 8,
-        SYCLHostUSMSpace = 9,
-        SYCLSharedUSMSpace = 10,
+        HostSpace = 1,
+        DeviceSpace = 2,
     };
 
     enum Layout : uint8_t {

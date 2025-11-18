@@ -5,6 +5,8 @@ pub mod rust_view;
 
 pub use rust_view::*;
 
+use std::time::Instant;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -12,10 +14,11 @@ mod tests {
     #[test]
     fn tests_caller() {
         kokkos_initialize();
-        create_various_type_test();
-        y_ax_test();
-        dot_product_test();
-        matrix_product_test();
+        // create_various_type_test();
+        // y_ax_test();
+        // dot_product_test();
+        // matrix_product_test();
+        performance_test();
         kokkos_finalize();
     }
 
@@ -36,7 +39,7 @@ mod tests {
     fn create_various_type_test() {
         let mut data1 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
 
-        let view1 = RustView::<f64, Dim1, HostSpace, LayoutRight>::from_shape(&[5], &mut data1);
+        let view1 = RustView::<f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[5], &mut data1);
 
         assert_eq!(unsafe { ffi::get_f64(view1.get(), &[2]) }, &3.0_f64);
 
@@ -48,13 +51,13 @@ mod tests {
 
     fn y_ax_test() {
         let mut data1 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
-        let y = RustView::<f64, Dim1, CudaSpace, LayoutRight>::from_shape(&[5], &mut data1);
+        let y = RustView::<f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[5], &mut data1);
 
         let mut data2 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
-        let a = RustView::<f64, Dim2, CudaSpace, LayoutRight>::from_shape(&[5, 2], &mut data2);
+        let a = RustView::<f64, Dim2, DeviceSpace, LayoutRight>::from_shape(&[5, 2], &mut data2);
 
         let mut data3 = [1.0, 2.0];
-        let x = RustView::<f64, Dim1, CudaSpace, LayoutLeft>::from_shape(&[2], &mut data3);
+        let x = RustView::<f64, Dim1, DeviceSpace, LayoutLeft>::from_shape(&[2], &mut data3);
 
         let result = y_ax_cuda(&y, &a, &x);
 
@@ -89,5 +92,19 @@ mod tests {
         assert_eq!(mat3[&[0,1]], 28.0_f64);
         assert_eq!(mat3[&[1,0]], 49.0_f64);
         assert_eq!(mat3[&[1,1]], 64.0_f64);
+    }
+
+    fn performance_test() {
+        let n = 1_000_000;
+
+        let start = Instant::now();
+        for _ in 0..n {
+            matrix_product_test();
+        }
+        let duration = start.elapsed();
+
+        let avg_time = duration / n;
+        println!("Average time per matrix_product_test : {} ns", avg_time.as_nanos());
+        println!("Total time elapsed : {} ns", duration.as_nanos());
     }
 }

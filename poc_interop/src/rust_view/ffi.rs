@@ -4,16 +4,8 @@ mod ffi {
     #[derive(Debug, PartialEq)]
     #[repr(u8)]
     pub enum MemSpace {
-        CudaSpace = 1,
-        CudaHostPinnedSpace = 2,
-        HIPSpace = 3,
-        HIPHostPinnedSpace = 4,
-        HIPManagedSpace = 5,
-        HostSpace = 6,
-        SharedSpace = 7,
-        SYCLDeviceUSMSpace = 8,
-        SYCLHostUSMSpace = 9,
-        SYCLSharedUSMSpace = 10,
+        HostSpace = 1,
+        DeviceSpace = 2,
     }
 
     #[derive(Debug, PartialEq)]

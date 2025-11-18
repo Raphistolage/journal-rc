@@ -2,7 +2,7 @@ use super::ffi;
 use super::ffi::OpaqueView;
 use crate::common_types::{Layout, MemSpace};
 use crate::rust_view::dim::{Dim1, Dim2};
-use crate::rust_view::{CudaSpace, HostSpace, LayoutRight, LayoutType, RustView};
+use crate::rust_view::{DeviceSpace, HostSpace, LayoutRight, LayoutType, RustView};
 use std::any::TypeId;
 
 pub fn kokkos_initialize() {
@@ -96,9 +96,9 @@ pub fn y_ax(
 }
 
 pub fn y_ax_cuda<L1: LayoutType, L2: LayoutType, L3: LayoutType>(
-    y: &RustView<f64, Dim1, CudaSpace, L1>,
-    a: &RustView<f64, Dim2, CudaSpace, L2>,
-    x: &RustView<f64, Dim1, CudaSpace, L3>,
+    y: &RustView<f64, Dim1, DeviceSpace, L1>,
+    a: &RustView<f64, Dim2, DeviceSpace, L2>,
+    x: &RustView<f64, Dim1, DeviceSpace, L3>,
 ) -> f64 {
     unsafe { ffi::y_ax_device(y.get(), a.get(), x.get()) }
 }
