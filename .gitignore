@@ -3,3 +3,4 @@ target/
 kokkos-*
 templated_macro/Cargo.lock
 poc_interop/Cargo.lock
+poc_interop/errormsg.txt
