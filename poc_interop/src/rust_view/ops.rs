@@ -21,12 +21,12 @@ pub fn create_opaque_view<T: 'static>(
     dimensions: Vec<usize>,
     mem_space: MemSpace,
     layout: Layout,
-    data: impl Into<Vec<T>>,
+    data: &mut [T],
 ) -> Option<OpaqueView> {
     let type_id = TypeId::of::<T>();
     match type_id {
         id if id == TypeId::of::<f64>() => unsafe {
-            let vec_data: Vec<f64> = std::mem::transmute(data.into());
+            let vec_data: &mut [f64] = std::mem::transmute(data);
             Some(ffi::create_view_f64(
                 dimensions,
                 mem_space.into(),
@@ -35,7 +35,7 @@ pub fn create_opaque_view<T: 'static>(
             ))
         },
         id if id == TypeId::of::<f32>() => unsafe {
-            let vec_data: Vec<f32> = std::mem::transmute(data.into());
+            let vec_data: &mut [f32] = std::mem::transmute(data);
             Some(ffi::create_view_f32(
                 dimensions,
                 mem_space.into(),
@@ -64,7 +64,7 @@ pub fn create_opaque_view<T: 'static>(
         //     Some(ffi::create_view_i64(dimensions,mem_space.into(), layout.into(), vec_data))
         // },
         id if id == TypeId::of::<i32>() => unsafe {
-            let vec_data: Vec<i32> = std::mem::transmute(data.into());
+            let vec_data: &mut [i32] = std::mem::transmute(data);
             Some(ffi::create_view_i32(
                 dimensions,
                 mem_space.into(),
