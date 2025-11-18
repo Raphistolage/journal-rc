@@ -52,14 +52,14 @@ mod ffi {
             dimensions: Vec<usize>,
             memSpace: MemSpace,
             layout: Layout,
-            data: Vec<f64>,
+            data: &mut [f64],
         ) -> OpaqueView;
         #[rust_name = "create_view_f32"]
         unsafe fn create_view(
             dimensions: Vec<usize>,
             memSpace: MemSpace,
             layout: Layout,
-            data: Vec<f32>,
+            data: &mut [f32],
         ) -> OpaqueView;
         // #[rust_name = "create_view_u64"]
         // unsafe fn create_view(dimensions: Vec<usize>, memSpace: MemSpace, layout: Layout,  data: Vec<u64>) -> OpaqueView;
@@ -76,7 +76,7 @@ mod ffi {
             dimensions: Vec<usize>,
             memSpace: MemSpace,
             layout: Layout,
-            data: Vec<i32>,
+            data: &mut [i32],
         ) -> OpaqueView;
         // #[rust_name = "create_view_i16"]
         // unsafe fn create_view(dimensions: Vec<usize>, memSpace: MemSpace, layout: Layout,  data: Vec<i16>) -> OpaqueView;

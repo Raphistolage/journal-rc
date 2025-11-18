@@ -20,13 +20,12 @@ pub struct RustView<T: 'static, D: Dimension, M: MemorySpace, L: LayoutType>(
 );
 
 impl<T: 'static, D: Dimension, M: MemorySpace, L: LayoutType> RustView<T, D, M, L> {
-    pub fn from_vec<U: Into<D>>(shapes: U, v: impl Into<Vec<T>>) -> Self {
-        let v = v.into();
+    pub fn from_shape<U: Into<D>>(shapes: U, v: &mut [T]) -> Self {
         let mem_space = M::default();
         let layout = L::default();
-        let dim: D = shapes.into();
+        let shapes: D = shapes.into();
         Self(
-            create_opaque_view(dim.into(), mem_space.to_space(), layout.to_layout(), v)
+            create_opaque_view(shapes.into(), mem_space.to_space(), layout.to_layout(), v)
                 .unwrap(),
             std::marker::PhantomData,
             std::marker::PhantomData,
@@ -38,52 +37,6 @@ impl<T: 'static, D: Dimension, M: MemorySpace, L: LayoutType> RustView<T, D, M, 
     pub fn from_opaque_view(opaque_view: OpaqueView) -> Self {
         Self(
             opaque_view,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-        )
-    }
-
-    pub fn zeros(shapes: &D) -> Self
-    where
-        T: Default + Clone,
-    {
-        let size = shapes.size();
-        let v_null = vec![T::default(); size];
-        let mem_space = M::default();
-        let layout = L::default();
-        Self(
-            create_opaque_view(
-                shapes.to_vec(),
-                mem_space.to_space(),
-                layout.to_layout(),
-                v_null,
-            )
-            .unwrap(),
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-        )
-    }
-
-    pub fn ones(shapes: &D) -> Self
-    where
-        T: Clone + From<u8>,
-    {
-        let size = shapes.size();
-        let v_ones = vec![T::from(1u8); size];
-        let mem_space = M::default();
-        let layout = L::default();
-        Self(
-            create_opaque_view(
-                shapes.to_vec(),
-                mem_space.to_space(),
-                layout.to_layout(),
-                v_ones,
-            )
-            .unwrap(),
             std::marker::PhantomData,
             std::marker::PhantomData,
             std::marker::PhantomData,
