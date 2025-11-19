@@ -5,7 +5,12 @@ fn main() {
     #[cfg(feature = "lib")]
     let kokkos_lib = "./../kokkos-install/lib";
 
-    // println!("cargo:warning=CC build part compiling mdspan_interop ...");
+    // TODO : IMPLEMENTING THAT
+    // templated_parser::bridge("src/rust_view/functions_ffi.rs");
+        // .file("src/cpp/functions.cpp")
+        // .include("src/include")
+    // -----------------------------------------
+
     // cc::Build::new()
     //     .cpp(true)
     //     .file("src/cpp/mdspan_interop.cpp")
@@ -18,7 +23,6 @@ fn main() {
     //     .flag_if_supported("-fopenmp")    // Enable OpenMP
     //     .compile("mdspan_interop");
 
-    // println!("cargo:warning=Cxx build part running...");
     // cxx_build::bridge("src/OpaqueView/ffi.rs")
     //     .file("src/cpp/view_wrapper.cpp")
     //     .include("src/include")
@@ -28,9 +32,9 @@ fn main() {
     //     .flag_if_supported("-fopenmp")    // Enable OpenMP
     //     .compile("opaque_view");
 
-    println!("cargo:warning=Cxx build part running...");
     cxx_build::bridge("src/rust_view/ffi.rs")
         .file("src/cpp/rust_view.cpp")
+        // .file("src/cpp/functions.cpp")
         .include("src/include")
         .include(kokkos_include)
         .flag_if_supported("-std=c++20")
@@ -50,4 +54,5 @@ fn main() {
     println!("cargo:rerun-if-changed=src/cpp/rust_view.cpp");
     println!("cargo:rerun-if-changed=src/include/rust_view.hpp");
     println!("cargo:rerun-if-changed=src/include/types.hpp");
+    // println!("cargo:rerun-if-changed=src/include/functions.hpp");
 }

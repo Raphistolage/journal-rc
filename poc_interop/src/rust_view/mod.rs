@@ -3,12 +3,14 @@ pub mod ffi;
 mod layout;
 mod memory_space;
 mod ops;
+mod functions_ffi;
 
 pub use dim::*;
 pub use ffi::OpaqueView;
 pub use layout::*;
 pub use memory_space::*;
 pub use ops::*;
+pub use functions_ffi::*;
 
 use std::{ops::Index};
 pub struct RustView<T: 'static, D: Dimension, M: MemorySpace, L: LayoutType>(
