@@ -8,10 +8,12 @@ ndarray = "0.16.1"
 libc = "0.2.0"
 cxx = "1.0"
 paste = "1.0"
+templated_macro = { path = "../templated_macro/." }
 
 [build-dependencies]
 cc = "1.0"
 cxx-build = "1.0"
+templated_parser = { path = "../templated_parser/." }
 
 [features]
 default = ["lib64"]
