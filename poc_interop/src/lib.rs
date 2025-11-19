@@ -14,12 +14,11 @@ mod tests {
     #[test]
     fn tests_caller() {
         kokkos_initialize();
-        // create_various_type_test();
+        create_various_type_test();
         y_ax_test();
-        // dot_product_test();
-        // matrix_product_test();
-        // performance_test();
-        // template_fn_call_test();
+        dot_product_test();
+        matrix_product_test();
+        performance_test();
         kokkos_finalize();
     }
 
@@ -108,12 +107,4 @@ mod tests {
         println!("Average time per matrix_product_test : {} ns", avg_time.as_nanos());
         println!("Total time elapsed : {} ns", duration.as_nanos());
     }
-
-    // fn template_fn_call_test() {
-    //     let a = 1;
-    //     let b = 2;
-    //     let c = unsafe {my_func_i32(a,b)};
-
-    //     assert_eq!(c, 3);
-    // }
 }

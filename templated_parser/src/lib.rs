@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::fs;
 
-use syn::{Block, FnArg, Generics, Ident, Item, ItemFn, PathSegment, ReturnType, Token, Type, punctuated::Punctuated, token::{Brace, Pub}};
+use syn::{Block, FnArg, Generics, Ident, Item, ItemFn, PathSegment, ReturnType, Token, Type, punctuated::Punctuated, token::{Brace}};
 use proc_macro2::{Span};
 // use proc_macro::{TokenStream, TokenTree};
 use quote::{quote};
