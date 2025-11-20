@@ -103,41 +103,45 @@ pub fn y_ax_device<L1: LayoutType, L2: LayoutType, L3: LayoutType>(
     unsafe { ffi::y_ax_device(y.get(), a.get(), x.get()) }
 }
 
-
-pub fn dot<T: TryFrom<f64> + TryFrom<f32> + TryFrom<i32>>(x: &RustView<T, Dim1, HostSpace, LayoutRight>, y: &RustView<T, Dim1, HostSpace, LayoutRight>) -> T
-{
+pub fn dot<T: TryFrom<f64> + TryFrom<f32> + TryFrom<i32>>(
+    x: &RustView<T, Dim1, HostSpace, LayoutRight>,
+    y: &RustView<T, Dim1, HostSpace, LayoutRight>,
+) -> T {
     let type_id = TypeId::of::<T>();
     match type_id {
         id if id == TypeId::of::<f64>() => {
-            let cast = T::try_from(unsafe {ffi::dot_f64(&x.get(), &y.get())});
+            let cast = T::try_from(ffi::dot_f64(&x.get(), &y.get()));
             match cast {
                 Ok(v) => v,
-                Err(_) => panic!("Bad cast of received value")
+                Err(_) => panic!("Bad cast of received value"),
             }
-        },
+        }
         id if id == TypeId::of::<f32>() => {
-            let cast = T::try_from(unsafe {ffi::dot_f32(&x.get(), &y.get())});
+            let cast = T::try_from(ffi::dot_f32(&x.get(), &y.get()));
             match cast {
                 Ok(v) => v,
-                Err(_) => panic!("Bad cast of received value")
+                Err(_) => panic!("Bad cast of received value"),
             }
-        },
+        }
         id if id == TypeId::of::<i32>() => {
-            let cast = T::try_from(unsafe {ffi::dot_i32(&x.get(), &y.get())});
+            let cast = T::try_from(ffi::dot_i32(&x.get(), &y.get()));
             match cast {
                 Ok(v) => v,
-                Err(_) => panic!("Bad cast of received value")
+                Err(_) => panic!("Bad cast of received value"),
             }
-        },
+        }
         _ => {
             panic!("This type of data is not supported yet.");
         }
     }
-
 }
 
-pub fn matrix_product_op<T, L1: LayoutType, L2: LayoutType>(a: &RustView<T, Dim2, HostSpace, L1>, b: &RustView<T, Dim2, HostSpace, L2>, c: &mut RustView<T, Dim2, HostSpace, L1>){
-    unsafe {ffi::matrix_product(a.get(), b.get(), c.get_mut())};
+pub fn matrix_product_op<T, L1: LayoutType, L2: LayoutType>(
+    a: &RustView<T, Dim2, HostSpace, L1>,
+    b: &RustView<T, Dim2, HostSpace, L2>,
+    c: &mut RustView<T, Dim2, HostSpace, L1>,
+) {
+    unsafe { ffi::matrix_product(a.get(), b.get(), c.get_mut()) };
 }
 
 // pub fn mutable_matrix_product<U,T>(arr1: &mut U, arr2: &T, arr3: &T)

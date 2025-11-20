@@ -1,17 +1,64 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::fs;
 
-use syn::{Block, FnArg, Generics, Ident, Item, ItemFn, PathSegment, ReturnType, Token, Type, punctuated::Punctuated, token::{Brace}};
+use syn::{Block, FnArg, Ident, Item, ItemFn, PathSegment, ReturnType, Token, Type, punctuated::Punctuated, token::{Brace}};
 use proc_macro2::{Span};
-// use proc_macro::{TokenStream, TokenTree};
 use quote::{quote};
-// use syn::{FnArg, ItemFn, Pat, parse_macro_input};
-// use std::path::{Path};
+
+fn replace_generic(ty: &mut Type, var: &str) {
+    match ty {
+        Type::Path(path) => {
+            if path.path.segments.len() == 1 && path.path.segments.first().unwrap().ident == "T" {
+                path.path.segments.first_mut().unwrap().ident = Ident::new(var, Span::call_site());
+            }
+        },
+        Type::Reference(reference ) => {
+            if let Type::Path(path) = &mut *reference.elem {
+                if path.path.segments.len() == 1 && path.path.segments.first().unwrap().ident == "T" {
+                    path.path.segments.first_mut().unwrap().ident = Ident::new(var, Span::call_site());
+                }
+            } else {
+                replace_generic(&mut reference.elem, var);
+            }
+        },
+        Type::Slice(s) => {
+            if let Type::Path(path) = &mut *s.elem {
+                if path.path.segments.len() == 1 && path.path.segments.first().unwrap().ident == "T" {
+                    path.path.segments.first_mut().unwrap().ident = Ident::new(var, Span::call_site());
+                }
+            } else {
+                replace_generic(&mut s.elem, var);
+            }
+        },
+        Type::Array(arr) => {
+            if let Type::Path(path) = &mut *arr.elem {
+                if path.path.segments.len() == 1 && path.path.segments.first().unwrap().ident == "T" {
+                    path.path.segments.first_mut().unwrap().ident = Ident::new(var, Span::call_site());
+                }
+            } else {
+                replace_generic(&mut arr.elem, var);
+            }
+        },
+        Type::Ptr(pnter) => {
+            if let Type::Path(path) = &mut *pnter.elem {
+                if path.path.segments.len() == 1 && path.path.segments.first().unwrap().ident == "T" {
+                    path.path.segments.first_mut().unwrap().ident = Ident::new(var, Span::call_site());
+                }
+            } else {
+                replace_generic(&mut pnter.elem, var);
+            }
+        }
+        _ => ()
+    }
+}
 
 pub fn bridge(rust_source_file: impl AsRef<Path>) -> cc::Build {
     let content = fs::read_to_string(rust_source_file).expect("unable to read file");
     let ast = syn::parse_file(&content).expect("unable to parse file");
-    let mut to_write: String = String::default();
+    let out_dir = std::env::var("OUT_DIR").expect("OUT_DIR not set");
+
+    let mut output_files: Vec<PathBuf> = vec![]; 
+
     for item in ast.items {
         if let Item::Fn(item_fn) = item {
             let mut is_templated = false;
@@ -28,10 +75,21 @@ pub fn bridge(rust_source_file: impl AsRef<Path>) -> cc::Build {
             }
 
             if is_templated {
+
+                let mut to_write: String = String::default();
                 to_write.push_str("#[cxx::bridge(namespace = \"functions\")]\n");
-                to_write.push_str("mod ffi {\n");
+                to_write.push_str(&format!("mod {}_ffi {{\n", item_fn.sig.ident.to_string()));
                 to_write.push_str("unsafe extern \"C++\" {\n");
                 to_write.push_str("include!(\"functions.hpp\");\n");
+                to_write.push_str("include!(\"rust_view.hpp\");\n\n");
+                to_write.push_str("#[namespace = \"rust_view\"]\n");
+                to_write.push_str("type OpaqueView = crate::rust_view::ffi::OpaqueView;\n\n");
+                to_write.push_str("#[namespace = \"rust_view\"]\n");
+                to_write.push_str("type MemSpace = crate::rust_view::ffi::MemSpace;\n\n");
+                to_write.push_str("#[namespace = \"rust_view\"]\n");
+                to_write.push_str("type Layout = crate::rust_view::ffi::Layout;\n\n");
+
+                let mut export_string = format!("pub use {}_ffi::{{", item_fn.sig.ident.to_string());
 
                 for var in variants.iter() {
                     let mut func = ItemFn { 
@@ -40,40 +98,45 @@ pub fn bridge(rust_source_file: impl AsRef<Path>) -> cc::Build {
                         sig: item_fn.sig.clone(), 
                         block: Box::new(Block{brace_token: Brace::default(), stmts: vec![]}) 
                     };
-                    func.sig.generics = Generics::default();
+
                     for input in func.sig.inputs.iter_mut(){
                         if let FnArg::Typed(pat) = input {
-                            if let Type::Path(path) = &mut *pat.ty { // TODO : Expand to TypeArray, TypePtr, TypeRef, TypeSlice
-                                if path.path.segments.len() == 1 && path.path.segments.first().unwrap().ident == "T" {
-                                        path.path.segments.first_mut().unwrap().ident = Ident::new(var, Span::call_site());
-                                }
-                            }
+                            replace_generic(&mut *pat.ty, var);
                         }
                     }
-                    if let ReturnType::Type(_, boxed_type) = &mut func.sig.output {
-                        if let Type::Path(path) = &mut **boxed_type {
-                            if path.path.segments.len() == 1 && path.path.segments.first().unwrap().ident == "T" {
-                                path.path.segments.first_mut().unwrap().ident = Ident::new(var, Span::call_site());
-                            }
-                        }
+
+                    if let ReturnType::Type(_, boxed_type) = &mut func.sig.output{
+                        replace_generic(&mut **boxed_type, var);
                     }
-                    to_write.push_str(&format!("#[rust_name = \"{}_{}\"]\n", func.sig.ident.to_string(), var));
+
+                    let var_func_ident = format!("{}_{}",func.sig.ident.to_string(), var);
+                    export_string.push_str(&var_func_ident);
+                    export_string.push(',');
+                    to_write.push_str(&format!("#[rust_name = \"{}\"]\n", var_func_ident));
                     let mut stringed_func = quote! {#func}.to_string();
                     stringed_func.truncate(stringed_func.len()-3);
                     stringed_func.push(';');
                     to_write.push_str(&stringed_func);
-                    to_write.push_str("\n");
+                    to_write.push_str("\n\n");
                 }
+
+                if export_string.ends_with(',') {
+                    _ = export_string.pop().unwrap();
+                }
+                
+                export_string.push_str("};");
                 to_write.push_str("}\n}\n");
-                to_write.push_str("pub use ffi::*;");
+                to_write.push_str(&export_string);
+
+                let output_file = Path::new(&out_dir).join(format!("{}_ffi.rs",item_fn.sig.ident.to_string()));
+                
+                std::fs::write(&output_file, to_write).unwrap();
+                output_files.push(output_file);
             }
         }
     }
-    let out_dir = std::env::var("OUT_DIR").expect("OUT_DIR not set");
-    let output_file = Path::new(&out_dir).join("test_ffi.rs");
+
     println!("cargo:warning=Folder of result : {}", out_dir);
     
-    std::fs::write(&output_file, to_write).unwrap();
-
-    cxx_build::bridge(output_file)
+    cxx_build::bridges(output_files.into_iter())
 }

@@ -11,7 +11,6 @@ pub struct HostSpace();
 #[derive(Default, Debug)]
 pub struct DeviceSpace();
 
-
 impl MemorySpace for HostSpace {
     fn to_space(&self) -> MemSpace {
         MemSpace::HostSpace

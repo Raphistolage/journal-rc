@@ -1,5 +1,6 @@
 mod dim;
 pub mod ffi;
+mod functions_ffi;
 mod layout;
 mod memory_space;
 mod ops;
@@ -10,7 +11,7 @@ pub use layout::*;
 pub use memory_space::*;
 pub use ops::*;
 
-use std::{ops::Index};
+use std::ops::Index;
 pub struct RustView<T: 'static, D: Dimension, M: MemorySpace, L: LayoutType>(
     OpaqueView,
     std::marker::PhantomData<D>,
@@ -25,8 +26,7 @@ impl<T: 'static, D: Dimension, M: MemorySpace, L: LayoutType> RustView<T, D, M, 
         let layout = L::default();
         let shapes: D = shapes.into();
         Self(
-            create_opaque_view(shapes.into(), mem_space.to_space(), layout.to_layout(), v)
-                .unwrap(),
+            create_opaque_view(shapes.into(), mem_space.to_space(), layout.to_layout(), v).unwrap(),
             std::marker::PhantomData,
             std::marker::PhantomData,
             std::marker::PhantomData,
@@ -57,7 +57,7 @@ impl<D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]> for RustView<f
     type Output = f64;
 
     fn index(&self, index: &[usize]) -> &Self::Output {
-        unsafe {ffi::get_f64(self.get(), index)}
+        ffi::get_f64(self.get(), index)
     }
 }
 
@@ -65,7 +65,7 @@ impl<D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]> for RustView<f
     type Output = f32;
 
     fn index(&self, index: &[usize]) -> &Self::Output {
-        unsafe {ffi::get_f32(self.get(), index)}
+        ffi::get_f32(self.get(), index)
     }
 }
 
@@ -73,6 +73,6 @@ impl<D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]> for RustView<i
     type Output = i32;
 
     fn index(&self, index: &[usize]) -> &Self::Output {
-        unsafe {ffi::get_i32(self.get(), index)}
+        ffi::get_i32(self.get(), index)
     }
 }

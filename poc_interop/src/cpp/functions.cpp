@@ -1,4 +1,4 @@
 #include "functions.hpp"
-namespace ffi_functions {
+namespace functions {
     
 }
