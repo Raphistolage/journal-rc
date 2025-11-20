@@ -95,7 +95,7 @@ pub fn y_ax(
     unsafe { ffi::y_ax(y.get(), a.get(), x.get()) }
 }
 
-pub fn y_ax_cuda<L1: LayoutType, L2: LayoutType, L3: LayoutType>(
+pub fn y_ax_device<L1: LayoutType, L2: LayoutType, L3: LayoutType>(
     y: &RustView<f64, Dim1, DeviceSpace, L1>,
     a: &RustView<f64, Dim2, DeviceSpace, L2>,
     x: &RustView<f64, Dim1, DeviceSpace, L3>,

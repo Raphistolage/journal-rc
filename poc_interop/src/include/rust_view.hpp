@@ -37,6 +37,7 @@ namespace rust_view {
 
         ~ViewHolder() {
             if(is_device) {
+                // Need to free the device memory space.
                 Kokkos::kokkos_free(view.data());
             }
         }
@@ -290,7 +291,7 @@ namespace rust_view {
             };
         } else {
             std::unique_ptr<IView> view;
-            T* device_ptr = static_cast<T*>(Kokkos::kokkos_malloc<DeviceMemorySpace>(data.size()));
+            T* device_ptr = static_cast<T*>(Kokkos::kokkos_malloc<DeviceMemorySpace>(data.size() * sizeof(T)));
             switch(rank) {
                 case 1: {
                     switch (layout)
