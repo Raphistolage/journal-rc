@@ -20,9 +20,18 @@ namespace opaque_view{
     };
 }
 
-#include "poc_interop/src/OpaqueView/ffi.rs.h"
+#include "poc_interop/src/opaque_view/ffi.rs.h"
 
 namespace opaque_view {
+
+    #ifdef KOKKOS_ENABLE_CUDA
+        using DeviceMemorySpace = Kokkos::CudaSpace;
+    #elif defined(KOKKOS_ENABLE_HIP)
+        using DeviceMemorySpace = Kokkos::HIPSpace;
+    #else
+        using DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space;
+    #endif
+
     void kokkos_initialize();
     void kokkos_finalize();
 
@@ -33,11 +42,16 @@ namespace opaque_view {
     template <typename ViewType>
     struct ViewHolder : IView {
         ViewType view;
-        
-        template <typename T, typename... Dims>
-        ViewHolder(T* data, Dims... dims) : view(data, dims...) {}
+        bool is_device;
 
-        ViewHolder(const ViewType& view) : view(view) {}
+        ViewHolder(const ViewType& view, bool is_device = false) : view(view), is_device(is_device) {}
+
+        ~ViewHolder() {
+            if(is_device) {
+                // Need to free the device memory space.
+                Kokkos::kokkos_free(view.data());
+            }
+        }
 
         void* get_view() {
             return &view;
@@ -48,7 +62,7 @@ namespace opaque_view {
                 if (i.size() != view.rank()) {
                     throw std::runtime_error("Bad indexing");
                 }
-                
+
                 for (size_t j = 0; j < view.rank(); j++)
                 {
                     if (i[j] >= view.extent(j))
@@ -75,6 +89,7 @@ namespace opaque_view {
                     throw std::runtime_error("Bad indexing");
                 }
             } else {
+
                 auto host_view = Kokkos::create_mirror_view(view);
                 if (i.size() != host_view.rank()) {
                     throw std::runtime_error("Bad indexing");
@@ -150,7 +165,7 @@ namespace opaque_view {
     };
 
     template <typename T>
-    OpaqueView create_view(MemSpace memSpace, rust::Vec<size_t> dimensions, rust::Vec<T> data) {
+    OpaqueView create_view(rust::Vec<size_t> dimensions, MemSpace memSpace, Layout layout, rust::Slice<T> data) {
         uint32_t rank = dimensions.size();
         if (rank < 1 || rank>7) {
             std::cout << "Rank must be between 1 and 7. \n";
@@ -166,59 +181,59 @@ namespace opaque_view {
             std::unique_ptr<IView> view;
             switch(rank) {
                 case 1: {
-                    Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0]);
-                    Kokkos::View<T*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0]);
-                    Kokkos::deep_copy(owning_view, host_view);
-                    view = std::make_unique<ViewHolder<Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-                        owning_view);
+                        switch (layout)
+                        {
+                        case Layout::LayoutRight:{
+                            Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0]);
+                            view = std::make_unique<ViewHolder<Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>>>(
+                                host_view);}
+                            break;
+                        case Layout::LayoutLeft:{
+                            Kokkos::View<T*, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0]);
+                            view = std::make_unique<ViewHolder<Kokkos::View<T*, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>>>(
+                                host_view);}
+                            break;
+                        default:
+                            break;
+                        }
                 }
                     break;
                 case 2: {
-                    Kokkos::View<T**, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1]);
-                    Kokkos::View<T**, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1]);
-                    Kokkos::deep_copy(owning_view, host_view);
-                    view = std::make_unique<ViewHolder<Kokkos::View<T**, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-                        owning_view);            
+                    switch (layout)
+                    {
+                    case LayoutRight:{
+                        Kokkos::View<T**, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1]);
+                        view = std::make_unique<ViewHolder<Kokkos::View<T**, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>>>(
+                            host_view); }
+                        break;
+                    case LayoutLeft:{
+                        Kokkos::View<T**, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1]);
+                        view = std::make_unique<ViewHolder<Kokkos::View<T**, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>>>(
+                            host_view); }
+                        break;
+                    default:
+                        break;
+                    }
+           
                 }
                     break;
                 case 3: {
-                    Kokkos::View<T***, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2]);
-                    Kokkos::View<T***, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
-                    Kokkos::deep_copy(owning_view, host_view);
-                    view = std::make_unique<ViewHolder<Kokkos::View<T***, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-                        owning_view);
-                }
-                    break;
-                case 4: {
-                    Kokkos::View<T****, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
-                    Kokkos::View<T****, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
-                    Kokkos::deep_copy(owning_view, host_view);
-                    view = std::make_unique<ViewHolder<Kokkos::View<T****, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-                        owning_view);
-                }
-                    break;
-                case 5: {
-                    Kokkos::View<T*****, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
-                    Kokkos::View<T*****, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
-                    Kokkos::deep_copy(owning_view, host_view);
-                    view = std::make_unique<ViewHolder<Kokkos::View<T*****, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-                        owning_view);
-                }
-                    break;
-                case 6: {
-                    Kokkos::View<T******, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
-                    Kokkos::View<T******, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
-                    Kokkos::deep_copy(owning_view, host_view);
-                    view = std::make_unique<ViewHolder<Kokkos::View<T******, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-                        owning_view);
-                }
-                    break;
-                case 7: {
-                    Kokkos::View<T*******, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
-                    Kokkos::View<T*******, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
-                    Kokkos::deep_copy(owning_view, host_view);
-                    view = std::make_unique<ViewHolder<Kokkos::View<T*******, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-                        owning_view);
+                    switch (layout)
+                    {
+                    case LayoutRight: {
+                        Kokkos::View<T***, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
+                        view = std::make_unique<ViewHolder<Kokkos::View<T***, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>>>(
+                            host_view);}
+                        break;
+                    case LayoutLeft: {
+                        Kokkos::View<T***, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
+                        view = std::make_unique<ViewHolder<Kokkos::View<T***, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>>>(
+                            host_view);}
+                        break;
+                    default:
+                        break;
+                    }
+
                 }
                     break;
             }
@@ -227,80 +242,94 @@ namespace opaque_view {
                 size,
                 rank,
                 dimensions,
-                MemSpace::HostSpace,
-                Layout::LayoutRight,
+                memSpace,
+                layout,
             };
         } else {
             std::unique_ptr<IView> view;
+            T* device_ptr = static_cast<T*>(Kokkos::kokkos_malloc<DeviceMemorySpace>(data.size() * sizeof(T)));
             switch(rank) {
                 case 1: {
-                    Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> device_view("device_view", dimensions[0]);
-                    Kokkos::View<T*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0]);
-                    Kokkos::deep_copy(device_view, host_view);
-                    view = std::make_unique<ViewHolder<Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>>>(
-                        device_view);
+                    switch (layout)
+                    {
+                    case LayoutRight:{
+                        Kokkos::View<T*, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, dimensions[0]);
+                        Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0]);
+                        Kokkos::deep_copy(device_view, host_view);
+                        view = std::make_unique<ViewHolder<Kokkos::View<T*, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>>>(
+                            device_view, true);}
+                        break;
+                    case LayoutLeft:{
+                        Kokkos::View<T*, Kokkos::LayoutLeft, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, dimensions[0]);
+                        Kokkos::View<T*, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0]);
+                        Kokkos::deep_copy(device_view, host_view);
+                        view = std::make_unique<ViewHolder<Kokkos::View<T*, Kokkos::LayoutLeft, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>>>(
+                            device_view, true);}
+                        break;
+                    default:
+                        break;
+                    }
+
                 }
                     break;
                 case 2: {
-                    Kokkos::View<T**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> device_view("device_view", dimensions[0], dimensions[1]);
-                    Kokkos::View<T**, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1]);
-                    Kokkos::deep_copy(device_view, host_view);
-                    view = std::make_unique<ViewHolder<Kokkos::View<T**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>>>(
-                        device_view);            
+                    switch (layout)
+                    {
+                    case LayoutRight:{
+                        Kokkos::View<T**, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, dimensions[0], dimensions[1]);
+                        Kokkos::View<T**, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1]);
+                        Kokkos::deep_copy(device_view, host_view);
+                        view = std::make_unique<ViewHolder<Kokkos::View<T**, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>>>(
+                            device_view, true);  }   
+                        break;
+                    case LayoutLeft:{
+                        Kokkos::View<T**, Kokkos::LayoutLeft, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, dimensions[0], dimensions[1]);
+                        Kokkos::View<T**, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1]);
+                        Kokkos::deep_copy(device_view, host_view);
+                        view = std::make_unique<ViewHolder<Kokkos::View<T**, Kokkos::LayoutLeft, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>>>(
+                            device_view, true); }  
+                        break;
+                    default:
+                        break;
+                    }
+       
                 }
                     break;
                 case 3: {
-                    Kokkos::View<T***, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> device_view("device_view", dimensions[0], dimensions[1], dimensions[2]);
-                    Kokkos::View<T***, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
-                    Kokkos::deep_copy(device_view, host_view);
-                    view = std::make_unique<ViewHolder<Kokkos::View<T***, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>>>(
-                        device_view);
+                    switch (layout)
+                    {
+                    case LayoutRight:{
+                        Kokkos::View<T***, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, dimensions[0], dimensions[1], dimensions[2]);
+                        Kokkos::View<T***, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
+                        Kokkos::deep_copy(device_view, host_view);
+                        view = std::make_unique<ViewHolder<Kokkos::View<T***, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>>>(
+                            device_view, true);}
+                        break;
+                    case LayoutLeft:{
+                        Kokkos::View<T***, Kokkos::LayoutLeft, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, dimensions[0], dimensions[1], dimensions[2]);
+                        Kokkos::View<T***, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
+                        Kokkos::deep_copy(device_view, host_view);
+                        view = std::make_unique<ViewHolder<Kokkos::View<T***, Kokkos::LayoutLeft, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>>>(
+                            device_view, true);}
+                        break;
+                    default:
+                        break;
+                    }
+
                 }
                     break;
-                case 4: {
-                    Kokkos::View<T****, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> device_view("device_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
-                    Kokkos::View<T****, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
-                    Kokkos::deep_copy(device_view, host_view);
-                    view = std::make_unique<ViewHolder<Kokkos::View<T****, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>>>(
-                        device_view);
-                }
-                    break;
-                case 5: {
-                    Kokkos::View<T*****, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> device_view("device_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
-                    Kokkos::View<T*****, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
-                    Kokkos::deep_copy(device_view, host_view);
-                    view = std::make_unique<ViewHolder<Kokkos::View<T*****, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>>>(
-                        device_view);
-                }
-                    break;
-                case 6: {
-                    Kokkos::View<T******, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> device_view("device_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
-                    Kokkos::View<T******, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
-                    Kokkos::deep_copy(device_view, host_view);
-                    view = std::make_unique<ViewHolder<Kokkos::View<T******, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>>>(
-                        device_view);
-                }
-                    break;
-                case 7: {
-                    Kokkos::View<T*******, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> device_view("device_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
-                    Kokkos::View<T*******, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
-                    Kokkos::deep_copy(device_view, host_view);
-                    view = std::make_unique<ViewHolder<Kokkos::View<T*******, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>>>(
-                        device_view);
-                }
-                    break;
-            }
-            
+            }  
             return OpaqueView {
                 std::move(view),
                 size,
                 rank,
                 dimensions,
-                MemSpace::CudaSpace,
-                Layout::LayoutLeft,
+                memSpace,
+                layout,
             };
         }
     }
+
     
     template <typename T>
     const T& get(const OpaqueView& view, rust::Slice<const size_t> i) {
@@ -309,7 +338,7 @@ namespace opaque_view {
         } else {
             return *static_cast<const T*>(view.view->get(i, false));
         }
-    }  
+    }
 }
 
 extern "C" {
