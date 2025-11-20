@@ -50,18 +50,20 @@ mod tests {
     }
 
     fn y_ax_test() {
-        let mut data1 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+        let mut data1 = [2.0, 2.0, 3.0, 4.0, 5.0];
         let y = RustView::<f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[5], &mut data1);
 
-        let mut data2 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
+        let mut data2 = [3.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
         let a = RustView::<f64, Dim2, DeviceSpace, LayoutRight>::from_shape(&[5, 2], &mut data2);
 
-        let mut data3 = [1.0, 2.0];
-        let x = RustView::<f64, Dim1, DeviceSpace, LayoutLeft>::from_shape(&[2], &mut data3);
+        let mut data3 = [4.0, 2.0];
+        let x = RustView::<f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[2], &mut data3);
 
-        let result = y_ax_cuda(&y, &a, &x);
-
-        assert_eq!(result, 315.0);
+        let result = y_ax_device(&y, &a, &x);
+        println!("Jusque la tout va bien, result: {}", result);
+        let result2 = y_ax_device(&y, &a, &x);
+        println!("Encore tout va bien, result2: {}", result2);
+        assert_eq!(result, 624.0);
     }
 
     fn dot_product_test() {
