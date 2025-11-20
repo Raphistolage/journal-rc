@@ -7,7 +7,7 @@ use ndarray::{IxDyn, ArrayView, ArrayViewMut};
 use super::ffi;
 use super::types::*;
 
-pub use crate::OpaqueView::{kokkos_finalize, kokkos_initialize};
+pub use crate::opaque_view::{kokkos_finalize, kokkos_initialize};
 
 pub trait RustDataType {
     fn data_type() -> DataType;
@@ -133,7 +133,7 @@ where
 }
 
 pub fn from_shared(shared_array: SharedArrayView) -> ndarray::ArrayView<'static, f64, ndarray::IxDyn> {
-    if shared_array.mem_space != MemSpace::HostSpace && shared_array.mem_space !=  MemSpace::CudaHostPinnedSpace && shared_array.mem_space != MemSpace::HIPHostPinnedSpace{
+    if shared_array.mem_space != MemSpace::HostSpace{
         panic!("Cannot cast from a sharedArrayView that is not on host space.");
     }
 
@@ -145,7 +145,7 @@ pub fn from_shared(shared_array: SharedArrayView) -> ndarray::ArrayView<'static,
 }
 
 pub fn from_shared_mut(shared_array: SharedArrayViewMut) -> ndarray::ArrayViewMut<'static, f64, ndarray::IxDyn> {
-    if shared_array.mem_space != MemSpace::HostSpace && shared_array.mem_space !=  MemSpace::CudaHostPinnedSpace && shared_array.mem_space != MemSpace::HIPHostPinnedSpace{
+    if shared_array.mem_space != MemSpace::HostSpace{
         panic!("Cannot cast from a sharedArrayView that is not on host space.");
     }
 

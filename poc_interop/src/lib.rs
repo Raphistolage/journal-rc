@@ -1,6 +1,6 @@
 pub mod common_types;
-// pub mod OpaqueView;
-// pub mod SharedArrayView;
+pub mod opaque_view;
+pub mod shared_array_view;
 pub mod rust_view;
 
 pub use rust_view::*;
