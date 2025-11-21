@@ -33,17 +33,8 @@ fn main() {
         .flag_if_supported("-std=c++20")
         .flag_if_supported("-fPIC")
         .flag_if_supported("-O3")
-        .flag_if_supported("-fopenmp")    // Enable OpenMP
+        .flag_if_supported("-fopenmp") // Enable OpenMP
         .compile("mdspan_interop");
-
-    cxx_build::bridge("src/opaque_view/ffi.rs")
-        .file("src/cpp/view_wrapper.cpp")
-        .include("src/include")
-        .include(kokkos_include)
-        .flag_if_supported("-std=c++20")
-        .flag_if_supported("-O3")
-        .flag_if_supported("-fopenmp")    // Enable OpenMP
-        .compile("opaque_view");
 
     println!("cargo:rustc-link-search=native={}", kokkos_lib);
 

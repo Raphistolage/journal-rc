@@ -36,13 +36,13 @@ mod ffi {
         type MemSpace;
         type Layout;
 
-        unsafe fn kokkos_initialize();
-        unsafe fn kokkos_finalize();
+        fn kokkos_initialize();
+        fn kokkos_finalize();
 
-        unsafe fn matrix_product(a: &OpaqueView, b: &OpaqueView, c: &mut OpaqueView);
+        fn matrix_product(a: &OpaqueView, b: &OpaqueView, c: &mut OpaqueView);
 
-        unsafe fn y_ax(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
-        unsafe fn y_ax_device(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
+        fn y_ax(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
+        fn y_ax_device(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
     }
 }
 

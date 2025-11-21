@@ -1,61 +1,87 @@
-use std::slice::{from_raw_parts, from_raw_parts_mut};
-use std::os::raw::{c_void};
 use std::mem::size_of;
+use std::os::raw::c_void;
+use std::slice::{from_raw_parts, from_raw_parts_mut};
 
-use ndarray::{IxDyn, ArrayView, ArrayViewMut};
+use ndarray::{ArrayView, ArrayViewMut, IxDyn};
 
 use super::ffi;
 use super::types::*;
-
-pub use crate::opaque_view::{kokkos_finalize, kokkos_initialize};
 
 pub trait RustDataType {
     fn data_type() -> DataType;
 }
 
 impl RustDataType for f32 {
-    fn data_type() -> DataType { DataType::Float }
+    fn data_type() -> DataType {
+        DataType::Float
+    }
 }
 impl RustDataType for f64 {
-    fn data_type() -> DataType { DataType::Float }
+    fn data_type() -> DataType {
+        DataType::Float
+    }
 }
 
 impl RustDataType for u8 {
-    fn data_type() -> DataType { DataType::Unsigned }
+    fn data_type() -> DataType {
+        DataType::Unsigned
+    }
 }
 impl RustDataType for u16 {
-    fn data_type() -> DataType { DataType::Unsigned }
+    fn data_type() -> DataType {
+        DataType::Unsigned
+    }
 }
 impl RustDataType for u32 {
-    fn data_type() -> DataType { DataType::Unsigned }
+    fn data_type() -> DataType {
+        DataType::Unsigned
+    }
 }
 impl RustDataType for u64 {
-    fn data_type() -> DataType { DataType::Unsigned }
+    fn data_type() -> DataType {
+        DataType::Unsigned
+    }
 }
 impl RustDataType for u128 {
-    fn data_type() -> DataType { DataType::Unsigned }
+    fn data_type() -> DataType {
+        DataType::Unsigned
+    }
 }
 impl RustDataType for usize {
-    fn data_type() -> DataType { DataType::Unsigned }
+    fn data_type() -> DataType {
+        DataType::Unsigned
+    }
 }
 
 impl RustDataType for i8 {
-    fn data_type() -> DataType { DataType::Signed }
+    fn data_type() -> DataType {
+        DataType::Signed
+    }
 }
 impl RustDataType for i16 {
-    fn data_type() -> DataType { DataType::Signed }
+    fn data_type() -> DataType {
+        DataType::Signed
+    }
 }
 impl RustDataType for i32 {
-    fn data_type() -> DataType { DataType::Signed }
+    fn data_type() -> DataType {
+        DataType::Signed
+    }
 }
 impl RustDataType for i64 {
-    fn data_type() -> DataType { DataType::Signed }
+    fn data_type() -> DataType {
+        DataType::Signed
+    }
 }
 impl RustDataType for i128 {
-    fn data_type() -> DataType { DataType::Signed }
+    fn data_type() -> DataType {
+        DataType::Signed
+    }
 }
 impl RustDataType for isize {
-    fn data_type() -> DataType { DataType::Signed }
+    fn data_type() -> DataType {
+        DataType::Signed
+    }
 }
 
 pub trait ToSharedArray {
@@ -90,50 +116,52 @@ where
     }
 }
 
-pub fn to_shared_array_mut<'a, T, D>(arr: &'a mut ndarray::ArrayViewMut<T, D>) -> SharedArrayViewMut 
-where 
+pub fn to_shared_array_mut<'a, T, D>(arr: &'a mut ndarray::ArrayViewMut<T, D>) -> SharedArrayViewMut
+where
     D: ndarray::Dimension + 'a,
-    T: RustDataType
+    T: RustDataType,
 {
     let rank = arr.ndim();
-    let shape= arr.shape().as_ptr();
+    let shape = arr.shape().as_ptr();
     let data_ptr = arr.as_mut_ptr();
     // An ndarray is always on hostspace
     SharedArrayViewMut {
-        ptr: data_ptr as *mut c_void, 
-        size: size_of::<T>() as i32, 
-        data_type: T::data_type(), 
-        rank: rank as i32, 
-        shape, 
-        mem_space: MemSpace::HostSpace, 
+        ptr: data_ptr as *mut c_void,
+        size: size_of::<T>() as i32,
+        data_type: T::data_type(),
+        rank: rank as i32,
+        shape,
+        mem_space: MemSpace::HostSpace,
         layout: Layout::LayoutRight,
         is_mut: true,
     }
 }
 
-pub fn to_shared_array<'a,T, D>(arr: &'a ndarray::ArrayView<T, D>) -> SharedArrayView 
-where 
+pub fn to_shared_array<'a, T, D>(arr: &'a ndarray::ArrayView<T, D>) -> SharedArrayView
+where
     D: ndarray::Dimension + 'a,
-    T: RustDataType
+    T: RustDataType,
 {
     let rank = arr.ndim();
     let shape = arr.shape().as_ptr();
     let data_ptr = arr.as_ptr();
     // An ndarray is always on hostspace
     SharedArrayView {
-        ptr: data_ptr as *const c_void, 
-        size: size_of::<T>() as i32, 
-        data_type: T::data_type(), 
-        rank: rank as i32, 
-        shape, 
-        mem_space: MemSpace::HostSpace, 
+        ptr: data_ptr as *const c_void,
+        size: size_of::<T>() as i32,
+        data_type: T::data_type(),
+        rank: rank as i32,
+        shape,
+        mem_space: MemSpace::HostSpace,
         layout: Layout::LayoutRight,
         is_mut: false,
     }
 }
 
-pub fn from_shared(shared_array: SharedArrayView) -> ndarray::ArrayView<'static, f64, ndarray::IxDyn> {
-    if shared_array.mem_space != MemSpace::HostSpace{
+pub fn from_shared(
+    shared_array: SharedArrayView,
+) -> ndarray::ArrayView<'static, f64, ndarray::IxDyn> {
+    if shared_array.mem_space != MemSpace::HostSpace {
         panic!("Cannot cast from a sharedArrayView that is not on host space.");
     }
 
@@ -144,8 +172,10 @@ pub fn from_shared(shared_array: SharedArrayView) -> ndarray::ArrayView<'static,
     ArrayView::from_shape(IxDyn(shape), v).unwrap()
 }
 
-pub fn from_shared_mut(shared_array: SharedArrayViewMut) -> ndarray::ArrayViewMut<'static, f64, ndarray::IxDyn> {
-    if shared_array.mem_space != MemSpace::HostSpace{
+pub fn from_shared_mut(
+    shared_array: SharedArrayViewMut,
+) -> ndarray::ArrayViewMut<'static, f64, ndarray::IxDyn> {
+    if shared_array.mem_space != MemSpace::HostSpace {
         panic!("Cannot cast from a sharedArrayView that is not on host space.");
     }
 
@@ -155,7 +185,6 @@ pub fn from_shared_mut(shared_array: SharedArrayViewMut) -> ndarray::ArrayViewMu
 
     ArrayViewMut::from_shape(IxDyn(shape), v).unwrap()
 }
-
 
 pub fn free_shared_array<T>(ptr: *const T) {
     unsafe {

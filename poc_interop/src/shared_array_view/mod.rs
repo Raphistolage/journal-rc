@@ -1,8 +1,8 @@
 mod ffi;
-mod ops;
 pub mod handle;
+mod ops;
 mod types;
 
-pub use ops::*;
 pub use handle::*;
+pub use ops::*;
 pub use types::*;

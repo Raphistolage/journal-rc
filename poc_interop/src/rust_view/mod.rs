@@ -4,29 +4,31 @@ mod functions_ffi;
 mod layout;
 mod memory_space;
 mod ops;
+mod data_type;
 
 pub use dim::*;
-pub use ffi::OpaqueView;
 pub use layout::*;
 pub use memory_space::*;
+pub use ffi::OpaqueView;
 pub use ops::*;
+pub use data_type::*;
 
 use std::ops::Index;
-pub struct RustView<T: 'static, D: Dimension, M: MemorySpace, L: LayoutType>(
+pub struct RustView<'a, T, D: Dimension, M: MemorySpace, L: LayoutType>(
     OpaqueView,
     std::marker::PhantomData<D>,
     std::marker::PhantomData<M>,
     std::marker::PhantomData<L>,
-    std::marker::PhantomData<T>,
+    std::marker::PhantomData<&'a mut T>,
 );
 
-impl<T: 'static, D: Dimension, M: MemorySpace, L: LayoutType> RustView<T, D, M, L> {
-    pub fn from_shape<U: Into<D>>(shapes: U, v: &mut [T]) -> Self {
+impl<'a,T: RustViewDataType<'a,T>, D: Dimension, M: MemorySpace, L: LayoutType> RustView<'a, T, D, M, L> {
+    pub fn from_shape<U: Into<D>>(shapes: U, v: &'a mut [T]) -> Self {
         let mem_space = M::default();
         let layout = L::default();
         let shapes: D = shapes.into();
         Self(
-            create_opaque_view(shapes.into(), mem_space.to_space(), layout.to_layout(), v).unwrap(),
+            T::create_opaque_view(shapes.into(), mem_space.to_space(), layout.to_layout(), v),
             std::marker::PhantomData,
             std::marker::PhantomData,
             std::marker::PhantomData,
@@ -53,7 +55,7 @@ impl<T: 'static, D: Dimension, M: MemorySpace, L: LayoutType> RustView<T, D, M, 
     }
 }
 
-impl<D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]> for RustView<f64, D, M, L> {
+impl<'a, D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]> for RustView<'a, f64, D, M, L> {
     type Output = f64;
 
     fn index(&self, index: &[usize]) -> &Self::Output {
@@ -61,7 +63,7 @@ impl<D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]> for RustView<f
     }
 }
 
-impl<D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]> for RustView<f32, D, M, L> {
+impl<'a, D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]> for RustView<'a, f32, D, M, L> {
     type Output = f32;
 
     fn index(&self, index: &[usize]) -> &Self::Output {
@@ -69,7 +71,7 @@ impl<D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]> for RustView<f
     }
 }
 
-impl<D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]> for RustView<i32, D, M, L> {
+impl<'a, D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]> for RustView<'a, i32, D, M, L> {
     type Output = i32;
 
     fn index(&self, index: &[usize]) -> &Self::Output {

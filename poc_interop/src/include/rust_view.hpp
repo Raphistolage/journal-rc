@@ -13,6 +13,9 @@ namespace rust_view{
         virtual ~IView() = default;     
         virtual const void*  get(rust::slice<const size_t> i, bool is_host) = 0;
         virtual void* get_view() = 0;
+        virtual SharedArrayView view_to_shared() = 0;
+        virtual SharedArrayViewMut view_to_shared_mut() = 0;
+
     };
 }
 
@@ -101,6 +104,46 @@ namespace rust_view {
                     throw std::runtime_error("Bad indexing");
                 }
             }
+        }
+
+        SharedArrayView view_to_shared() override {
+            auto host_mirror = Kokkos::create_mirror_view(view);
+            int rank = view.rank();
+            size_t* shape = new size_t[rank];
+            for (int i = 0; i < rank; i++)
+            {
+                shape[i] = view.extent(i);
+            }
+            return SharedArrayView{
+                host_mirror.data(),
+                8,
+                DataType::Float,
+                rank,
+                shape,
+                MemSpace::HostSpace,
+                Layout::LayoutRight,
+                false,
+            };
+        }
+
+        SharedArrayViewMut view_to_shared_mut() override {
+            auto host_mirror = Kokkos::create_mirror_view(view);
+            int rank = view.rank();
+            size_t* shape = new size_t[rank];
+            for (int i = 0; i < rank; i++)
+            {
+                shape[i] = view.extent(i);
+            }
+            return SharedArrayViewMut{
+                host_mirror.data(),
+                8,
+                DataType::Float,
+                rank,
+                shape,
+                MemSpace::HostSpace,
+                Layout::LayoutRight,
+                true,
+            };
         }
     };
 

@@ -1,8 +1,10 @@
 #pragma once
 #include "rust_view.hpp"
 
+using rust_view::OpaqueView;
+
 namespace functions {
-    using rust_view::OpaqueView;
+
     using rust_view::MemSpace;
     using rust_view::IView;
     using rust_view::ViewHolder;
@@ -122,98 +124,6 @@ namespace functions {
 
                 }
                     break;
-                // case 4: {
-                //     switch (layout)
-                //     {
-                //     case LayoutRight:{
-                //         Kokkos::View<T****, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
-                //         Kokkos::View<T****, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::Unmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
-                //         Kokkos::deep_copy(owning_view, host_view);
-                //         view = std::make_unique<ViewHolder<Kokkos::View<T****, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-                //             owning_view);}
-                //         break;
-                //     case LayoutLeft:{
-                //         Kokkos::View<T****, Kokkos::LayoutLeft, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
-                //         Kokkos::View<T****, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::Unmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
-                //         Kokkos::deep_copy(owning_view, host_view);
-                //         view = std::make_unique<ViewHolder<Kokkos::View<T****, Kokkos::LayoutLeft, Kokkos::HostSpace>>>(
-                //             owning_view);}
-                //         break;
-                //     default:
-                //         break;
-                //     }
-
-                // }
-                //     break;
-                // case 5: {
-                //     switch (layout)
-                //     {
-                //     case LayoutRight:{
-                //         Kokkos::View<T*****, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
-                //         Kokkos::View<T*****, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::Unmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
-                //         Kokkos::deep_copy(owning_view, host_view);
-                //         view = std::make_unique<ViewHolder<Kokkos::View<T*****, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-                //             owning_view);}
-                //         break;
-                //     case LayoutLeft:{
-                //         Kokkos::View<T*****, Kokkos::LayoutLeft, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
-                //         Kokkos::View<T*****, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::Unmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
-                //         Kokkos::deep_copy(owning_view, host_view);
-                //         view = std::make_unique<ViewHolder<Kokkos::View<T*****, Kokkos::LayoutLeft, Kokkos::HostSpace>>>(
-                //             owning_view);}
-                //         break;
-                //     default:
-                //         break;
-                //     }
-
-                // }
-                //     break;
-        //         case 6: {
-        //             switch (layout)
-        //             {
-        //             case LayoutRight:{
-        //                 Kokkos::View<T******, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
-        //                 Kokkos::View<T******, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::Unmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
-        //                 Kokkos::deep_copy(owning_view, host_view);
-        //                 view = std::make_unique<ViewHolder<Kokkos::View<T******, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-        //                     owning_view);}
-        //                 break;
-        //             case LayoutLeft:{
-        //                 Kokkos::View<T******, Kokkos::LayoutLeft, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
-        //                 Kokkos::View<T******, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::Unmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
-        //                 Kokkos::deep_copy(owning_view, host_view);
-        //                 view = std::make_unique<ViewHolder<Kokkos::View<T******, Kokkos::LayoutLeft, Kokkos::HostSpace>>>(
-        //                     owning_view);}
-        //                 break;
-        //             default:
-        //                 break;
-        //             }
-
-        //         }
-        //             break;
-        //         case 7: {
-        //             switch (layout)
-        //             {
-        //             case LayoutRight:{
-        //                 Kokkos::View<T*******, Kokkos::LayoutRight, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
-        //                 Kokkos::View<T*******, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::Unmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
-        //                 Kokkos::deep_copy(owning_view, host_view);
-        //                 view = std::make_unique<ViewHolder<Kokkos::View<T*******, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
-        //                     owning_view);}
-        //                 break;
-        //             case LayoutLeft:{
-        //                 Kokkos::View<T*******, Kokkos::LayoutLeft, Kokkos::HostSpace> owning_view("owning_host_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
-        //                 Kokkos::View<T*******, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::Unmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
-        //                 Kokkos::deep_copy(owning_view, host_view);
-        //                 view = std::make_unique<ViewHolder<Kokkos::View<T*******, Kokkos::LayoutLeft, Kokkos::HostSpace>>>(
-        //                     owning_view);}
-        //                 break;
-        //             default:
-        //                 break;
-        //             }
-
-        //         }
-        //             break;
             }
             return OpaqueView {
                 std::move(view),
@@ -296,98 +206,6 @@ namespace functions {
 
                 }
                     break;
-                // case 4: {
-                //     switch (layout)
-                //     {
-                //     case LayoutRight:{
-                //         Kokkos::View<T****, Kokkos::LayoutRight, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
-                //         Kokkos::View<T****, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
-                //         Kokkos::deep_copy(device_view, host_view);
-                //         view = std::make_unique<ViewHolder<Kokkos::View<T****, Kokkos::LayoutRight, DeviceMemorySpace>>>(
-                //             device_view);}
-                //         break;
-                //     case LayoutLeft:{
-                //         Kokkos::View<T****, Kokkos::LayoutLeft, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
-                //         Kokkos::View<T****, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3]);
-                //         Kokkos::deep_copy(device_view, host_view);
-                //         view = std::make_unique<ViewHolder<Kokkos::View<T****, Kokkos::LayoutLeft, DeviceMemorySpace>>>(
-                //             device_view);}
-                //         break;
-                //     default:
-                //         break;
-                //     }
-
-                // }
-                //     break;
-                // case 5: {
-                //     switch (layout)
-                //     {
-                //     case LayoutRight:{
-                //         Kokkos::View<T*****, Kokkos::LayoutRight, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
-                //         Kokkos::View<T*****, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
-                //         Kokkos::deep_copy(device_view, host_view);
-                //         view = std::make_unique<ViewHolder<Kokkos::View<T*****, Kokkos::LayoutRight, DeviceMemorySpace>>>(
-                //             device_view);}
-                //         break;
-                //     case LayoutLeft:{
-                //         Kokkos::View<T*****, Kokkos::LayoutLeft, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
-                //         Kokkos::View<T*****, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4]);
-                //         Kokkos::deep_copy(device_view, host_view);
-                //         view = std::make_unique<ViewHolder<Kokkos::View<T*****, Kokkos::LayoutLeft, DeviceMemorySpace>>>(
-                //             device_view);}
-                //         break;
-                //     default:
-                //         break;
-                //     }
-
-                // }
-                //     break;
-        //         case 6: {
-        //             switch (layout)
-        //             {
-        //             case LayoutRight:{
-        //                 Kokkos::View<T******, Kokkos::LayoutRight, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
-        //                 Kokkos::View<T******, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
-        //                 Kokkos::deep_copy(device_view, host_view);
-        //                 view = std::make_unique<ViewHolder<Kokkos::View<T******, Kokkos::LayoutRight, DeviceMemorySpace>>>(
-        //                     device_view);}
-        //                 break;
-        //             case LayoutLeft:{
-        //                 Kokkos::View<T******, Kokkos::LayoutLeft, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
-        //                 Kokkos::View<T******, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
-        //                 Kokkos::deep_copy(device_view, host_view);
-        //                 view = std::make_unique<ViewHolder<Kokkos::View<T******, Kokkos::LayoutLeft, DeviceMemorySpace>>>(
-        //                     device_view);}
-        //                 break;
-        //             default:
-        //                 break;
-        //             }
-                
-        //         }
-        //             break;
-        //         case 7: {
-        //             switch (layout)
-        //             {
-        //             case LayoutRight:{
-        //                 Kokkos::View<T*******, Kokkos::LayoutRight, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
-        //                 Kokkos::View<T*******, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
-        //                 Kokkos::deep_copy(device_view, host_view);
-        //                 view = std::make_unique<ViewHolder<Kokkos::View<T*******, Kokkos::LayoutRight, DeviceMemorySpace>>>(
-        //                     device_view);}
-        //                 break;
-        //             case LayoutLeft:{
-        //                 Kokkos::View<T*******, Kokkos::LayoutLeft, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
-        //                 Kokkos::View<T*******, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5], dimensions[6]);
-        //                 Kokkos::deep_copy(device_view, host_view);
-        //                 view = std::make_unique<ViewHolder<Kokkos::View<T*******, Kokkos::LayoutLeft, DeviceMemorySpace>>>(
-        //                     device_view);}
-        //                 break;
-        //             default:
-        //                 break;
-        //             }
-                    
-        //         }
-        //             break;
             }
             
             return OpaqueView {
@@ -400,4 +218,9 @@ namespace functions {
             };
         }
     }
+}
+
+extern "C" {
+    SharedArrayView view_to_shared_c(const OpaqueView* opaqueView);
+    SharedArrayViewMut view_to_shared_mut_c(const OpaqueView* opaqueView);
 }
