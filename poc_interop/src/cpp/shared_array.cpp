@@ -7,7 +7,7 @@
 #include <utility>
 #include <cstdlib>
 
-#include "mdspan_interop.hpp"
+#include "shared_array.hpp"
 
 extern "C" {
     Errors deep_copy(SharedArrayViewMut& shared__arr1, const SharedArrayView& shared_arr2) {
@@ -101,39 +101,12 @@ extern "C" {
                 break;
             }
             break;
-        case DataType::Unsigned:
-            switch (shared__arr1.size)
-            {
-            case 1:
-                return templated_dot<uint8_t>(shared__arr1, shared_arr2);
-                break;
-            case 2:
-                return templated_dot<uint16_t>(shared__arr1, shared_arr2);
-                break;
-            case 4:
-                return templated_dot<uint32_t>(shared__arr1, shared_arr2);
-                break;
-            case 8:
-                return templated_dot<uint64_t>(shared__arr1, shared_arr2);
-            default:
-                throw std::runtime_error("Unsupported data type.");
-                break;
-            }
-            break;
         case DataType::Signed:
             switch (shared__arr1.size)
             {
-            case 1:
-                return templated_dot<int8_t>(shared__arr1, shared_arr2);
-                break;
-            case 2:
-                return templated_dot<int16_t>(shared__arr1, shared_arr2);
-                break;
             case 4:
                 return templated_dot<int32_t>(shared__arr1, shared_arr2);
                 break;
-            case 8:
-                return templated_dot<int64_t>(shared__arr1, shared_arr2);
             default:
                 throw std::runtime_error("Unsupported data type.");
                 break;
@@ -166,39 +139,12 @@ extern "C" {
                 break;
             }
             break;
-        case DataType::Unsigned:
-            switch (shared__arr1.size)
-            {
-            case 1:
-                return templated_matrix_vector_product<uint8_t>(shared__arr1, shared_arr2);
-                break;
-            case 2:
-                return templated_matrix_vector_product<uint16_t>(shared__arr1, shared_arr2);
-                break;
-            case 4:
-                return templated_matrix_vector_product<uint32_t>(shared__arr1, shared_arr2);
-                break;
-            case 8:
-                return templated_matrix_vector_product<uint64_t>(shared__arr1, shared_arr2);
-            default:
-                throw std::runtime_error("Unsupported data type.");
-                break;
-            }
-            break;
         case DataType::Signed:
             switch (shared__arr1.size)
             {
-            case 1:
-                return templated_matrix_vector_product<int8_t>(shared__arr1, shared_arr2);
-                break;
-            case 2:
-                return templated_matrix_vector_product<int16_t>(shared__arr1, shared_arr2);
-                break;
             case 4:
                 return templated_matrix_vector_product<int32_t>(shared__arr1, shared_arr2);
                 break;
-            case 8:
-                return templated_matrix_vector_product<int64_t>(shared__arr1, shared_arr2);
             default:
                 throw std::runtime_error("Unsupported data type.");
                 break;
@@ -232,39 +178,12 @@ extern "C" {
                 break;
             }
             break;
-        case DataType::Unsigned:
-            switch (shared__arr1.size)
-            {
-            case 1:
-                return templated_matrix_product<uint8_t>(shared__arr1, shared_arr2);
-                break;
-            case 2:
-                return templated_matrix_product<uint16_t>(shared__arr1, shared_arr2);
-                break;
-            case 4:
-                return templated_matrix_product<uint32_t>(shared__arr1, shared_arr2);
-                break;
-            case 8:
-                return templated_matrix_product<uint64_t>(shared__arr1, shared_arr2);
-            default:
-                throw std::runtime_error("Unsupported data type.");
-                break;
-            }
-            break;
         case DataType::Signed:
             switch (shared__arr1.size)
             {
-            case 1:
-                return templated_matrix_product<int8_t>(shared__arr1, shared_arr2);
-                break;
-            case 2:
-                return templated_matrix_product<int16_t>(shared__arr1, shared_arr2);
-                break;
             case 4:
                 return templated_matrix_product<int32_t>(shared__arr1, shared_arr2);
                 break;
-            case 8:
-                return templated_matrix_product<int64_t>(shared__arr1, shared_arr2);
             default:
                 throw std::runtime_error("Unsupported data type.");
                 break;

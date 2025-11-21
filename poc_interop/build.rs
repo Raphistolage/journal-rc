@@ -26,7 +26,7 @@ fn main() {
 
     cc::Build::new()
         .cpp(true)
-        .file("src/cpp/mdspan_interop.cpp")
+        .file("src/cpp/shared_array.cpp")
         .include("src/include")
         .include(kokkos_include)
         .compiler("g++")
@@ -34,7 +34,7 @@ fn main() {
         .flag_if_supported("-fPIC")
         .flag_if_supported("-O3")
         .flag_if_supported("-fopenmp") // Enable OpenMP
-        .compile("mdspan_interop");
+        .compile("shared_array");
 
     println!("cargo:rustc-link-search=native={}", kokkos_lib);
 
@@ -50,6 +50,6 @@ fn main() {
     println!("cargo:rerun-if-changed=src/include/rust_view.hpp");
     println!("cargp:rerun-if-changed=src/include/view_wrapper.hpp");
     println!("cargo:rerun-if-changed=src/cpp/view_wrapper.cpp");
-    println!("cargp:rerun-if-changed=src/include/mdspan_interop.hpp");
-    println!("cargo:rerun-if-changed=src/cpp/mdspan_interop.cpp");
+    println!("cargp:rerun-if-changed=src/include/shared_array.hpp");
+    println!("cargo:rerun-if-changed=src/cpp/shared_array.cpp");
 }
