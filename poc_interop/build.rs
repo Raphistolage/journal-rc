@@ -7,7 +7,6 @@ fn main() {
 
     cxx_build::bridge("src/rust_view/ffi.rs")
         .file("src/cpp/rust_view.cpp")
-        // .file("src/cpp/functions.cpp")
         .include("src/include")
         .include(kokkos_include)
         .flag_if_supported("-std=c++20")

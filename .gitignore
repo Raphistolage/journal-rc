@@ -5,3 +5,5 @@ templated_macro/Cargo.lock
 poc_interop/Cargo.lock
 poc_interop/errormsg.txt
 test_rust_view
+cmake_rust/build
+Cargo.lock
