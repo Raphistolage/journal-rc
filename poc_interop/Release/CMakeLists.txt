@@ -1,10 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(cxxKokkoslib CXX)
 
-find_package(Kokkos REQUIRED PATHS /home/clissonr/Documents/StageCEA/journal-rc/kokkos-install NO_DEFAULT_PATH) # On va chercher l'installation locale.
-
-
-
+find_package(Kokkos REQUIRED PATHS ../../kokkos-install NO_DEFAULT_PATH) # On va chercher l'installation locale.
 
 # RustView : 
 add_library(rustView SHARED ../src/cpp/rust_view.cpp ../target/cxxbridge/poc_interop/src/rust_view/ffi.rs.cc)
