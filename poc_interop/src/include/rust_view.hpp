@@ -1,5 +1,5 @@
 #pragma once
-#include "rust/cxx.h"
+#include "cxx.h"
 #include <Kokkos_Core.hpp>
 #include <string>
 #include <iostream>
@@ -19,7 +19,7 @@ namespace rust_view{
     };
 }
 
-#include "poc_interop/src/rust_view/ffi.rs.h"
+#include "ffi.rs.h"
 
 namespace rust_view {
     template <typename ViewType>

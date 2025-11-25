@@ -134,7 +134,7 @@ pub mod tests {
     }
 
     pub fn performance_test() {
-        let n = 1;
+        let n = 5_000_000;
 
         let start = Instant::now();
         for _ in 0..n {

@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 project(cxxKokkoslib CXX)
 
-find_package(Kokkos REQUIRED PATHS /home/clissonr/Documents/StageCEA/cmake_rust/kokkos-install NO_DEFAULT_PATH)
+find_package(Kokkos REQUIRED PATHS /home/clissonr/Documents/StageCEA/cmake_rust/kokkos-install NO_DEFAULT_PATH) # On va chercher l'installation locale.
 
-# find_package(OpenMP)
+# find_package(gomp)
 
 add_library(cxxKokkoslib SHARED src/cpp/functions.cpp target/cxxbridge/cmake_rust/src/ffi.rs.cc)
 

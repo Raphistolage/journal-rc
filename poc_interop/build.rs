@@ -1,45 +1,23 @@
+
+use cmake::Config;
 fn main() {
-    let kokkos_include = "./../kokkos-install/include";
-    #[cfg(feature = "lib64")]
-    let kokkos_lib = "./../kokkos-install/lib64";
-    #[cfg(feature = "lib")]
-    let kokkos_lib = "./../kokkos-install/lib";
+    let _ = cxx_build::bridge("src/rust_view/ffi.rs");
 
-    cxx_build::bridge("src/rust_view/ffi.rs")
-        .file("src/cpp/rust_view.cpp")
-        .include("src/include")
-        .include(kokkos_include)
-        .flag_if_supported("-std=c++20")
-        .flag_if_supported("-O3")
-        .flag_if_supported("-fopenmp") // Enable OpenMP
-        .compile("rust_view");
+    let _ = templated_parser::bridge("src/rust_view/functions_ffi.rs");
 
-    templated_parser::bridge("src/rust_view/functions_ffi.rs")
-        .file("src/cpp/functions.cpp")
-        .include(kokkos_include)
-        .flag_if_supported("-std=c++20")
-        .flag_if_supported("-O3")
-        .flag_if_supported("-fopenmp") // Enable OpenMP
-        .include("src/include")
-        .compile("functions");
+    let dst = Config::new("Release")
+        .configure_arg("-DCMAKE_BUILD_TYPE=Release")
+        // .configure_arg(format!("-DCARGO_TARGET_DIR={}", std::env::var("CARGO_BUILD_TARGET_DIR").expect("CARGO_BUILD_TARGET_DIR not defined")))
+        .configure_arg(format!("-DOUT_DIR={}", std::env::var("OUT_DIR").expect("out_dir not defined")))
+        .build();
 
-    cc::Build::new()
-        .cpp(true)
-        .file("src/cpp/shared_array.cpp")
-        .include("src/include")
-        .include(kokkos_include)
-        .compiler("g++")
-        .flag_if_supported("-std=c++20")
-        .flag_if_supported("-fPIC")
-        .flag_if_supported("-O3")
-        .flag_if_supported("-fopenmp") // Enable OpenMP
-        .compile("shared_array");
+    println!("cargo:rustc-link-search=native={}", dst.display());
+    println!("cargo:rustc-link-lib=functionsFfi");
+    println!("cargo:rustc-link-lib=rustView");
+    println!("cargo:rustc-link-lib=sharedArrayView");
+    println!("cargo:rustc-link-arg=-Wl,-rpath={}", dst.display());
 
-    println!("cargo:rustc-link-search=native={}", kokkos_lib);
-
-    // Link libraries
-    println!("cargo:rustc-link-lib=kokkoscore");
-    println!("cargo:rustc-link-lib=gomp");
+    println!("cargo:warning=Dst display : {}", dst.display());
 
     // Only rerun build script when these files change
     println!("cargo:rerun-if-changed=src/lib.rs");

@@ -14,7 +14,7 @@ pub use ops::*;
 pub use data_type::*;
 
 use std::ops::Index;
-pub struct RustView<'a, T, D: Dimension, M: MemorySpace, L: LayoutType>(
+pub struct RustView<'a, T: RustViewDataType<'a,T>, D: Dimension, M: MemorySpace, L: LayoutType>(
     OpaqueView,
     std::marker::PhantomData<D>,
     std::marker::PhantomData<M>,
