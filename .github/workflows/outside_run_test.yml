@@ -1,4 +1,4 @@
-name: Tests
+name: Outside Run Test
 
 on:
   push:
@@ -19,8 +19,8 @@ jobs:
     - name: Kokkos installation
       run: bash kokkos-install.sh
     - name: Build
-      working-directory: ./poc_interop
+      working-directory: ./test_poc_interop
       run: cargo build --verbose
-    - name: Run tests
-      working-directory: ./poc_interop
-      run: cargo test --verbose
+    - name: Run extern proj using poc_interop
+      working-directory: ./test_poc_interop
+      run: cargo run --verbose

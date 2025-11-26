@@ -5,6 +5,3 @@ edition = "2024"
 
 [dependencies]
 poc_interop = {path = "../poc_interop/." }
-templated_macro = { path = "../templated_macro/." }
-
-

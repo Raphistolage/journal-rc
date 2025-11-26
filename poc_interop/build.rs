@@ -4,7 +4,7 @@ fn main() {
 
     let _ = templated_parser::bridge("src/rust_view/functions_ffi.rs");
 
-    let kokkos_root = "/home/raphael/Documents/StageCEA/journal-rc/kokkos-install";
+    // let kokkos_root = "/home/raphael/Documents/StageCEA/journal-rc/kokkos-install";
 
     let dst = Config::new("Release")
         .configure_arg("-DCMAKE_BUILD_TYPE=Release")
@@ -16,7 +16,7 @@ fn main() {
             "-DPKG_NAME={}",
             std::env::var("CARGO_PKG_NAME").expect("PKG_NAME is not defined")
         ))
-        .configure_arg(format!("-DKokkos_ROOT={}", kokkos_root))
+        // .configure_arg(format!("-DKokkos_ROOT={}", kokkos_root))
         .build();
 
     println!("cargo:rustc-link-search=native={}", dst.display());
