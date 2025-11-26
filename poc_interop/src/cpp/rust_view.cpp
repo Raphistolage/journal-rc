@@ -10,6 +10,8 @@ namespace rust_view {
         if (!Kokkos::is_initialized()) {
             Kokkos::initialize();
             std::cout << "Kokkos initialized successfully!" << std::endl;
+            std::cout << "Execution space: " << typeid(Kokkos::DefaultExecutionSpace).name() << "\n";
+            std::cout << "Concurrency = " << Kokkos::DefaultExecutionSpace().concurrency() << "\n";
         } else {
             std::cout << "Kokkos is already initialized." << std::endl;
         }
