@@ -3,11 +3,11 @@ use crate::rust_view::dim::{Dim1, Dim2};
 use crate::rust_view::{DeviceSpace, HostSpace, LayoutRight, LayoutType, RustView, data_type};
 
 pub fn kokkos_initialize() {
-        ffi::kokkos_initialize();
+    ffi::kokkos_initialize();
 }
 
 pub fn kokkos_finalize() {
-        ffi::kokkos_finalize();
+    ffi::kokkos_finalize();
 }
 
 pub fn y_ax(
@@ -29,7 +29,10 @@ pub fn y_ax_device<L1: LayoutType, L2: LayoutType, L3: LayoutType>(
 pub fn dot<'a, T>(
     x: &'a RustView<'a, T, Dim1, HostSpace, LayoutRight>,
     y: &'a RustView<'a, T, Dim1, HostSpace, LayoutRight>,
-) -> T where T: data_type::RustViewDataType<'a, T>{
+) -> T
+where
+    T: data_type::RustViewDataType<'a, T>,
+{
     T::dot(x.get(), y.get())
 }
 
@@ -53,13 +56,12 @@ pub fn matrix_product_op<'a, L1: LayoutType, L2: LayoutType>(
 //     unsafe {ffi::mutable_matrix_product(&shared_arr1, &shared_arr2, &shared_arr3)};
 // }
 
-
 #[cfg(test)]
 pub mod tests {
     use std::time::Instant;
 
     use super::*;
-    
+
     #[test]
     #[ignore = "Will crash"]
     pub fn out_of_scope_indexing_test() {
@@ -67,7 +69,8 @@ pub mod tests {
         {
             let mut data1 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
 
-            let view1 = RustView::<'_, f64, Dim1, HostSpace, LayoutRight>::from_shape(&[5], &mut data1);
+            let view1 =
+                RustView::<'_, f64, Dim1, HostSpace, LayoutRight>::from_shape(&[5], &mut data1);
 
             assert_eq!(ffi::get_f64(view1.get(), &[6]), &7.0_f64);
         }
@@ -77,7 +80,8 @@ pub mod tests {
     pub fn create_various_type_test() {
         let mut data1 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
 
-        let view1 = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[5], &mut data1);
+        let view1 =
+            RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[5], &mut data1);
 
         assert_eq!(ffi::get_f64(view1.get(), &[2]), &3.0_f64);
 
@@ -92,7 +96,8 @@ pub mod tests {
         let y = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[5], &mut data1);
 
         let mut data2 = [3.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
-        let a = RustView::<'_, f64, Dim2, DeviceSpace, LayoutRight>::from_shape(&[5, 2], &mut data2);
+        let a =
+            RustView::<'_, f64, Dim2, DeviceSpace, LayoutRight>::from_shape(&[5, 2], &mut data2);
 
         let mut data3 = [4.0, 2.0];
         let x = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[2], &mut data3);
@@ -116,10 +121,12 @@ pub mod tests {
 
     pub fn matrix_product_test() {
         let mut data1 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
-        let mat1 = RustView::<'_, f64, Dim2, HostSpace, LayoutRight>::from_shape(&[2, 3], &mut data1);
+        let mat1 =
+            RustView::<'_, f64, Dim2, HostSpace, LayoutRight>::from_shape(&[2, 3], &mut data1);
 
         let mut data2 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
-        let mat2 = RustView::<'_, f64, Dim2, HostSpace, LayoutRight>::from_shape(&[3, 2], &mut data2);
+        let mat2 =
+            RustView::<'_, f64, Dim2, HostSpace, LayoutRight>::from_shape(&[3, 2], &mut data2);
 
         let mut data3 = [0.0, 0.0, 0.0, 0.0];
         let mut mat3 =

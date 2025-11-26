@@ -1,14 +1,27 @@
 use std::fmt::Debug;
 
-use crate::{Layout, MemSpace, rust_view::{OpaqueView, ffi}};
+use crate::{
+    Layout, MemSpace,
+    rust_view::{OpaqueView, ffi},
+};
 
 pub trait RustViewDataType<'a, T>: Debug {
-    fn create_opaque_view(dimensions: Vec<usize>, mem_space: MemSpace, layout: Layout, data: &'a mut [T]) -> OpaqueView;
+    fn create_opaque_view(
+        dimensions: Vec<usize>,
+        mem_space: MemSpace,
+        layout: Layout,
+        data: &'a mut [T],
+    ) -> OpaqueView;
     fn dot(x: &OpaqueView, y: &OpaqueView) -> T;
 }
 
 impl<'a> RustViewDataType<'a, f64> for f64 {
-    fn create_opaque_view(dimensions: Vec<usize>, mem_space: MemSpace, layout: Layout, data: &'a mut [f64]) -> OpaqueView {
+    fn create_opaque_view(
+        dimensions: Vec<usize>,
+        mem_space: MemSpace,
+        layout: Layout,
+        data: &'a mut [f64],
+    ) -> OpaqueView {
         ffi::create_view_f64(dimensions, mem_space.into(), layout.into(), data)
     }
     fn dot(x: &OpaqueView, y: &OpaqueView) -> f64 {
@@ -17,7 +30,12 @@ impl<'a> RustViewDataType<'a, f64> for f64 {
 }
 
 impl<'a> RustViewDataType<'a, f32> for f32 {
-    fn create_opaque_view(dimensions: Vec<usize>, mem_space: MemSpace, layout: Layout, data: &'a mut [f32]) -> OpaqueView {
+    fn create_opaque_view(
+        dimensions: Vec<usize>,
+        mem_space: MemSpace,
+        layout: Layout,
+        data: &'a mut [f32],
+    ) -> OpaqueView {
         ffi::create_view_f32(dimensions, mem_space.into(), layout.into(), data)
     }
     fn dot(x: &OpaqueView, y: &OpaqueView) -> f32 {
@@ -26,7 +44,12 @@ impl<'a> RustViewDataType<'a, f32> for f32 {
 }
 
 impl<'a> RustViewDataType<'a, i32> for i32 {
-    fn create_opaque_view(dimensions: Vec<usize>, mem_space: MemSpace, layout: Layout, data: &'a mut [i32]) -> OpaqueView {
+    fn create_opaque_view(
+        dimensions: Vec<usize>,
+        mem_space: MemSpace,
+        layout: Layout,
+        data: &'a mut [i32],
+    ) -> OpaqueView {
         ffi::create_view_i32(dimensions, mem_space.into(), layout.into(), data)
     }
     fn dot(x: &OpaqueView, y: &OpaqueView) -> i32 {

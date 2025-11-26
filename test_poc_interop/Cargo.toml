@@ -1,0 +1,10 @@
+[package]
+name = "test_poc_interop"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+poc_interop = {path = "../poc_interop/." }
+templated_macro = { path = "../templated_macro/." }
+
+

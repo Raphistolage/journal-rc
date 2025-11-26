@@ -1,9 +1,7 @@
 use templated_macro::templated;
-use templated_macro::variants;
 
-#[templated(f64,f32,i32)]
-mod test_ffi{
-    #[variants(f64, f32, i32, i64)]
+#[templated(f64, f32, i32)]
+mod test_ffi {
     fn dot(x: &OpaqueView, y: &OpaqueView) -> T {
         unimplemented!();
     }
@@ -21,5 +19,3 @@ mod test_ffi{
         unimplemented!();
     }
 }
-
-

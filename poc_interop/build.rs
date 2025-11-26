@@ -1,28 +1,29 @@
-
 use cmake::Config;
 fn main() {
     let _ = cxx_build::bridge("src/rust_view/ffi.rs");
 
-    let out_dir = std::env::var_os("OUT_DIR").expect("out_dir not defined");
-
-
     let _ = templated_parser::bridge("src/rust_view/functions_ffi.rs");
+
+    let kokkos_root = "/home/raphael/Documents/StageCEA/journal-rc/kokkos-install";
 
     let dst = Config::new("Release")
         .configure_arg("-DCMAKE_BUILD_TYPE=Release")
-        .configure_arg(format!("-DOUT_DIR={}", std::env::var("OUT_DIR").expect("out_dir not defined")))
-        .configure_arg(format!("-DPKG_NAME={}", std::env::var("CARGO_PKG_NAME").expect("PKG_NAME is not defined")))
+        .configure_arg(format!(
+            "-DOUT_DIR={}",
+            std::env::var("OUT_DIR").expect("out_dir not defined")
+        ))
+        .configure_arg(format!(
+            "-DPKG_NAME={}",
+            std::env::var("CARGO_PKG_NAME").expect("PKG_NAME is not defined")
+        ))
+        .configure_arg(format!("-DKokkos_ROOT={}", kokkos_root))
         .build();
-
-    println!("cargo:warning=Out dir is : {}", std::env::var("OUT_DIR").expect("out_dir not defined"));
 
     println!("cargo:rustc-link-search=native={}", dst.display());
     println!("cargo:rustc-link-lib=functionsFfi");
     println!("cargo:rustc-link-lib=rustView");
     println!("cargo:rustc-link-lib=sharedArrayView");
     println!("cargo:rustc-link-arg=-Wl,-rpath={}", dst.display());
-
-    println!("cargo:warning=Dst display : {}", dst.display());
 
     // Only rerun build script when these files change
     println!("cargo:rerun-if-changed=src/lib.rs");

@@ -90,7 +90,6 @@ pub fn bridge(rust_source_file: impl AsRef<Path>) -> cc::Build {
 
                 let mut export_string = format!("pub use {}_ffi::{{", module.ident.to_string());
 
-            
                 if let Some(content) =  module.content{
                     for mod_item in content.1 {
                         if let Item::Fn(item_fn) = mod_item {
