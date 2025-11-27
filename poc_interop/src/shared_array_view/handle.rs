@@ -21,77 +21,21 @@ impl RustDataType for f64 {
         DataType::Float
     }
 }
-
-impl RustDataType for u8 {
-    fn data_type() -> DataType {
-        DataType::Unsigned
-    }
-}
-impl RustDataType for u16 {
-    fn data_type() -> DataType {
-        DataType::Unsigned
-    }
-}
-impl RustDataType for u32 {
-    fn data_type() -> DataType {
-        DataType::Unsigned
-    }
-}
-impl RustDataType for u64 {
-    fn data_type() -> DataType {
-        DataType::Unsigned
-    }
-}
-impl RustDataType for u128 {
-    fn data_type() -> DataType {
-        DataType::Unsigned
-    }
-}
-impl RustDataType for usize {
-    fn data_type() -> DataType {
-        DataType::Unsigned
-    }
-}
-
-impl RustDataType for i8 {
-    fn data_type() -> DataType {
-        DataType::Signed
-    }
-}
-impl RustDataType for i16 {
-    fn data_type() -> DataType {
-        DataType::Signed
-    }
-}
 impl RustDataType for i32 {
     fn data_type() -> DataType {
         DataType::Signed
     }
 }
-impl RustDataType for i64 {
-    fn data_type() -> DataType {
-        DataType::Signed
-    }
-}
-impl RustDataType for i128 {
-    fn data_type() -> DataType {
-        DataType::Signed
-    }
-}
-impl RustDataType for isize {
-    fn data_type() -> DataType {
-        DataType::Signed
-    }
-}
+
 
 pub trait ToSharedArray {
     type Dim: ndarray::Dimension;
-    fn to_shared_array(&self) -> SharedArrayView;
+    fn to_shared_array(&self, mem_space: MemSpace) -> SharedArrayView;
 }
 
 pub trait ToSharedArrayMut {
     type Dim: ndarray::Dimension;
-    fn to_shared_array_mut(&mut self) -> SharedArrayViewMut;
+    fn to_shared_array_mut(&mut self, mem_space: MemSpace) -> SharedArrayViewMut;
 }
 
 impl<'a, D> ToSharedArray for ndarray::ArrayView<'a, f64, D>
@@ -100,8 +44,8 @@ where
     // T: RustDataType,     TODO : utiliser ca pour passer en generic.
 {
     type Dim = D;
-    fn to_shared_array(&self) -> SharedArrayView {
-        to_shared_array(self)
+    fn to_shared_array(&self, mem_space: MemSpace) -> SharedArrayView {
+        to_shared_array(self, mem_space)
     }
 }
 
@@ -111,12 +55,12 @@ where
     // T: RustDataType,     TODO : utiliser ca pour passer en generic.
 {
     type Dim = D;
-    fn to_shared_array_mut(&mut self) -> SharedArrayViewMut {
-        to_shared_array_mut(self)
+    fn to_shared_array_mut(&mut self, mem_space: MemSpace) -> SharedArrayViewMut {
+        to_shared_array_mut(self, mem_space)
     }
 }
 
-pub fn to_shared_array_mut<'a, T, D>(arr: &'a mut ndarray::ArrayViewMut<T, D>) -> SharedArrayViewMut
+pub fn to_shared_array_mut<'a, T, D>(arr: &'a mut ndarray::ArrayViewMut<T, D>, mem_space: MemSpace) -> SharedArrayViewMut
 where
     D: ndarray::Dimension + 'a,
     T: RustDataType,
@@ -124,20 +68,35 @@ where
     let rank = arr.ndim();
     let shape = arr.shape().as_ptr();
     let data_ptr = arr.as_mut_ptr();
-    // An ndarray is always on hostspace
-    SharedArrayViewMut {
+    let shared_arr = SharedArrayViewMut {
         ptr: data_ptr as *mut c_void,
         size: size_of::<T>() as i32,
         data_type: T::data_type(),
         rank: rank as i32,
         shape,
-        mem_space: MemSpace::HostSpace,
+        mem_space: mem_space,
         layout: Layout::LayoutRight,
         is_mut: true,
+    };
+    if mem_space == MemSpace::HostSpace {
+        shared_arr
+    } else {
+        let data_ptr = unsafe{ffi::get_device_ptr_mut(&shared_arr)};
+        SharedArrayViewMut {
+            ptr: data_ptr,
+            size: size_of::<T>() as i32,
+            data_type: T::data_type(),
+            rank: rank as i32,
+            shape,
+            mem_space: mem_space,
+            layout: Layout::LayoutRight,
+            is_mut: true,
+        }
     }
+
 }
 
-pub fn to_shared_array<'a, T, D>(arr: &'a ndarray::ArrayView<T, D>) -> SharedArrayView
+pub fn to_shared_array<'a, T, D>(arr: &'a ndarray::ArrayView<T, D>, mem_space: MemSpace) -> SharedArrayView
 where
     D: ndarray::Dimension + 'a,
     T: RustDataType,
@@ -145,17 +104,32 @@ where
     let rank = arr.ndim();
     let shape = arr.shape().as_ptr();
     let data_ptr = arr.as_ptr();
-    // An ndarray is always on hostspace
-    SharedArrayView {
+    let shared_arr = SharedArrayView {
         ptr: data_ptr as *const c_void,
         size: size_of::<T>() as i32,
         data_type: T::data_type(),
         rank: rank as i32,
         shape,
-        mem_space: MemSpace::HostSpace,
+        mem_space: mem_space,
         layout: Layout::LayoutRight,
         is_mut: false,
+    };
+    if mem_space == MemSpace::HostSpace {
+        shared_arr
+    } else {
+        let data_ptr = unsafe {ffi::get_device_ptr(&shared_arr)};
+        SharedArrayView {
+            ptr: data_ptr,
+            size: size_of::<T>() as i32,
+            data_type: T::data_type(),
+            rank: rank as i32,
+            shape,
+            mem_space: mem_space,
+            layout: Layout::LayoutRight,
+            is_mut: false,
+        }
     }
+    
 }
 
 pub fn from_shared(

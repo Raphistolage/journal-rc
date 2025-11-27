@@ -7,6 +7,8 @@ unsafe extern "C" {
         shared_arr1: &mut SharedArrayViewMut,
         shared_arr2: &SharedArrayView,
     ) -> Errors;
+    pub unsafe fn get_device_ptr(shared_arr: &SharedArrayView) -> *const c_void;
+    pub unsafe fn get_device_ptr_mut(shared_arr: &SharedArrayViewMut) -> *mut c_void;
     pub unsafe fn dot(
         shared_arr1: &SharedArrayView,
         shared_arr2: &SharedArrayView,

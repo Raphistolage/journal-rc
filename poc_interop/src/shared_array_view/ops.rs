@@ -9,8 +9,8 @@ where
     T: ToSharedArray,
     U: ToSharedArrayMut,
 {
-    let mut shared_arr1 = arr1.to_shared_array_mut();
-    let shared_arr2 = arr2.to_shared_array();
+    let mut shared_arr1 = arr1.to_shared_array_mut(MemSpace::HostSpace);
+    let shared_arr2 = arr2.to_shared_array(MemSpace::HostSpace);
     let result = unsafe { ffi::deep_copy(&mut shared_arr1, &shared_arr2) };
     if result == Errors::NoErrors {
         Ok(())
@@ -25,8 +25,8 @@ pub fn dot<T>(arr1: &T, arr2: &T) -> ArrayBase<ViewRepr<&'static f64>, Dim<IxDyn
 where
     T: ToSharedArray,
 {
-    let shared_arr1 = arr1.to_shared_array();
-    let shared_arr2 = arr2.to_shared_array();
+    let shared_arr1 = arr1.to_shared_array(MemSpace::HostSpace);
+    let shared_arr2 = arr2.to_shared_array(MemSpace::HostSpace);
 
     from_shared(unsafe { ffi::dot(&shared_arr1, &shared_arr2) })
 }
@@ -39,8 +39,8 @@ where
     T: ToSharedArray<Dim = ndarray::Ix2>,
     U: ToSharedArray<Dim = ndarray::Ix1>,
 {
-    let shared_arr1 = arr1.to_shared_array();
-    let shared_arr2 = arr2.to_shared_array();
+    let shared_arr1 = arr1.to_shared_array(MemSpace::HostSpace);
+    let shared_arr2 = arr2.to_shared_array(MemSpace::HostSpace);
 
     from_shared(unsafe { ffi::matrix_vector_product(&shared_arr1, &shared_arr2) })
 }
@@ -49,12 +49,9 @@ pub fn matrix_product<T>(arr1: &T, arr2: &T) -> ArrayBase<ViewRepr<&'static f64>
 where
     T: ToSharedArray<Dim = ndarray::Ix2>,
 {
-    let mut shared_arr1 = arr1.to_shared_array();
-    let mut shared_arr2 = arr2.to_shared_array();
+    let shared_arr1 = arr1.to_shared_array(MemSpace::DeviceSpace);
+    let shared_arr2 = arr2.to_shared_array(MemSpace::DeviceSpace);
 
-    // On veut sur Device
-    shared_arr1.mem_space = MemSpace::DeviceSpace;
-    shared_arr2.mem_space = MemSpace::DeviceSpace;
 
     let shared_result = unsafe { ffi::matrix_product(&shared_arr1, &shared_arr2) };
 
@@ -66,15 +63,15 @@ where
     T: ToSharedArray<Dim = ndarray::Ix2>,
     U: ToSharedArrayMut<Dim = ndarray::Ix2>,
 {
-    let shared_arr1 = arr1.to_shared_array_mut();
-    let shared_arr2 = arr2.to_shared_array();
-    let shared_arr3 = arr3.to_shared_array();
+    let shared_arr1 = arr1.to_shared_array_mut(MemSpace::HostSpace);
+    let shared_arr2 = arr2.to_shared_array(MemSpace::HostSpace);
+    let shared_arr3 = arr3.to_shared_array(MemSpace::HostSpace);
 
     unsafe { ffi::mutable_matrix_product(&shared_arr1, &shared_arr2, &shared_arr3) };
 }
 
 pub fn bad_modifier(arr: &impl ToSharedArray<Dim = ndarray::Ix2>) {
-    let shared_arr = arr.to_shared_array();
+    let shared_arr = arr.to_shared_array(MemSpace::HostSpace);
 
     unsafe {
         ffi::bad_modifier(&shared_arr);

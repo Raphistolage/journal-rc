@@ -80,6 +80,44 @@ extern "C" {
         return Errors::NoErrors;
     }
 
+    const void* get_device_ptr(const SharedArrayView &shared_arr) {
+        const size_t* shape = shared_arr.shape;
+
+        int size = 1;
+        for (size_t i = 0; i < shared_arr.rank; i++)
+        {
+            size *= shape[i];
+        }
+
+        const uint8_t* typed_ptr = static_cast<const uint8_t*>(shared_arr.ptr);
+        Kokkos::View<const uint8_t*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(typed_ptr, size*shared_arr.size);
+
+        uint8_t* device_ptr = static_cast<uint8_t*>(Kokkos::kokkos_malloc(size*shared_arr.size));
+        Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, size*shared_arr.size);
+        
+        Kokkos::deep_copy(device_view, host_view);
+        return device_view.data();
+    }
+
+    void* get_device_ptr_mut(const SharedArrayViewMut &shared_arr) {
+        const size_t* shape = shared_arr.shape;
+
+        int size = 1;
+        for (size_t i = 0; i < shared_arr.rank; i++)
+        {
+            size *= shape[i];
+        }
+        
+        uint8_t* typed_ptr = static_cast<uint8_t*>(shared_arr.ptr);
+        Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(typed_ptr, size*shared_arr.size);
+
+        uint8_t* device_ptr = static_cast<uint8_t*>(Kokkos::kokkos_malloc(size*shared_arr.size));
+        Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, size*shared_arr.size);
+
+        Kokkos::deep_copy(device_view, host_view);
+        return device_view.data();
+    }
+
     SharedArrayView dot(const SharedArrayView &shared__arr1, const SharedArrayView &shared_arr2) {
         if (shared__arr1.size != shared_arr2.size || shared__arr1.data_type != shared_arr2.data_type)
         {
@@ -204,11 +242,12 @@ extern "C" {
         }
 
         if (shared__arr1.mem_space == shared_arr2.mem_space && shared_arr2.mem_space == shared_arr3.mem_space && shared__arr1.mem_space == MemSpace::HostSpace) {
+            std::cout << "Mutable matrix product \n";
             auto mat1 = mdspan_from_shared_mut<2, double>(shared__arr1);
             auto mat2 = mdspan_from_shared<2, double>(shared_arr2);
             auto mat3 = mdspan_from_shared<2, double>(shared_arr2);
 
-            Kokkos::parallel_for("host_matrix_product", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0,0}, {mat2.extent(0), mat3.extent(1)}), KOKKOS_LAMBDA (const int i, const int j) {
+            Kokkos::parallel_for("mutable_host_matrix_product", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0,0}, {mat2.extent(0), mat3.extent(1)}), KOKKOS_LAMBDA (const int i, const int j) {
                     double r = 0;
                     for (size_t k = 0; k < mat1.extent(1); k++)
                     {
@@ -217,6 +256,8 @@ extern "C" {
                     mat1(i,j) = r;
                 }
             ); 
+        } else {
+            throw std::runtime_error("Can only mutate rust data on host.");
         }
     }
 
