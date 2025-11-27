@@ -73,7 +73,7 @@ namespace rust_view {
                 }
             } else {
 
-                auto host_view = Kokkos::create_mirror_view(view);
+                auto host_view = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(),view);
                 if (i.size() != host_view.rank()) {
                     throw std::runtime_error("Bad indexing");
                 }
@@ -89,6 +89,11 @@ namespace rust_view {
                 if constexpr (ViewType::rank() == 1) {
                     return &host_view(i[0]);
                 } else if constexpr (ViewType::rank() == 2) {
+                    // if constexpr (std::is_same<typename decltype(this.view)::value_type, int>::value) {
+                    //     Kokkos::parallel_for(this.view.extent(0), KOKKOS_LAMBDA(const int i) {
+                    //         printf("Element (%i,0) : %i \n",i,this.view(i,0));
+                    //     });
+                    // }
                     return &host_view(i[0], i[1]);
                 } else if constexpr (ViewType::rank() == 3) {
                     return &host_view(i[0], i[1], i[2]);
@@ -153,5 +158,7 @@ namespace rust_view {
     void matrix_product(const OpaqueView& A, const OpaqueView& B, OpaqueView& C);
     double y_ax(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
     double y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
+
+    void cpp_perf_test(int n);
     // void deep_copy(const RustViewWrapper& view1, const RustViewWrapper& view2);
 }

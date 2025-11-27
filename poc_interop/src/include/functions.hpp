@@ -1,6 +1,8 @@
 #pragma once
 #include "rust_view.hpp"
 
+#include <iostream>
+
 using rust_view::OpaqueView;
 
 namespace functions {
@@ -26,8 +28,8 @@ namespace functions {
             throw std::runtime_error("Incompatible shapes.");
         }
 
-        auto* y_view_ptr = static_cast<Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace>*>(y.view->get_view());
-        auto* x_view_ptr = static_cast<Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace>*>(x.view->get_view());
+        auto* y_view_ptr = static_cast<Kokkos::View<T*, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(y.view->get_view());
+        auto* x_view_ptr = static_cast<Kokkos::View<T*, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(x.view->get_view());
 
         auto y_view = *y_view_ptr;
         auto x_view = *x_view_ptr;

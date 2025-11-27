@@ -27,8 +27,8 @@ pub fn y_ax_device<L1: LayoutType, L2: LayoutType, L3: LayoutType>(
 }
 
 pub fn dot<'a, T>(
-    x: &'a RustView<'a, T, Dim1, HostSpace, LayoutRight>,
-    y: &'a RustView<'a, T, Dim1, HostSpace, LayoutRight>,
+    x: &'a RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
+    y: &'a RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
 ) -> T
 where
     T: data_type::RustViewDataType<'a, T>,
@@ -37,9 +37,9 @@ where
 }
 
 pub fn matrix_product_op<'a, L1: LayoutType, L2: LayoutType>(
-    a: &RustView<'a, f64, Dim2, HostSpace, L1>,
-    b: &RustView<'a, f64, Dim2, HostSpace, L2>,
-    c: &mut RustView<'a, f64, Dim2, HostSpace, L1>,
+    a: &RustView<'a, f64, Dim2, DeviceSpace, L1>,
+    b: &RustView<'a, f64, Dim2, DeviceSpace, L2>,
+    c: &mut RustView<'a, f64, Dim2, DeviceSpace, L1>,
 ) {
     ffi::matrix_product(a.get(), b.get(), c.get_mut());
 }
@@ -59,6 +59,8 @@ pub fn matrix_product_op<'a, L1: LayoutType, L2: LayoutType>(
 #[cfg(test)]
 pub mod tests {
     use std::time::Instant;
+
+    use crate::rust_view::LayoutLeft;
 
     use super::*;
 
@@ -109,10 +111,10 @@ pub mod tests {
 
     pub fn dot_product_test() {
         let mut data1 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
-        let y = RustView::<'_, f64, Dim1, HostSpace, LayoutRight>::from_shape(&[6], &mut data1);
+        let y = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[6], &mut data1);
 
         let mut data3 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
-        let x = RustView::<'_, f64, Dim1, HostSpace, LayoutRight>::from_shape(&[6], &mut data3);
+        let x = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[6], &mut data3);
 
         let result = dot(&x, &y);
 
@@ -122,38 +124,43 @@ pub mod tests {
     pub fn matrix_product_test() {
         let mut data1 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
         let mat1 =
-            RustView::<'_, f64, Dim2, HostSpace, LayoutRight>::from_shape(&[2, 3], &mut data1);
+            RustView::<'_, f64, Dim2, DeviceSpace, LayoutRight>::from_shape(&[2, 3], &mut data1);
 
         let mut data2 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
         let mat2 =
-            RustView::<'_, f64, Dim2, HostSpace, LayoutRight>::from_shape(&[3, 2], &mut data2);
+            RustView::<'_, f64, Dim2, DeviceSpace, LayoutLeft>::from_shape(&[3, 2], &mut data2);
 
         let mut data3 = [0.0, 0.0, 0.0, 0.0];
         let mut mat3 =
-            RustView::<'_, f64, Dim2, HostSpace, LayoutRight>::from_shape(&[2, 2], &mut data3);
+            RustView::<'_, f64, Dim2, DeviceSpace, LayoutRight>::from_shape(&[2, 2], &mut data3);
 
         matrix_product_op(&mat1, &mat2, &mut mat3);
 
-        assert_eq!(mat3[&[0, 0]], 22.0_f64);
-        assert_eq!(mat3[&[0, 1]], 28.0_f64);
-        assert_eq!(mat3[&[1, 0]], 49.0_f64);
-        assert_eq!(mat3[&[1, 1]], 64.0_f64);
+        assert_eq!(mat3[&[0, 0]], 14.0_f64);
+        assert_eq!(mat3[&[0, 1]], 32.0_f64);
+        assert_eq!(mat3[&[1, 0]], 32.0_f64);
+        assert_eq!(mat3[&[1, 1]], 77.0_f64);
     }
 
+    // pub fn performance_test() {
+    //     let n = 5_000;
+
+    //     let start = Instant::now();
+    //     for _ in 0..n {
+    //         matrix_product_test();
+    //     }
+    //     let duration = start.elapsed();
+
+    //     let avg_time = duration / n;
+    //     println!(
+    //         "Average time per matrix_product_test : {} ns",
+    //         avg_time.as_nanos()
+    //     );
+    //     println!("Total time elapsed : {} ns", duration.as_nanos());
+    // }
+
     pub fn performance_test() {
-        let n = 5_000;
-
-        let start = Instant::now();
-        for _ in 0..n {
-            matrix_product_test();
-        }
-        let duration = start.elapsed();
-
-        let avg_time = duration / n;
-        println!(
-            "Average time per matrix_product_test : {} ns",
-            avg_time.as_nanos()
-        );
-        println!("Total time elapsed : {} ns", duration.as_nanos());
+        let n = 1;
+        ffi::cpp_perf_test(n);
     }
 }

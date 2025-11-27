@@ -221,7 +221,7 @@ SharedArrayView templated_matrix_product(const SharedArrayView &shared_arr1, con
         
         std::cout << "Device matrix product" << "\n";
 
-        T* tmp = reinterpret_cast<T*>(std::malloc(mat1.extent(0)*mat2.extent(1)*sizeof(T)));
+        Kokkos::View<T*> tmp("tmp", mat1.extent(0)*mat2.extent(1));
 
         Kokkos::parallel_for("device_matrix_product", Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0,0}, {mat1.extent(0), mat2.extent(1)}), KOKKOS_LAMBDA (const int i, const int j) {
                 T r = 0;
@@ -233,8 +233,12 @@ SharedArrayView templated_matrix_product(const SharedArrayView &shared_arr1, con
             }
         );
 
-        const T* heap_result = tmp;
-        auto result = Kokkos::mdspan(heap_result, mat1.extent(0), mat2.extent(1));
+        T* heap_result = reinterpret_cast<T*>(std::malloc(mat1.extent(0) * mat2.extent(1) * sizeof(T)));
+        Kokkos::View<T*, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> temp_heap_result(heap_result, mat1.extent(0) * mat2.extent(1));
+
+        deep_copy(temp_heap_result, tmp);
+
+        auto result = Kokkos::mdspan(temp_heap_result.data(), mat1.extent(0), mat2.extent(1));
         return to_shared<2>(result);   
     } else {
         throw std::runtime_error("Incompatible memSpaces of arrayViews");

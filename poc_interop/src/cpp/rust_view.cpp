@@ -6,10 +6,20 @@
 
 namespace rust_view {
 
+    #ifdef KOKKOS_ENABLE_CUDA
+        using DeviceMemorySpace = Kokkos::CudaSpace;
+    #elif defined(KOKKOS_ENABLE_HIP)
+        using DeviceMemorySpace = Kokkos::HIPSpace;
+    #else
+        using DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space;
+    #endif
+
+
     void kokkos_initialize() {
         if (!Kokkos::is_initialized()) {
             Kokkos::initialize();
             std::cout << "Kokkos initialized successfully!" << std::endl;
+            std::cout << "Device memory space = " << typeid(DeviceMemorySpace).name() << "\n";
             std::cout << "Execution space: " << typeid(Kokkos::DefaultExecutionSpace).name() << "\n";
             std::cout << "Concurrency = " << Kokkos::DefaultExecutionSpace().concurrency() << "\n";
         } else {
@@ -47,7 +57,7 @@ namespace rust_view {
 
         double result = 0;
 
-        Kokkos::parallel_reduce( N, KOKKOS_LAMBDA ( const int j, double &update ) {
+        Kokkos::parallel_reduce( Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, N), [&](const int j, double &update ) {
             double temp2 = 0;
             for ( int i = 0; i < M; ++i ) {
                 temp2 += a_view( j, i ) * x_view( i );
@@ -68,9 +78,9 @@ namespace rust_view {
             throw std::runtime_error("Incompatible shapes.");
         }
 
-        auto* y_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(y.view->get_view());
-        auto* a_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(A.view->get_view());
-        auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(x.view->get_view());
+        auto* y_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(y.view->get_view());
+        auto* a_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(A.view->get_view());
+        auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(x.view->get_view());
 
         auto y_view = *y_view_ptr;
         auto a_view = *a_view_ptr;
@@ -105,15 +115,15 @@ namespace rust_view {
             throw std::runtime_error("Incompatible shapes.");
         }
 
-        auto* A_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(A.view->get_view());
-        auto* B_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(B.view->get_view());
-        auto* C_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(C.view->get_view());
+        auto* A_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(A.view->get_view());
+        auto* B_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutLeft, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(B.view->get_view());
+        auto* C_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(C.view->get_view());
 
         auto& A_view = *A_view_ptr;
         auto& B_view = *B_view_ptr;
         auto& C_view = *C_view_ptr;
 
-        Kokkos::parallel_for("host_matrix_product", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0,0}, {A_view.extent(0), B_view.extent(1)}), KOKKOS_LAMBDA (const int i, const int j) {
+        Kokkos::parallel_for("matrix_product", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0,0}, {A_view.extent(0), B_view.extent(1)}), KOKKOS_LAMBDA (const int i, const int j) {
                 double r = 0;
                 for (size_t k = 0; k < A_view.extent(1); k++)
                 {
@@ -122,6 +132,50 @@ namespace rust_view {
                 C_view(i,j) = r;
             }
         );
+    }
+
+    void cpp_perf_test(int n) {
+        for (size_t u = 0; u < n; u++)
+        {
+            using ExecSpace = Kokkos::DefaultExecutionSpace;
+
+            const int N = 8192; // large rows
+            const int M = 8192; // large cols
+
+            // Device views
+            Kokkos::View<double**, Kokkos::LayoutRight, ExecSpace> A("A", N, M);
+            Kokkos::View<double**, Kokkos::LayoutRight, ExecSpace> B("B", N, M);
+            Kokkos::View<double**, Kokkos::LayoutRight, ExecSpace> C("C", N, M);
+
+            // Initialize A and B
+            Kokkos::parallel_for(
+                "InitAB",
+                Kokkos::MDRangePolicy<ExecSpace, Kokkos::Rank<2>>({0,0}, {N,M}),
+                KOKKOS_LAMBDA(int i, int j){
+                    A(i,j) = i * 0.0001 + j * 0.0002;
+                    B(i,j) = i * 0.0003 - j * 0.0004;
+                }
+            );
+
+            // Heavy computation: C = sin(A) + cos(B)
+            Kokkos::parallel_for(
+                "ComputeC",
+                Kokkos::MDRangePolicy<ExecSpace, Kokkos::Rank<2>>({0,0}, {N,M}),
+                KOKKOS_LAMBDA(int i, int j){
+                    double tmp = 0;
+                    // small inner loop to increase GPU work per thread
+                    for(int k=0;k<128;k++){
+                        tmp += sin(A(i,j) + k*0.01) * cos(B(i,j) + k*0.02);
+                    }
+                    C(i,j) = tmp;
+                }
+            );
+
+            Kokkos::fence(); // ensure completion
+
+            std::cout << "Finished GPU-friendly test\n";
+        }
+        
     }
 
 }
