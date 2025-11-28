@@ -13,8 +13,8 @@
 extern "C" {
 
     Errors deep_copy(SharedArrayViewMut &shared_arr1, const SharedArrayView &shared_arr2);
-    const void* get_device_ptr(const SharedArrayView &shared_arr);
-    void* get_device_ptr_mut(const SharedArrayViewMut &shared_arr);
+    const void* get_device_ptr(const void* data_ptr, size_t array_size, int data_size);
+    void* get_device_ptr_mut(void* data_ptr, size_t array_size, int data_size);
 
     SharedArrayView dot(const SharedArrayView &shared_arr1, const SharedArrayView &shared_arr2);
     SharedArrayView matrix_vector_product(const SharedArrayView &shared_arr1, const SharedArrayView &shared_arr2);
@@ -22,7 +22,8 @@ extern "C" {
     void mutable_matrix_product(SharedArrayViewMut &shared_arr1, const SharedArrayView &shared_arr2, const SharedArrayView &shared_arr3);
     void bad_modifier(SharedArrayViewMut &shared_arr);
 
-    void free_shared_array(const void* ptr, MemSpace mem_space, const size_t* shape);
+    void free_shared_array(SharedArrayView &shared_arr);
+    void free_shared_array_mut(SharedArrayViewMut &shared_arr);
 
     //Cpp test, to call from rust.
     void cpp_var_rust_func_test();
@@ -82,7 +83,7 @@ Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> mdspan_from_shared_mut(Share
 }
 
 template <int D, typename T>
-SharedArrayViewMut to_shared_mut(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds, MemSpace mem_space = MemSpace::HostSpace) {
+SharedArrayViewMut to_shared_mut(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds, bool allocated_by_cpp, MemSpace mem_space = MemSpace::HostSpace) {
     int rank = fromMds.rank();
     size_t* shape = new size_t[7];
     for (int i = 0; i < rank; i++)
@@ -110,11 +111,13 @@ SharedArrayViewMut to_shared_mut(Kokkos::mdspan<T, Kokkos::dextents<std::size_t,
         mem_space,
         layout,
         true,
+        allocated_by_cpp,
+        true
     };
 }
 
 template <int D, typename T>
-SharedArrayView to_shared(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds, MemSpace mem_space = MemSpace::HostSpace) {
+SharedArrayView to_shared(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMds, bool allocated_by_cpp, MemSpace mem_space = MemSpace::HostSpace) {
     int rank = fromMds.rank();
     size_t* shape = new size_t[7];
     for (int i = 0; i < rank; i++)
@@ -142,6 +145,8 @@ SharedArrayView to_shared(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fr
         mem_space,
         layout,
         false,
+        allocated_by_cpp,
+        true
     };
 }
 
@@ -165,7 +170,7 @@ SharedArrayView templated_dot(const SharedArrayView &shared_arr1, const SharedAr
     tmp[0] = r;
     const T* heap_result = tmp;
     auto result = Kokkos::mdspan(heap_result, 1);
-    return to_shared<1>(result, MemSpace::HostSpace);
+    return to_shared<1>(result, true, MemSpace::HostSpace);
 }
 
 template <typename T = double>
@@ -192,7 +197,7 @@ SharedArrayView templated_matrix_vector_product(const SharedArrayView &shared_ar
 
     const T* heap_result = tmp;
     auto result = Kokkos::mdspan(heap_result, mat.extent(0));
-    return to_shared<1>(result);
+    return to_shared<1>(result, true);
 }
 
 template <typename T = double>
@@ -221,7 +226,7 @@ SharedArrayView templated_matrix_product(const SharedArrayView &shared_arr1, con
 
         const T* heap_result = tmp;
         auto result = Kokkos::mdspan(heap_result, mat1.extent(0), mat2.extent(1));
-        return to_shared<2>(result);   
+        return to_shared<2>(result, true);   
 
     } else if (shared_arr1.mem_space == shared_arr2.mem_space && shared_arr1.mem_space != MemSpace::HostSpace) {
         auto mat1 = mdspan_from_shared<2,T>(shared_arr1);
@@ -248,7 +253,7 @@ SharedArrayView templated_matrix_product(const SharedArrayView &shared_arr1, con
         Kokkos::deep_copy(host_view, result_view);
 
         auto result = Kokkos::mdspan(host_view.data(), mat1.extent(0), mat2.extent(1));
-        return to_shared<2>(result);    
+        return to_shared<2>(result, true);    
     } else {
         throw std::runtime_error("Incompatible memSpaces of arrayViews");
     }

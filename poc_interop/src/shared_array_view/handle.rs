@@ -67,23 +67,25 @@ where
 {
     let rank = arr.ndim();
     let shape = arr.shape().as_ptr();
-    let data_ptr = arr.as_mut_ptr();
-    let shared_arr = SharedArrayViewMut {
-        ptr: data_ptr as *mut c_void,
-        size: size_of::<T>() as i32,
-        data_type: T::data_type(),
-        rank: rank as i32,
-        shape,
-        mem_space: MemSpace::HostSpace,
-        layout: Layout::LayoutRight,
-        is_mut: true,
-    };
+    let data_ptr = arr.as_mut_ptr() as *mut c_void;
+    let array_size = arr.len();
+
     if mem_space == MemSpace::HostSpace {
-        shared_arr
-    } else {
-        let data_ptr = unsafe{ffi::get_device_ptr_mut(&shared_arr)};
         SharedArrayViewMut {
             ptr: data_ptr,
+            size: size_of::<T>() as i32,
+            data_type: T::data_type(),
+            rank: rank as i32,
+            shape,
+            mem_space: MemSpace::HostSpace,
+            layout: Layout::LayoutRight,
+            is_mut: true,
+            allocated_by_cpp: false,
+            shape_by_cpp: false,
+        }
+    } else {
+        SharedArrayViewMut {
+            ptr: unsafe{ffi::get_device_ptr_mut(data_ptr, array_size, size_of::<T>() as i32)},
             size: size_of::<T>() as i32,
             data_type: T::data_type(),
             rank: rank as i32,
@@ -91,6 +93,8 @@ where
             mem_space: mem_space,
             layout: Layout::LayoutRight,
             is_mut: true,
+            allocated_by_cpp: true,
+            shape_by_cpp: false,
         }
     }
 
@@ -103,23 +107,25 @@ where
 {
     let rank = arr.ndim();
     let shape = arr.shape().as_ptr();
-    let data_ptr = arr.as_ptr();
-    let shared_arr = SharedArrayView {
-        ptr: data_ptr as *const c_void,
-        size: size_of::<T>() as i32,
-        data_type: T::data_type(),
-        rank: rank as i32,
-        shape,
-        mem_space: MemSpace::HostSpace,
-        layout: Layout::LayoutRight,
-        is_mut: false,
-    };
+    let data_ptr = arr.as_ptr() as *const c_void;
+    let array_size = arr.len();
+    
     if mem_space == MemSpace::HostSpace {
-        shared_arr
-    } else {
-        let data_ptr = unsafe {ffi::get_device_ptr(&shared_arr)};
         SharedArrayView {
             ptr: data_ptr,
+            size: size_of::<T>() as i32,
+            data_type: T::data_type(),
+            rank: rank as i32,
+            shape,
+            mem_space: MemSpace::HostSpace,
+            layout: Layout::LayoutRight,
+            is_mut: false,
+            allocated_by_cpp: false,
+            shape_by_cpp: false,
+        }
+    } else {
+        SharedArrayView {
+            ptr: unsafe {ffi::get_device_ptr(data_ptr, array_size, size_of::<T>() as i32)},
             size: size_of::<T>() as i32,
             data_type: T::data_type(),
             rank: rank as i32,
@@ -127,13 +133,15 @@ where
             mem_space: mem_space,
             layout: Layout::LayoutRight,
             is_mut: false,
+            allocated_by_cpp: true,
+            shape_by_cpp: false,
         }
     }
     
 }
 
 pub fn from_shared(
-    shared_array: SharedArrayView,
+    shared_array: &SharedArrayView,
 ) -> ndarray::ArrayView<'static, f64, ndarray::IxDyn> {
     if shared_array.mem_space != MemSpace::HostSpace {
         panic!("Cannot cast from a sharedArrayView that is not on host space.");
@@ -147,7 +155,7 @@ pub fn from_shared(
 }
 
 pub fn from_shared_mut(
-    shared_array: SharedArrayViewMut,
+    shared_array: &SharedArrayViewMut,
 ) -> ndarray::ArrayViewMut<'static, f64, ndarray::IxDyn> {
     if shared_array.mem_space != MemSpace::HostSpace {
         panic!("Cannot cast from a sharedArrayView that is not on host space.");
@@ -160,20 +168,14 @@ pub fn from_shared_mut(
     ArrayViewMut::from_shape(IxDyn(shape), v).unwrap()
 }
 
-pub fn free_shared_array<T>(ptr: *const T, mem_space: MemSpace, shape: *const usize) {
-    unsafe {
-        ffi::free_shared_array(ptr as *mut c_void, mem_space, shape);
-    }
-}
-
 impl Drop for SharedArrayView {
     fn drop(&mut self) {
-        free_shared_array(self.ptr, self.mem_space, self.shape);
+        unsafe {ffi::free_shared_array(self);}
     }
 }
 
 impl Drop for SharedArrayViewMut {
     fn drop(&mut self) {
-        free_shared_array(self.ptr, self.mem_space, self.shape);
+        unsafe {ffi::free_shared_array_mut(self);}
     }
 }

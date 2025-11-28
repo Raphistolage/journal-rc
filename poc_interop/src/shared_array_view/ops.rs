@@ -28,7 +28,9 @@ where
     let shared_arr1 = arr1.to_shared_array(MemSpace::HostSpace);
     let shared_arr2 = arr2.to_shared_array(MemSpace::HostSpace);
 
-    from_shared(unsafe { ffi::dot(&shared_arr1, &shared_arr2) })
+    let shared_result = unsafe { ffi::dot(&shared_arr1, &shared_arr2) };
+
+    from_shared(&shared_result)
 }
 
 pub fn matrix_vector_product<T, U>(
@@ -42,10 +44,12 @@ where
     let shared_arr1 = arr1.to_shared_array(MemSpace::HostSpace);
     let shared_arr2 = arr2.to_shared_array(MemSpace::HostSpace);
 
-    from_shared(unsafe { ffi::matrix_vector_product(&shared_arr1, &shared_arr2) })
+    let shared_result = unsafe { ffi::matrix_vector_product(&shared_arr1, &shared_arr2) };
+
+    from_shared(&shared_result)
 }
 
-pub fn matrix_product<T>(arr1: &T, arr2: &T) -> ArrayBase<ViewRepr<&'static f64>, Dim<IxDynImpl>>
+pub fn matrix_product<T>(arr1: &T, arr2: &T) -> SharedArrayView
 where
     T: ToSharedArray<Dim = ndarray::Ix2>,
 {
@@ -53,9 +57,7 @@ where
     let shared_arr2 = arr2.to_shared_array(MemSpace::DeviceSpace);
 
 
-    let shared_result = unsafe { ffi::matrix_product(&shared_arr1, &shared_arr2) };
-
-    from_shared(shared_result)
+    unsafe { ffi::matrix_product(&shared_arr1, &shared_arr2) }
 }
 
 pub fn mutable_matrix_product<U, T>(arr1: &mut U, arr2: &T, arr3: &T)
@@ -83,6 +85,22 @@ pub mod tests {
     use ndarray::{ArrayView, ArrayViewMut, ShapeBuilder};
 
     use super::*;
+
+    pub fn desperate_attempt() {
+        let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let arr = ArrayView::from_shape((2, 6).strides((1, 2)), &s).unwrap();
+
+        let resulting_array_of_a_desperate_man = arr.to_shared_array(MemSpace::DeviceSpace);
+
+        // let dream_killer = from_shared(&resulting_array_of_a_desperate_man);
+
+        // let expected_slice = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        // let expected = ArrayView::from_shape(2, &expected_slice)
+        //     .unwrap()
+        //     .into_dyn();
+
+        // assert_eq!(expected, dream_killer);
+    }
 
     pub fn create_shared_test() {
         let mut v = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
@@ -145,9 +163,11 @@ pub mod tests {
             .unwrap()
             .into_dyn();
 
-        let result = matrix_product(&arr1, &arr2);
+        let shared_result = matrix_product(&arr1, &arr2);
 
-        assert_eq!(result, expected);
+        let array_result = from_shared(&shared_result);
+
+        assert_eq!(array_result, expected);
     }
 
     pub fn mutable_matrix_product_test() {

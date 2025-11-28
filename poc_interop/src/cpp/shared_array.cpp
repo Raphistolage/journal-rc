@@ -80,39 +80,25 @@ extern "C" {
         return Errors::NoErrors;
     }
 
-    const void* get_device_ptr(const SharedArrayView &shared_arr) {
-        const size_t* shape = shared_arr.shape;
+    const void* get_device_ptr(const void* data_ptr, size_t array_size, int data_size) {
 
-        int size = 1;
-        for (size_t i = 0; i < shared_arr.rank; i++)
-        {
-            size *= shape[i];
-        }
+        const uint8_t* typed_ptr = static_cast<const uint8_t*>(data_ptr);
+        Kokkos::View<const uint8_t*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(typed_ptr, array_size*data_size);
 
-        const uint8_t* typed_ptr = static_cast<const uint8_t*>(shared_arr.ptr);
-        Kokkos::View<const uint8_t*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(typed_ptr, size*shared_arr.size);
-
-        uint8_t* device_ptr = static_cast<uint8_t*>(Kokkos::kokkos_malloc<Kokkos::DefaultExecutionSpace::memory_space>(size*shared_arr.size));
-        Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, size*shared_arr.size);
+        uint8_t* device_ptr = static_cast<uint8_t*>(Kokkos::kokkos_malloc<Kokkos::DefaultExecutionSpace::memory_space>(array_size*data_size));
+        Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, array_size*data_size);
         
         Kokkos::deep_copy(device_view, host_view);
         return device_ptr;
     }
 
-    void* get_device_ptr_mut(const SharedArrayViewMut &shared_arr) {
-        const size_t* shape = shared_arr.shape;
+    void* get_device_ptr_mut(void* data_ptr, size_t array_size, int data_size) {
 
-        int size = 1;
-        for (size_t i = 0; i < shared_arr.rank; i++)
-        {
-            size *= shape[i];
-        }
-        
-        uint8_t* typed_ptr = static_cast<uint8_t*>(shared_arr.ptr);
-        Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(typed_ptr, size*shared_arr.size);
+        uint8_t* typed_ptr = static_cast<uint8_t*>(data_ptr);
+        Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(typed_ptr, array_size*data_size);
 
-        uint8_t* device_ptr = static_cast<uint8_t*>(Kokkos::kokkos_malloc<Kokkos::DefaultExecutionSpace::memory_space>(size*shared_arr.size));
-        Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, size*shared_arr.size);
+        uint8_t* device_ptr = static_cast<uint8_t*>(Kokkos::kokkos_malloc<Kokkos::DefaultExecutionSpace::memory_space>(array_size*data_size));
+        Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, array_size*data_size);
 
         Kokkos::deep_copy(device_view, host_view);
         return device_ptr;
@@ -283,7 +269,7 @@ extern "C" {
 
         auto arr = Kokkos::mdspan<double, Kokkos::dextents<size_t, 2>>(data, 2, 3); // 2x3 matrix.
 
-        SharedArrayView shared_arr = to_shared<2,double>(arr);
+        SharedArrayView shared_arr = to_shared<2,double>(arr, true);
 
         double result = mat_reduce(shared_arr);
 
@@ -296,7 +282,7 @@ extern "C" {
 
         auto arr = Kokkos::mdspan<double, Kokkos::dextents<size_t, 2>>(data, 2, 3); // 2x3 matrix.
 
-        SharedArrayViewMut shared_arr = to_shared_mut<2,double>(arr);
+        SharedArrayViewMut shared_arr = to_shared_mut<2,double>(arr, true);
 
         mat_add_one(shared_arr);
         for (int i = 0; i < 6; i++)
@@ -305,10 +291,39 @@ extern "C" {
         }
     }
 
-    void free_shared_array(const void* ptr, MemSpace mem_space, const size_t* shape) {
-        if (mem_space != MemSpace::HostSpace)
+    void free_shared_array(SharedArrayView &shared_arr) {
+        std::cout << "Freeing shared array on cpp side \n";
+        if (shared_arr.allocated_by_cpp)
         {
-            Kokkos::kokkos_free(const_cast<void*>(ptr));
-        }  
+            if (shared_arr.mem_space != MemSpace::HostSpace) {
+                std::cout << "Freeing the shared array on device \n";
+                Kokkos::kokkos_free(const_cast<void*>(shared_arr.ptr));
+            } else {
+                std::cout << "Freeing the shared array on host \n";
+                free(const_cast<void*>(shared_arr.ptr));
+            }
+        }
+
+        if (shared_arr.shape_by_cpp)
+        {
+            free(const_cast<size_t*>(shared_arr.shape));
+        }
+    }
+
+    void free_shared_array_mut(SharedArrayViewMut &shared_arr) {
+        if (shared_arr.allocated_by_cpp)
+        {
+            if (shared_arr.mem_space != MemSpace::HostSpace) {
+                Kokkos::kokkos_free(const_cast<void*>(shared_arr.ptr));
+            } else {
+                free(const_cast<void*>(shared_arr.ptr));
+            }
+        }
+
+        if (shared_arr.shape_by_cpp)
+        {
+            free(const_cast<size_t*>(shared_arr.shape));
+        }
+        
     }
 }

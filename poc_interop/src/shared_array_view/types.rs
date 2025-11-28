@@ -28,6 +28,10 @@ pub struct SharedArrayViewMut {
     pub layout: Layout,
 
     pub is_mut: bool, // Only useful for C++ side.
+
+    pub allocated_by_cpp: bool,
+
+    pub shape_by_cpp: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -48,4 +52,8 @@ pub struct SharedArrayView {
     pub layout: Layout,
 
     pub is_mut: bool, // Only useful for C++ side.
+
+    pub allocated_by_cpp: bool,
+
+    pub shape_by_cpp: bool,
 }

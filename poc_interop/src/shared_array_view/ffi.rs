@@ -7,8 +7,8 @@ unsafe extern "C" {
         shared_arr1: &mut SharedArrayViewMut,
         shared_arr2: &SharedArrayView,
     ) -> Errors;
-    pub unsafe fn get_device_ptr(shared_arr: &SharedArrayView) -> *const c_void;
-    pub unsafe fn get_device_ptr_mut(shared_arr: &SharedArrayViewMut) -> *mut c_void;
+    pub unsafe fn get_device_ptr(data_ptr: *const c_void, array_size: usize, data_size: i32) -> *const c_void;
+    pub unsafe fn get_device_ptr_mut(data_ptr: *mut c_void, array_size: usize, data_size: i32) -> *mut c_void;
     pub unsafe fn dot(
         shared_arr1: &SharedArrayView,
         shared_arr2: &SharedArrayView,
@@ -27,7 +27,8 @@ unsafe extern "C" {
         shared_arr3: &SharedArrayView,
     );
     pub unsafe fn bad_modifier(shared_arr: &SharedArrayView);
-    pub unsafe fn free_shared_array(ptr: *const c_void, mem_space: MemSpace, shape: *const usize);
+    pub unsafe fn free_shared_array(shared_arr: &mut SharedArrayView);
+    pub unsafe fn free_shared_array_mut(shared_arr: &mut SharedArrayViewMut);
 
     // Cpp tests
     pub unsafe fn cpp_var_rust_func_test();
@@ -36,7 +37,7 @@ unsafe extern "C" {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn mat_reduce(shared_arr: SharedArrayView) -> f64 {
-    let arr = from_shared(shared_arr);
+    let arr = from_shared(&shared_arr);
 
     let mut result = 0.0_f64;
 
@@ -51,7 +52,7 @@ pub extern "C" fn mat_reduce(shared_arr: SharedArrayView) -> f64 {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn mat_add_one(shared_arr: SharedArrayViewMut) {
-    let mut arr = from_shared_mut(shared_arr);
+    let mut arr = from_shared_mut(&shared_arr);
 
     for i in 0..arr.dim()[0] {
         for j in 0..arr.dim()[1] {

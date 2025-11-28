@@ -41,6 +41,9 @@ extern "C" {
 
         const bool is_mut;
 
+        const bool allocated_by_cpp;
+
+        const bool shape_by_cpp;
     };
 
     struct SharedArrayView{
@@ -59,5 +62,9 @@ extern "C" {
         Layout layout;
 
         const bool is_mut;
+
+        const bool allocated_by_cpp;
+
+        const bool shape_by_cpp;
     };
 }
