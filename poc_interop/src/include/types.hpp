@@ -40,6 +40,7 @@ extern "C" {
         Layout layout;
 
         const bool is_mut;
+
     };
 
     struct SharedArrayView{

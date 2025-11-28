@@ -92,11 +92,11 @@ extern "C" {
         const uint8_t* typed_ptr = static_cast<const uint8_t*>(shared_arr.ptr);
         Kokkos::View<const uint8_t*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(typed_ptr, size*shared_arr.size);
 
-        uint8_t* device_ptr = static_cast<uint8_t*>(Kokkos::kokkos_malloc(size*shared_arr.size));
+        uint8_t* device_ptr = static_cast<uint8_t*>(Kokkos::kokkos_malloc<Kokkos::DefaultExecutionSpace::memory_space>(size*shared_arr.size));
         Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, size*shared_arr.size);
         
         Kokkos::deep_copy(device_view, host_view);
-        return device_view.data();
+        return device_ptr;
     }
 
     void* get_device_ptr_mut(const SharedArrayViewMut &shared_arr) {
@@ -111,11 +111,11 @@ extern "C" {
         uint8_t* typed_ptr = static_cast<uint8_t*>(shared_arr.ptr);
         Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(typed_ptr, size*shared_arr.size);
 
-        uint8_t* device_ptr = static_cast<uint8_t*>(Kokkos::kokkos_malloc(size*shared_arr.size));
+        uint8_t* device_ptr = static_cast<uint8_t*>(Kokkos::kokkos_malloc<Kokkos::DefaultExecutionSpace::memory_space>(size*shared_arr.size));
         Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, size*shared_arr.size);
 
         Kokkos::deep_copy(device_view, host_view);
-        return device_view.data();
+        return device_ptr;
     }
 
     SharedArrayView dot(const SharedArrayView &shared__arr1, const SharedArrayView &shared_arr2) {
@@ -247,7 +247,7 @@ extern "C" {
             auto mat2 = mdspan_from_shared<2, double>(shared_arr2);
             auto mat3 = mdspan_from_shared<2, double>(shared_arr2);
 
-            Kokkos::parallel_for("mutable_host_matrix_product", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0,0}, {mat2.extent(0), mat3.extent(1)}), KOKKOS_LAMBDA (const int i, const int j) {
+            Kokkos::parallel_for("mutable_host_matrix_product", Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0,0}, {mat2.extent(0), mat3.extent(1)}), KOKKOS_LAMBDA (const int i, const int j) {
                     double r = 0;
                     for (size_t k = 0; k < mat1.extent(1); k++)
                     {
@@ -305,8 +305,10 @@ extern "C" {
         }
     }
 
-    // cette fonction devra être appelé sur chaque ptr de data de sharedArray qui auront été instanciés depuis le côté C++
-    void free_shared_array(void* ptr) {
-        free(ptr);
+    void free_shared_array(const void* ptr, MemSpace mem_space, const size_t* shape) {
+        if (mem_space != MemSpace::HostSpace)
+        {
+            Kokkos::kokkos_free(const_cast<void*>(ptr));
+        }  
     }
 }

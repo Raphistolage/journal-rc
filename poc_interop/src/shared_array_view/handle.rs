@@ -74,7 +74,7 @@ where
         data_type: T::data_type(),
         rank: rank as i32,
         shape,
-        mem_space: mem_space,
+        mem_space: MemSpace::HostSpace,
         layout: Layout::LayoutRight,
         is_mut: true,
     };
@@ -110,7 +110,7 @@ where
         data_type: T::data_type(),
         rank: rank as i32,
         shape,
-        mem_space: mem_space,
+        mem_space: MemSpace::HostSpace,
         layout: Layout::LayoutRight,
         is_mut: false,
     };
@@ -160,8 +160,20 @@ pub fn from_shared_mut(
     ArrayViewMut::from_shape(IxDyn(shape), v).unwrap()
 }
 
-pub fn free_shared_array<T>(ptr: *const T) {
+pub fn free_shared_array<T>(ptr: *const T, mem_space: MemSpace, shape: *const usize) {
     unsafe {
-        ffi::free_shared_array(ptr as *mut c_void);
+        ffi::free_shared_array(ptr as *mut c_void, mem_space, shape);
+    }
+}
+
+impl Drop for SharedArrayView {
+    fn drop(&mut self) {
+        free_shared_array(self.ptr, self.mem_space, self.shape);
+    }
+}
+
+impl Drop for SharedArrayViewMut {
+    fn drop(&mut self) {
+        free_shared_array(self.ptr, self.mem_space, self.shape);
     }
 }

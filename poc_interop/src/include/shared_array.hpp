@@ -22,7 +22,7 @@ extern "C" {
     void mutable_matrix_product(SharedArrayViewMut &shared_arr1, const SharedArrayView &shared_arr2, const SharedArrayView &shared_arr3);
     void bad_modifier(SharedArrayViewMut &shared_arr);
 
-    void free_shared_array(void* ptr);
+    void free_shared_array(const void* ptr, MemSpace mem_space, const size_t* shape);
 
     //Cpp test, to call from rust.
     void cpp_var_rust_func_test();
@@ -229,7 +229,8 @@ SharedArrayView templated_matrix_product(const SharedArrayView &shared_arr1, con
         
         std::cout << "Device matrix product" << "\n";
 
-        T* tmp = reinterpret_cast<T*>(std::malloc(mat1.extent(0)*mat2.extent(1)*sizeof(T)));
+
+        Kokkos::View<T**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> result_view("result_view", mat1.extent(0), mat2.extent(1));
 
         Kokkos::parallel_for("device_matrix_product", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0,0}, {mat1.extent(0), mat2.extent(1)}), KOKKOS_LAMBDA (const int i, const int j) {
                 T r = 0;
@@ -237,12 +238,16 @@ SharedArrayView templated_matrix_product(const SharedArrayView &shared_arr1, con
                 {
                     r += mat1(i,k)*mat2(k,j);
                 }
-                tmp[i*mat2.extent(1) + j] = r;
+                result_view(i,j) = r;
             }
         );
 
-        const T* heap_result = tmp;
-        auto result = Kokkos::mdspan(heap_result, mat1.extent(0), mat2.extent(1));
+        T* tmp = reinterpret_cast<T*>(std::malloc(mat1.extent(0)*mat2.extent(1)*sizeof(T)));
+        Kokkos::View<T**, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(tmp, mat1.extent(0),mat2.extent(1));
+
+        Kokkos::deep_copy(host_view, result_view);
+
+        auto result = Kokkos::mdspan(host_view.data(), mat1.extent(0), mat2.extent(1));
         return to_shared<2>(result);    
     } else {
         throw std::runtime_error("Incompatible memSpaces of arrayViews");

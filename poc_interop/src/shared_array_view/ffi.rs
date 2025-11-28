@@ -27,7 +27,7 @@ unsafe extern "C" {
         shared_arr3: &SharedArrayView,
     );
     pub unsafe fn bad_modifier(shared_arr: &SharedArrayView);
-    pub unsafe fn free_shared_array(ptr: *const c_void);
+    pub unsafe fn free_shared_array(ptr: *const c_void, mem_space: MemSpace, shape: *const usize);
 
     // Cpp tests
     pub unsafe fn cpp_var_rust_func_test();

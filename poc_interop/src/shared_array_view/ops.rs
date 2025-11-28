@@ -91,6 +91,7 @@ pub mod tests {
 
         let mut arr1 = ArrayViewMut::from_shape((2, 6).strides((1, 2)), &mut v).unwrap();
         let arr2 = ArrayView::from_shape((2, 6).strides((1, 2)), &s).unwrap();
+
         let arr3 = ArrayView::from_shape((2, 6).strides((1, 2)), &c).unwrap();
 
         assert_eq!(arr1, arr3);
