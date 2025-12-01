@@ -1,4 +1,4 @@
-use poc_interop::{rust_view::{Dim1, Dim2, DeviceSpace, LayoutRight, RustView, kokkos_finalize, kokkos_initialize, y_ax_device}};
+use poc_interop::{rust_view::{Dim1, Dim2, DeviceSpace, LayoutRight, RustView, y_ax_device}, shared_array_view::{kokkos_finalize, kokkos_initialize}};
 
 fn main() {
     kokkos_initialize();
