@@ -23,6 +23,7 @@ fn main() {
     println!("cargo:rustc-link-lib=functionsFfi");
     println!("cargo:rustc-link-lib=rustView");
     println!("cargo:rustc-link-lib=sharedArrayView");
+    println!("cargo:rustc-link-lib=kokkosHandles");
     println!("cargo:rustc-link-arg=-Wl,-rpath={}", dst.display());
 
     // Only rerun build script when these files change

@@ -85,7 +85,7 @@ extern "C" {
         const uint8_t* typed_ptr = static_cast<const uint8_t*>(data_ptr);
         Kokkos::View<const uint8_t*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(typed_ptr, array_size*data_size);
 
-        uint8_t* device_ptr = static_cast<uint8_t*>(Kokkos::kokkos_malloc<Kokkos::DefaultExecutionSpace::memory_space>(array_size*data_size));
+        uint8_t* device_ptr = static_cast<uint8_t*>(Kokkos::kokkos_malloc(array_size*data_size));
         Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, array_size*data_size);
         
         Kokkos::deep_copy(device_view, host_view);
@@ -97,7 +97,7 @@ extern "C" {
         uint8_t* typed_ptr = static_cast<uint8_t*>(data_ptr);
         Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(typed_ptr, array_size*data_size);
 
-        uint8_t* device_ptr = static_cast<uint8_t*>(Kokkos::kokkos_malloc<Kokkos::DefaultExecutionSpace::memory_space>(array_size*data_size));
+        uint8_t* device_ptr = static_cast<uint8_t*>(Kokkos::kokkos_malloc(array_size*data_size));
         Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, array_size*data_size);
 
         Kokkos::deep_copy(device_view, host_view);
@@ -292,31 +292,32 @@ extern "C" {
     }
 
     void free_shared_array(SharedArrayView &shared_arr) {
-        std::cout << "Freeing shared array on cpp side \n";
-        if (shared_arr.allocated_by_cpp)
-        {
-            if (shared_arr.mem_space != MemSpace::HostSpace) {
-                std::cout << "Freeing the shared array on device \n";
-                Kokkos::kokkos_free(const_cast<void*>(shared_arr.ptr));
-            } else {
-                std::cout << "Freeing the shared array on host \n";
-                free(const_cast<void*>(shared_arr.ptr));
-            }
-        }
+        // std::cout << "Freeing shared array on cpp side \n";
+        // if (shared_arr.allocated_by_cpp)
+        // {
+        //     if (shared_arr.mem_space != MemSpace::HostSpace) {
+        //         std::cout << "Freeing the shared array on device \n";
+        //         Kokkos::kokkos_free(const_cast<void*>(shared_arr.ptr));
+        //     } else {
+        //         std::cout << "Freeing the shared array on host \n";
+        //         free(const_cast<void*>(shared_arr.ptr));
+        //     }
+        // }
 
-        if (shared_arr.shape_by_cpp)
-        {
-            free(const_cast<size_t*>(shared_arr.shape));
-        }
+        // if (shared_arr.shape_by_cpp)
+        // {
+        //     free(const_cast<size_t*>(shared_arr.shape));
+        // }
     }
 
     void free_shared_array_mut(SharedArrayViewMut &shared_arr) {
         if (shared_arr.allocated_by_cpp)
         {
             if (shared_arr.mem_space != MemSpace::HostSpace) {
-                Kokkos::kokkos_free(const_cast<void*>(shared_arr.ptr));
+                std::cout << "Freeing the shared array mut on device \n";
+                Kokkos::kokkos_free(shared_arr.ptr);
             } else {
-                free(const_cast<void*>(shared_arr.ptr));
+                free(shared_arr.ptr);
             }
         }
 

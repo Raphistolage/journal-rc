@@ -44,6 +44,10 @@ extern "C" {
         const bool allocated_by_cpp;
 
         const bool shape_by_cpp;
+
+        ~SharedArrayViewMut() {
+            std::cout << "Cpp destructor called \n";
+        }
     };
 
     struct SharedArrayView{

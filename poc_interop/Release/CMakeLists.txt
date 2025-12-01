@@ -39,6 +39,18 @@ target_include_directories(sharedArrayView PUBLIC
 
 set_target_properties(sharedArrayView PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
+
+# Kokkos_handles
+add_library(kokkosHandles SHARED ../src/cpp/kokkos_handles.cpp)
+
+target_link_libraries(kokkosHandles PUBLIC Kokkos::kokkos)
+
+set_target_properties(kokkosHandles PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+
+
+
 install(TARGETS rustView DESTINATION .)
 install(TARGETS functionsFfi DESTINATION .)
 install(TARGETS sharedArrayView DESTINATION .)
+install(TARGETS kokkosHandles DESTINATION .)

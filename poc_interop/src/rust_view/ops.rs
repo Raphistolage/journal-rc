@@ -2,14 +2,6 @@ use super::ffi;
 use crate::rust_view::dim::{Dim1, Dim2};
 use crate::rust_view::{DeviceSpace, HostSpace, LayoutRight, LayoutType, RustView, data_type};
 
-pub fn kokkos_initialize() {
-    ffi::kokkos_initialize();
-}
-
-pub fn kokkos_finalize() {
-    ffi::kokkos_finalize();
-}
-
 pub fn y_ax(
     y: &RustView<'_, f64, Dim1, HostSpace, LayoutRight>,
     a: &RustView<'_, f64, Dim2, HostSpace, LayoutRight>,
@@ -64,20 +56,20 @@ pub mod tests {
 
     use super::*;
 
-    #[test]
-    #[ignore = "Will crash"]
-    pub fn out_of_scope_indexing_test() {
-        kokkos_initialize();
-        {
-            let mut data1 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+    // #[test]
+    // #[ignore = "Will crash"]
+    // pub fn out_of_scope_indexing_test() {
+    //     kokkos_initialize();
+    //     {
+    //         let mut data1 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
 
-            let view1 =
-                RustView::<'_, f64, Dim1, HostSpace, LayoutRight>::from_shape(&[5], &mut data1);
+    //         let view1 =
+    //             RustView::<'_, f64, Dim1, HostSpace, LayoutRight>::from_shape(&[5], &mut data1);
 
-            assert_eq!(ffi::get_f64(view1.get(), &[6]), &7.0_f64);
-        }
-        kokkos_finalize();
-    }
+    //         assert_eq!(ffi::get_f64(view1.get(), &[6]), &7.0_f64);
+    //     }
+    //     kokkos_finalize();
+    // }
 
     pub fn create_various_type_test() {
         let mut data1 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];

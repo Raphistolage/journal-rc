@@ -14,28 +14,6 @@ namespace rust_view {
         using DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space;
     #endif
 
-
-    void kokkos_initialize() {
-        if (!Kokkos::is_initialized()) {
-            Kokkos::initialize();
-            std::cout << "Kokkos initialized successfully!" << std::endl;
-            std::cout << "Device memory space = " << typeid(DeviceMemorySpace).name() << "\n";
-            std::cout << "Execution space: " << typeid(Kokkos::DefaultExecutionSpace).name() << "\n";
-            std::cout << "Concurrency = " << Kokkos::DefaultExecutionSpace().concurrency() << "\n";
-        } else {
-            std::cout << "Kokkos is already initialized." << std::endl;
-        }
-    }
-
-    void kokkos_finalize() {
-        if (Kokkos::is_initialized()) {
-            Kokkos::finalize();
-            std::cout << "Kokkos finalized successfully!" << std::endl;
-        } else {
-            std::cout << "Kokkos is not initialized." << std::endl;
-        }
-    }
-
     double y_ax(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x) {
         if (y.rank != 1 || A.rank != 2 || x.rank != 1) {
             std::cout << "Ranks : y : " << y.rank << " A: " << A.rank << " x: " << x.rank <<" \n";

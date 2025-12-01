@@ -11,7 +11,6 @@
 #include "types.hpp"
 
 extern "C" {
-
     Errors deep_copy(SharedArrayViewMut &shared_arr1, const SharedArrayView &shared_arr2);
     const void* get_device_ptr(const void* data_ptr, size_t array_size, int data_size);
     void* get_device_ptr_mut(void* data_ptr, size_t array_size, int data_size);

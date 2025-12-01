@@ -152,9 +152,6 @@ namespace rust_view {
         }
     };
 
-    void kokkos_initialize();
-    void kokkos_finalize();
-
     void matrix_product(const OpaqueView& A, const OpaqueView& B, OpaqueView& C);
     double y_ax(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
     double y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);

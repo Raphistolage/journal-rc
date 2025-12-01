@@ -36,9 +36,6 @@ mod ffi {
         type MemSpace;
         type Layout;
 
-        fn kokkos_initialize();
-        fn kokkos_finalize();
-
         fn matrix_product(a: &OpaqueView, b: &OpaqueView, c: &mut OpaqueView);
 
         fn cpp_perf_test(n: i32);

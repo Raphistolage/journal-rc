@@ -3,6 +3,8 @@ use super::types::*;
 use std::os::raw::c_void;
 
 unsafe extern "C" {
+    pub unsafe fn kokkos_finalize();
+    pub unsafe fn kokkos_initialize();
     pub unsafe fn deep_copy(
         shared_arr1: &mut SharedArrayViewMut,
         shared_arr2: &SharedArrayView,

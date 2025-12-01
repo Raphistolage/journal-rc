@@ -7,6 +7,14 @@ use ndarray::{ArrayView, ArrayViewMut, IxDyn};
 use super::ffi;
 use super::types::*;
 
+pub fn kokkos_initialize() {
+    unsafe {ffi::kokkos_initialize();}
+}
+
+pub fn kokkos_finalize() {
+    unsafe {ffi::kokkos_finalize();}
+}
+
 pub trait RustDataType {
     fn data_type() -> DataType;
 }

@@ -87,10 +87,10 @@ pub mod tests {
     use super::*;
 
     pub fn desperate_attempt() {
-        let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let arr = ArrayView::from_shape((2, 6).strides((1, 2)), &s).unwrap();
+        let mut s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let mut arr = ArrayViewMut::from_shape((2, 6).strides((1, 2)), &mut s).unwrap();
 
-        let resulting_array_of_a_desperate_man = arr.to_shared_array(MemSpace::DeviceSpace);
+        let resulting_array_of_a_desperate_man = arr.to_shared_array_mut(MemSpace::DeviceSpace);
 
         // let dream_killer = from_shared(&resulting_array_of_a_desperate_man);
 
