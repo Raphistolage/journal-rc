@@ -1,12 +1,9 @@
-#[cxx::bridge(namespace = "cpp_functions")]
+#[cxx::bridge]
 mod ffi {
     unsafe extern "C++" {
         include!("functions.hpp");
 
-        fn kokkos_initialize();
-        fn kokkos_finalize();
-
-        fn parallel_hello_world();
+        fn perf_y_ax(argv: Vec<String>) -> i32;
     }
 }
 

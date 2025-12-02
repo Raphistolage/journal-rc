@@ -86,22 +86,6 @@ pub mod tests {
 
     use super::*;
 
-    pub fn desperate_attempt() {
-        let mut s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let mut arr = ArrayViewMut::from_shape((2, 6).strides((1, 2)), &mut s).unwrap();
-
-        let resulting_array_of_a_desperate_man = arr.to_shared_array_mut(MemSpace::DeviceSpace);
-
-        // let dream_killer = from_shared(&resulting_array_of_a_desperate_man);
-
-        // let expected_slice = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        // let expected = ArrayView::from_shape(2, &expected_slice)
-        //     .unwrap()
-        //     .into_dyn();
-
-        // assert_eq!(expected, dream_killer);
-    }
-
     pub fn create_shared_test() {
         let mut v = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
         let c = v.clone();

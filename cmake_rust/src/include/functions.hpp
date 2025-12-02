@@ -1,11 +1,8 @@
 #pragma once
 #include "cxx.h"
 #include <Kokkos_Core.hpp>
+#include "ffi.rs.h"
 
-namespace cpp_functions
-{
-    void kokkos_initialize();
-    void kokkos_finalize();
+int perf_y_ax(rust::Vec<rust::String> argv);
 
-    void parallel_hello_world();
-} // namespace cpp_functions
+void checkSizes( int &N, int &M, int &S, int &nrepeat );
