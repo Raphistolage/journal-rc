@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(cxxKokkoslib CXX)
 
-# find_package(Kokkos REQUIRED PATHS /home/clissonr/Documents/StageCEA/journal-rc/kokkos-install NO_DEFAULT_PATH) # On va chercher l'installation locale.
-
 find_package(Kokkos CONFIG)
 if(Kokkos_FOUND)
   message(STATUS "Found Kokkos: ${Kokkos_DIR} (version \"${Kokkos_VERSION}\")")
@@ -20,8 +18,6 @@ else()
     FetchContent_MakeAvailable(Kokkos)
   endif()
 endif()
-
-# find_package(gomp)
 
 add_library(cxxKokkoslib SHARED ../src/cpp/functions.cpp ../target/cxxbridge/cmake_rust/src/ffi.rs.cc)
 
