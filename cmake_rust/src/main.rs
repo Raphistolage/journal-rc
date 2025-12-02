@@ -3,11 +3,7 @@ mod ffi;
 fn main() {
     println!("Begining.");
 
-    ffi::kokkos_initialize();
-
-    ffi::parallel_hello_world();
-
-    ffi::kokkos_finalize();
+    ffi::perf_y_ax(vec!["".to_string()]);
 
     println!("Finished");
 }

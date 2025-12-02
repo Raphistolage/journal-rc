@@ -1,36 +1,43 @@
+use cmake::Config;
+
 fn main() {
-    // let kokkos_include = "./kokkos-install/include";
-    // #[cfg(feature = "lib64")]
-    // let kokkos_lib = "./kokkos-install/lib64";
-    // #[cfg(feature = "lib")]
-    // let kokkos_lib = "./kokkos-install/lib";
+    let _ = cxx_build::bridge("src/ffi.rs");  
 
-    // TODO : Faire une chaine de build qui permet de générer le bridge Cxx, puis compiler avec nvcc (ligne de commande, produire un .a), puis linker correctement.
-    // Pour compiler, doit récupérer les flags du cmake.
-    
-    let _ = cxx_build::bridge("src/ffi.rs");     // Génère les fichiers .h et .cc du bridge
-    // Compiler ce .cc ainsi que functions.cpp, avec les flags du CMake de Kokkos.
-    // Linker le résulat à cargo. 
+    #[cfg(feature = "cuda")]
+    let dst = Config::new("Build")
+        .configure_arg("-DCMAKE_BUILD_TYPE=Release")
+        .configure_arg(format!(
+            "-DOUT_DIR={}",
+            std::env::var("OUT_DIR").expect("out_dir not defined")
+        ))
+        .configure_arg(format!(
+            "-DPKG_NAME={}",
+            std::env::var("CARGO_PKG_NAME").expect("PKG_NAME is not defined")
+        ))
+        .configure_arg("-DKokkos_ENABLE_CUDA=ON")
+        // .configure_arg(format!("-DKokkos_ROOT={}", kokkos_root))
+        .build_arg("KOKKOS_DEVICES=Cuda")
+        .build();
+    #[cfg(feature = "omp")]
+    let dst = Config::new("Build")
+        .configure_arg("-DCMAKE_BUILD_TYPE=Release")
+        .configure_arg(format!(
+            "-DOUT_DIR={}",
+            std::env::var("OUT_DIR").expect("out_dir not defined")
+        ))
+        .configure_arg(format!(
+            "-DPKG_NAME={}",
+            std::env::var("CARGO_PKG_NAME").expect("PKG_NAME is not defined")
+        ))
+        // .configure_arg(format!("-DKokkos_ROOT={}", kokkos_root))
+        .build_arg("KOKKOS_DEVICES=OpenMP")
+        .build();
 
-    // cxx_build::bridge("src/ffi.rs")
-    //     .file("src/cpp/functions.cpp")
-    //     .include("src/include")
-    //     .include(kokkos_include)
-    //     .flag_if_supported("-std=c++20")
-    //     .flag_if_supported("-O3")
-    //     .flag_if_supported("-fopenmp") // Enable OpenMP
-    //     .compile("functions");
 
-
-    // println!("cargo:rustc-link-search=native={}", kokkos_lib);
-
-    // // // Link libraries
-    // println!("cargo:rustc-link-lib=kokkoscore");
-    // println!("cargo:rustc-link-lib=gomp");
-
-    println!("cargo:rustc-link-search=./build");
+    println!("cargo:warning=Path est : {}", dst.display());
+    println!("cargo:rustc-link-search=native={}", dst.display());
     println!("cargo:rustc-link-lib=cxxKokkoslib");
-    println!("cargo:rustc-link-arg=-Wl,-rpath=./build"); // runtime dependance
+    println!("cargo:rustc-link-arg=-Wl,-rpath={}", dst.display());
 
     // Only rerun build script when these files change
     println!("cargo:rerun-if-changed=src/include/functions.hpp");
