@@ -16,6 +16,7 @@ fn main() {
             "-DPKG_NAME={}",
             std::env::var("CARGO_PKG_NAME").expect("PKG_NAME is not defined")
         ))
+        .configure_arg("-DCMAKE_BUILD_TYPE=Release")
         // .configure_arg(format!("-DKokkos_ROOT={}", kokkos_root))
         .build();
 

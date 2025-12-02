@@ -19,6 +19,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 
 #include "functions.hpp"
 
@@ -65,73 +66,76 @@ int perf_y_ax( rust::Vec<rust::String> argv)
 
   Kokkos::initialize();
   {
+    std::cout << "Kokkos initialized successfully!" << std::endl;
+    std::cout << "Device memory space = " << typeid(Kokkos::DefaultExecutionSpace::memory_space).name() << "\n";
+    std::cout << "Execution space: " << typeid(Kokkos::DefaultExecutionSpace).name() << "\n";
+    std::cout << "Concurrency = " << Kokkos::DefaultExecutionSpace().concurrency() << "\n";
+    // Allocate y, x vectors and Matrix A on device.
+    using ViewVectorType = Kokkos::View<double*, Kokkos::SharedSpace>;
+    using ViewMatrixType = Kokkos::View<double**, Kokkos::SharedSpace>;
+    ViewVectorType y( "y", N );
+    ViewVectorType x( "x", M );
+    ViewMatrixType A( "A", N, M );
 
-  // Allocate y, x vectors and Matrix A on device.
-  using ViewVectorType = Kokkos::View<double*, Kokkos::SharedSpace>;
-  using ViewMatrixType = Kokkos::View<double**, Kokkos::SharedSpace>;
-  ViewVectorType y( "y", N );
-  ViewVectorType x( "x", M );
-  ViewMatrixType A( "A", N, M );
-
-  // Initialize y vector on host.
-  for ( int i = 0; i < N; ++i ) {
-    y( i ) = 1;
-  }
-
-  // Initialize x vector on host.
-  for ( int i = 0; i < M; ++i ) {
-    x( i ) = 1;
-  }
-
-  // Initialize A matrix on host, note 2D indexing.
-  for ( int j = 0; j < N; ++j ) {
-    for ( int i = 0; i < M; ++i ) {
-      A( j, i ) = 1;
+    // Initialize y vector on host.
+    for ( int i = 0; i < N; ++i ) {
+      y( i ) = 1;
     }
-  }
 
-  // Timer products.
-  Kokkos::Timer timer;
+    // Initialize x vector on host.
+    for ( int i = 0; i < M; ++i ) {
+      x( i ) = 1;
+    }
 
-  for ( int repeat = 0; repeat < nrepeat; repeat++ ) {
-    // Application: <y,Ax> = y^T*A*x
-    double result = 0;
-
-    Kokkos::parallel_reduce( "yAx", N, KOKKOS_LAMBDA ( int j, double &update ) {
-      double temp2 = 0;
-
+    // Initialize A matrix on host, note 2D indexing.
+    for ( int j = 0; j < N; ++j ) {
       for ( int i = 0; i < M; ++i ) {
-        temp2 += A( j, i ) * x( i );
+        A( j, i ) = 1;
+      }
+    }
+
+    // Timer products.
+    Kokkos::Timer timer;
+
+    for ( int repeat = 0; repeat < nrepeat; repeat++ ) {
+      // Application: <y,Ax> = y^T*A*x
+      double result = 0;
+
+      Kokkos::parallel_reduce( "yAx", N, KOKKOS_LAMBDA ( int j, double &update ) {
+        double temp2 = 0;
+
+        for ( int i = 0; i < M; ++i ) {
+          temp2 += A( j, i ) * x( i );
+        }
+
+        update += y( j ) * temp2;
+      }, result );
+
+      // Output result.
+      if ( repeat == ( nrepeat - 1 ) ) {
+        printf( "  Computed result for %d x %d is %lf\n", N, M, result );
       }
 
-      update += y( j ) * temp2;
-    }, result );
+      const double solution = (double) N * (double) M;
 
-    // Output result.
-    if ( repeat == ( nrepeat - 1 ) ) {
-      printf( "  Computed result for %d x %d is %lf\n", N, M, result );
+      if ( result != solution ) {
+        printf( "  Error: result( %lf ) != solution( %lf )\n", result, solution );
+      }
     }
 
-    const double solution = (double) N * (double) M;
+    // Calculate time.
+    double time = timer.seconds();
 
-    if ( result != solution ) {
-      printf( "  Error: result( %lf ) != solution( %lf )\n", result, solution );
-    }
-  }
+    // Calculate bandwidth.
+    // Each matrix A row (each of length M) is read once.
+    // The x vector (of length M) is read N times.
+    // The y vector (of length N) is read once.
+    // double Gbytes = 1.0e-9 * double( sizeof(double) * ( 2 * M * N + N ) );
+    double Gbytes = 1.0e-9 * double( sizeof(double) * ( M + M * N + N ) );
 
-  // Calculate time.
-  double time = timer.seconds();
-
-  // Calculate bandwidth.
-  // Each matrix A row (each of length M) is read once.
-  // The x vector (of length M) is read N times.
-  // The y vector (of length N) is read once.
-  // double Gbytes = 1.0e-9 * double( sizeof(double) * ( 2 * M * N + N ) );
-  double Gbytes = 1.0e-9 * double( sizeof(double) * ( M + M * N + N ) );
-
-  // Print results (problem size, time and bandwidth in GB/s).
-  printf( "  N( %d ) M( %d ) nrepeat ( %d ) problem( %g MB ) time( %g s ) bandwidth( %g GB/s )\n",
-          N, M, nrepeat, Gbytes * 1000, time, Gbytes * nrepeat / time );
+    // Print results (problem size, time and bandwidth in GB/s).
+    printf( "  N( %d ) M( %d ) nrepeat ( %d ) problem( %g MB ) time( %g s ) bandwidth( %g GB/s )\n",
+            N, M, nrepeat, Gbytes * 1000, time, Gbytes * nrepeat / time );
 
   }
   Kokkos::finalize();
