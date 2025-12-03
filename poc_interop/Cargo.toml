@@ -15,3 +15,12 @@ cc = "1.0"
 cxx-build = "1.0"
 templated_parser = { path = "../templated_parser/." }
 cmake = "0.1.31"
+
+
+[features]
+default = ["omp"]
+omp = []
+cuda = []
+hip = []
+sycl = []
+

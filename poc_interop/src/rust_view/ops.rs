@@ -19,13 +19,14 @@ pub fn y_ax_device<L1: LayoutType, L2: LayoutType, L3: LayoutType>(
 }
 
 pub fn dot<'a, T>(
+    r: &'a mut RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
     x: &'a RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
     y: &'a RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
 ) -> T
 where
     T: data_type::RustViewDataType<'a, T>,
 {
-    T::dot(x.get(), y.get())
+    ffi::dot(r.get, x.get(), y.get())
 }
 
 pub fn matrix_product_op<'a, L1: LayoutType, L2: LayoutType>(
@@ -108,7 +109,10 @@ pub mod tests {
         let mut data3 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
         let x = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[6], &mut data3);
 
-        let result = dot(&x, &y);
+        let mut res = [0.0];
+        let mut r = RustView::<f64, Dim1,DeviceSpace, LayoutRight>::from_shape(&[1], &mut res);
+
+        let result = dot(&mut r, &x, &y);
 
         assert_eq!(result, 91.0);
     }
@@ -133,23 +137,6 @@ pub mod tests {
         assert_eq!(mat3[&[1, 0]], 32.0_f64);
         assert_eq!(mat3[&[1, 1]], 77.0_f64);
     }
-
-    // pub fn performance_test() {
-    //     let n = 5_000;
-
-    //     let start = Instant::now();
-    //     for _ in 0..n {
-    //         matrix_product_test();
-    //     }
-    //     let duration = start.elapsed();
-
-    //     let avg_time = duration / n;
-    //     println!(
-    //         "Average time per matrix_product_test : {} ns",
-    //         avg_time.as_nanos()
-    //     );
-    //     println!("Total time elapsed : {} ns", duration.as_nanos());
-    // }
 
     pub fn performance_test() {
         let n = 1;

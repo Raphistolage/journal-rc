@@ -26,49 +26,6 @@ pub fn shared_arr_to_opaque_view(shared_arr: &SharedArrayViewMut) -> ffi::Opaque
     ffi::create_view_f64(dimensions, mem_space.into(), layout.into(), slice)
 }
 
-// pub fn create_opaque_view<'a, T>(
-//     dimensions: Vec<usize>,
-//     mem_space: MemSpace,
-//     layout: Layout,
-//     data: &'a mut [T],
-// ) -> Option<ffi::OpaqueView> {
-//     let type_id = TypeId::of::<T>();
-//     match type_id {
-//         id if id == TypeId::of::<f64>() => unsafe {
-//             let vec_data: &mut [f64] = std::mem::transmute(data);
-//             Some(ffi::create_view_f64(
-//                 dimensions,
-//                 mem_space.into(),
-//                 layout.into(),
-//                 vec_data,
-//             ))
-//         },
-//         id if id == TypeId::of::<f32>() => unsafe {
-//             let vec_data: &mut [f32] = std::mem::transmute(data);
-//             Some(ffi::create_view_f32(
-//                 dimensions,
-//                 mem_space.into(),
-//                 layout.into(),
-//                 vec_data,
-//             ))
-//         },
-
-//         id if id == TypeId::of::<i32>() => unsafe {
-//             let vec_data: &mut [i32] = std::mem::transmute(data);
-//             Some(ffi::create_view_i32(
-//                 dimensions,
-//                 mem_space.into(),
-//                 layout.into(),
-//                 vec_data,
-//             ))
-//         },
-//         _ => {
-//             println!("This type of data is not supported yet.");
-//             None
-//         }
-//     }
-// }
-
 pub fn y_ax(y: &ffi::OpaqueView, a: &ffi::OpaqueView, x: &ffi::OpaqueView) -> f64 {
     ffi::y_ax(y, a, x)
 }

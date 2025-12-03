@@ -37,6 +37,7 @@ mod ffi {
         type Layout;
 
         fn matrix_product(a: &OpaqueView, b: &OpaqueView, c: &mut OpaqueView);
+        fn dot(r: &mut OpaqueView, x: &OpaqueView, y: &OpaqueView);
 
         fn cpp_perf_test(n: i32);
 
