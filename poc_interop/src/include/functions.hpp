@@ -20,32 +20,6 @@ namespace functions {
     #endif
 
     template <typename T>
-    T dot(const OpaqueView& x, const OpaqueView& y) {
-        if (y.rank != 1 || x.rank != 1) {
-            std::cout << "Ranks : y : " << y.rank << " x: " << x.rank <<" \n";
-            throw std::runtime_error("Bad ranks of views.");
-        } else if (x.shape[0] != y.shape[0]) {
-            throw std::runtime_error("Incompatible shapes.");
-        }
-
-        auto* y_view_ptr = static_cast<Kokkos::View<T*, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(y.view->get_view());
-        auto* x_view_ptr = static_cast<Kokkos::View<T*, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(x.view->get_view());
-
-        auto y_view = *y_view_ptr;
-        auto x_view = *x_view_ptr;
-
-        int N = x.shape[0];
-
-        T result = 0;
-
-        Kokkos::parallel_reduce( N, KOKKOS_LAMBDA ( const int j, T &update ) {
-            update += y_view( j ) * x_view( j );
-        }, result );
-
-        return result;
-    }
-
-    template <typename T>
     const T& get(const OpaqueView& view, rust::Slice<const size_t> i) {
         if (view.mem_space == MemSpace::HostSpace) {
             return *static_cast<const T*>(view.view->get(i, true));

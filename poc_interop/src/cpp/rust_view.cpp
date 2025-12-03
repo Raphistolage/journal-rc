@@ -14,6 +14,33 @@ namespace rust_view {
         using DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space;
     #endif
 
+    void dot(OpaqueView& r, const OpaqueView& x, const OpaqueView& y) {
+        if (y.rank != 1 || x.rank != 1) {
+            std::cout << "Ranks : y : " << y.rank << " x: " << x.rank <<" \n";
+            throw std::runtime_error("Bad ranks of views.");
+        } else if (x.shape[0] != y.shape[0]) {
+            throw std::runtime_error("Incompatible shapes.");
+        }
+
+        auto* r_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(r.view->get_view());
+        auto* y_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(y.view->get_view());
+        auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(x.view->get_view());
+
+        auto r_view = *r_view_ptr;
+        auto y_view = *y_view_ptr;
+        auto x_view = *x_view_ptr;
+
+        int N = x.shape[0];
+
+        double result = 0;
+
+        Kokkos::parallel_reduce( N, KOKKOS_LAMBDA ( const int j, double &update ) {
+            update += y_view( j ) * x_view( j );
+        }, result );
+
+        Kokkos::deep_copy(r_view, result);
+    }
+
     double y_ax(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x) {
         if (y.rank != 1 || A.rank != 2 || x.rank != 1) {
             std::cout << "Ranks : y : " << y.rank << " A: " << A.rank << " x: " << x.rank <<" \n";
