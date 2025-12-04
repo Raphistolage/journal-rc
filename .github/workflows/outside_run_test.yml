@@ -16,8 +16,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Kokkos installation
-      run: bash kokkos-install.sh
     - name: Build
       working-directory: ./test_poc_interop
       run: cargo build --verbose
