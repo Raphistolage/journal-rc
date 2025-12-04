@@ -21,7 +21,7 @@ where
     }
 }
 
-pub fn dot<T>(arr1: &T, arr2: &T) -> ArrayBase<ViewRepr<&'static f64>, Dim<IxDynImpl>>
+pub fn dot<T>(arr1: &T, arr2: &T) -> SharedArrayView
 where
     T: ToSharedArray,
 {
@@ -29,14 +29,13 @@ where
     let shared_arr2 = arr2.to_shared_array(MemSpace::HostSpace);
 
     let shared_result = unsafe { ffi::dot(&shared_arr1, &shared_arr2) };
-
-    from_shared(&shared_result)
+    shared_result
 }
 
 pub fn matrix_vector_product<T, U>(
     arr1: &T,
     arr2: &U,
-) -> ArrayBase<ViewRepr<&'static f64>, Dim<IxDynImpl>>
+) -> SharedArrayView
 where
     T: ToSharedArray<Dim = ndarray::Ix2>,
     U: ToSharedArray<Dim = ndarray::Ix1>,
@@ -46,7 +45,7 @@ where
 
     let shared_result = unsafe { ffi::matrix_vector_product(&shared_arr1, &shared_arr2) };
 
-    from_shared(&shared_result)
+    shared_result
 }
 
 pub fn matrix_product<T>(arr1: &T, arr2: &T) -> SharedArrayView
@@ -110,7 +109,8 @@ pub mod tests {
         let arr1 = ArrayView::from_shape((2, 6), &v).unwrap();
         let arr2 = ArrayView::from_shape(6, &s).unwrap();
 
-        let result = matrix_vector_product(&arr1, &arr2);
+        let result_shared = matrix_vector_product(&arr1, &arr2);
+        let result = from_shared(&result_shared);
 
         let expected_slice = [55.0, 145.0];
         let expected = ArrayView::from_shape(2, &expected_slice)
@@ -126,7 +126,8 @@ pub mod tests {
         let arr1 = ArrayView::from_shape((6).strides(1), &v).unwrap();
         let arr2 = ArrayView::from_shape((6).strides(1), &s).unwrap();
 
-        let result = dot(&arr1, &arr2);
+        let result_shared = dot(&arr1, &arr2);
+        let result = from_shared(&result_shared);
 
         let expected_slice = [55.0];
         let expected = ArrayView::from_shape(1, &expected_slice)
