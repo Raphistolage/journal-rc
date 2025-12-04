@@ -22,9 +22,9 @@ namespace rust_view {
             throw std::runtime_error("Incompatible shapes.");
         }
 
-        auto* r_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(r.view->get_view());
-        auto* y_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(y.view->get_view());
-        auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(x.view->get_view());
+        auto* r_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, DeviceMemorySpace>*>(r.view->get_view());
+        auto* y_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, DeviceMemorySpace>*>(y.view->get_view());
+        auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, DeviceMemorySpace>*>(x.view->get_view());
 
         auto r_view = *r_view_ptr;
         auto y_view = *y_view_ptr;
@@ -49,9 +49,9 @@ namespace rust_view {
             throw std::runtime_error("Incompatible shapes.");
         }
 
-        auto* y_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(y.view->get_view());
-        auto* a_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(A.view->get_view());
-        auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(x.view->get_view());
+        auto* y_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace>*>(y.view->get_view());
+        auto* a_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace>*>(A.view->get_view());
+        auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace>*>(x.view->get_view());
 
         auto y_view = *y_view_ptr;
         auto a_view = *a_view_ptr;
@@ -83,9 +83,9 @@ namespace rust_view {
             throw std::runtime_error("Incompatible shapes.");
         }
 
-        auto* y_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(y.view->get_view());
-        auto* a_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(A.view->get_view());
-        auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(x.view->get_view());
+        auto* y_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, DeviceMemorySpace>*>(y.view->get_view());
+        auto* a_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, DeviceMemorySpace>*>(A.view->get_view());
+        auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, DeviceMemorySpace>*>(x.view->get_view());
 
         auto y_view = *y_view_ptr;
         auto a_view = *a_view_ptr;
@@ -120,9 +120,9 @@ namespace rust_view {
             throw std::runtime_error("Incompatible shapes.");
         }
 
-        auto* A_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(A.view->get_view());
-        auto* B_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutLeft, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(B.view->get_view());
-        auto* C_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, DeviceMemorySpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>*>(C.view->get_view());
+        auto* A_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, DeviceMemorySpace>*>(A.view->get_view());
+        auto* B_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutLeft, DeviceMemorySpace>*>(B.view->get_view());
+        auto* C_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, DeviceMemorySpace>*>(C.view->get_view());
 
         auto& A_view = *A_view_ptr;
         auto& B_view = *B_view_ptr;
@@ -170,13 +170,16 @@ namespace rust_view {
                     double tmp = 0;
                     // small inner loop to increase GPU work per thread
                     for(int k=0;k<128;k++){
-                        tmp += sin(A(i,j) + k*0.01) * cos(B(i,j) + k*0.02);
+
+                        tmp += Kokkos::sin(A(i,j) + k*0.01) * Kokkos::cos(B(i,j) + k*0.02);
                     }
                     C(i,j) = tmp;
                 }
             );
 
             Kokkos::fence(); // ensure completion
+
+            //TODO : verif valeurs.
 
             std::cout << "Finished GPU-friendly test\n";
         }
