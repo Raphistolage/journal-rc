@@ -292,22 +292,20 @@ extern "C" {
     }
 
     void free_shared_array(SharedArrayView &shared_arr) {
-        // std::cout << "Freeing shared array on cpp side \n";
-        // if (shared_arr.allocated_by_cpp)
-        // {
-        //     if (shared_arr.mem_space != MemSpace::HostSpace) {
-        //         std::cout << "Freeing the shared array on device \n";
-        //         Kokkos::kokkos_free(const_cast<void*>(shared_arr.ptr));
-        //     } else {
-        //         std::cout << "Freeing the shared array on host \n";
-        //         free(const_cast<void*>(shared_arr.ptr));
-        //     }
-        // }
+        if (shared_arr.allocated_by_cpp)
+        {
+            if (shared_arr.mem_space != MemSpace::HostSpace) {
+                std::cout << "Freeing the shared array mut on device \n";
+                Kokkos::kokkos_free(const_cast<void*>(shared_arr.ptr));
+            } else {
+                free(const_cast<void*>(shared_arr.ptr));
+            }
+        }
 
-        // if (shared_arr.shape_by_cpp)
-        // {
-        //     free(const_cast<size_t*>(shared_arr.shape));
-        // }
+        if (shared_arr.shape_by_cpp)
+        {
+            free(const_cast<size_t*>(shared_arr.shape));
+        }
     }
 
     void free_shared_array_mut(SharedArrayViewMut &shared_arr) {
@@ -325,6 +323,5 @@ extern "C" {
         {
             free(const_cast<size_t*>(shared_arr.shape));
         }
-        
     }
 }
