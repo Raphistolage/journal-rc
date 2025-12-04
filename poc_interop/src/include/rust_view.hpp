@@ -15,7 +15,6 @@ namespace rust_view{
         virtual void* get_view() = 0;
         virtual SharedArrayView view_to_shared() = 0;
         virtual SharedArrayViewMut view_to_shared_mut() = 0;
-
     };
 }
 
@@ -28,13 +27,6 @@ namespace rust_view {
         bool is_device;
 
         ViewHolder(const ViewType& view, bool is_device = false) : view(view), is_device(is_device) {}
-
-        ~ViewHolder() {
-            if(is_device) {
-                // Need to free the device memory space.
-                Kokkos::kokkos_free(view.data());
-            }
-        }
 
         void* get_view() {
             return &view;
@@ -89,11 +81,6 @@ namespace rust_view {
                 if constexpr (ViewType::rank() == 1) {
                     return &host_view(i[0]);
                 } else if constexpr (ViewType::rank() == 2) {
-                    // if constexpr (std::is_same<typename decltype(this.view)::value_type, int>::value) {
-                    //     Kokkos::parallel_for(this.view.extent(0), KOKKOS_LAMBDA(const int i) {
-                    //         printf("Element (%i,0) : %i \n",i,this.view(i,0));
-                    //     });
-                    // }
                     return &host_view(i[0], i[1]);
                 } else if constexpr (ViewType::rank() == 3) {
                     return &host_view(i[0], i[1], i[2]);
