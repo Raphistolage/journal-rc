@@ -152,6 +152,7 @@ namespace rust_view {
         }
     };
 
+    void dot(OpaqueView& r, const OpaqueView& x, const OpaqueView& y);
     void matrix_product(const OpaqueView& A, const OpaqueView& B, OpaqueView& C);
     double y_ax(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
     double y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);

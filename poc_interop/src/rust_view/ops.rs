@@ -19,14 +19,14 @@ pub fn y_ax_device<L1: LayoutType, L2: LayoutType, L3: LayoutType>(
 }
 
 pub fn dot<'a, T>(
-    r: &'a mut RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
-    x: &'a RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
-    y: &'a RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
-) -> T
+    r: &mut RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
+    x: &RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
+    y: &RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
+)
 where
     T: data_type::RustViewDataType<'a, T>,
 {
-    ffi::dot(r.get, x.get(), y.get())
+    ffi::dot(r.get_mut(), x.get(), y.get())
 }
 
 pub fn matrix_product_op<'a, L1: LayoutType, L2: LayoutType>(
@@ -110,11 +110,11 @@ pub mod tests {
         let x = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[6], &mut data3);
 
         let mut res = [0.0];
-        let mut r = RustView::<f64, Dim1,DeviceSpace, LayoutRight>::from_shape(&[1], &mut res);
+        let mut r = RustView::<'_, f64, Dim1,DeviceSpace, LayoutRight>::from_shape(&[1], &mut res);
 
-        let result = dot(&mut r, &x, &y);
+        dot(&mut r, &x, &y);
 
-        assert_eq!(result, 91.0);
+        assert_eq!(r[&[0]], 91.0);
     }
 
     pub fn matrix_product_test() {
