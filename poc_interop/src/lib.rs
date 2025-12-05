@@ -4,6 +4,8 @@ pub mod rust_view;
 pub mod shared_array_view;
 
 pub use common_types::*;
+pub use rust_view::*;
+pub use shared_array_view::*;
 
 #[allow(unused_imports)]
 use std::time::Instant;

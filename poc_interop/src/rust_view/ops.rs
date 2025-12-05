@@ -36,17 +36,6 @@ pub fn matrix_product_op<'a, L1: LayoutType, L2: LayoutType>(
     ffi::matrix_product(a.get(), b.get(), c.get_mut());
 }
 
-// pub fn mutable_matrix_product<U,T>(arr1: &mut U, arr2: &T, arr3: &T)
-// where
-//     T: ToSharedArray<Dim = ndarray::Ix2>,
-//     U: ToSharedArrayMut<Dim = ndarray::Ix2>,
-// {
-//     let shared_arr1 = arr1.to_shared_array_mut();
-//     let shared_arr2 = arr2.to_shared_array();
-//     let shared_arr3 = arr3.to_shared_array();
-
-//     unsafe {ffi::mutable_matrix_product(&shared_arr1, &shared_arr2, &shared_arr3)};
-// }
 
 #[cfg(test)]
 pub mod tests {
@@ -144,6 +133,5 @@ pub mod tests {
             let b = RustView::<'_, f64, Dim2, DeviceSpace, LayoutRight>::zeros(&[64*2_i32.pow(i) as usize, 64*2_i32.pow(i) as usize]);
             ffi::cpp_perf_test(a.get(), b.get(), 64*2_i32.pow(i), 64*2_i32.pow(i));
         }
-        
     }
 }
