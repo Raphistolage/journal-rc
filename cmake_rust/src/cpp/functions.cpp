@@ -70,29 +70,39 @@ int perf_y_ax( rust::Vec<rust::String> argv)
     std::cout << "Device memory space = " << typeid(Kokkos::DefaultExecutionSpace::memory_space).name() << "\n";
     std::cout << "Execution space: " << typeid(Kokkos::DefaultExecutionSpace).name() << "\n";
     std::cout << "Concurrency = " << Kokkos::DefaultExecutionSpace().concurrency() << "\n";
-    // Allocate y, x vectors and Matrix A on device.
-    using ViewVectorType = Kokkos::View<double*, Kokkos::SharedSpace>;
-    using ViewMatrixType = Kokkos::View<double**, Kokkos::SharedSpace>;
+    
+    using ViewVectorType = Kokkos::View<double*>;
+    using ViewMatrixType = Kokkos::View<double**>;
     ViewVectorType y( "y", N );
     ViewVectorType x( "x", M );
     ViewMatrixType A( "A", N, M );
 
+    // Create host mirrors of device views.
+    auto h_y = Kokkos::create_mirror_view( y );
+    auto h_x = Kokkos::create_mirror_view( x );
+    auto h_A = Kokkos::create_mirror_view( A );
+
     // Initialize y vector on host.
     for ( int i = 0; i < N; ++i ) {
-      y( i ) = 1;
+      h_y( i ) = 1;
     }
 
     // Initialize x vector on host.
     for ( int i = 0; i < M; ++i ) {
-      x( i ) = 1;
+      h_x( i ) = 1;
     }
 
-    // Initialize A matrix on host, note 2D indexing.
+    // Initialize A matrix on host.
     for ( int j = 0; j < N; ++j ) {
       for ( int i = 0; i < M; ++i ) {
-        A( j, i ) = 1;
+        h_A( j, i ) = 1;
       }
     }
+
+    // Deep copy host views to device views.
+    Kokkos::deep_copy( y, h_y );
+    Kokkos::deep_copy( x, h_x );
+    Kokkos::deep_copy( A, h_A );
 
     // Timer products.
     Kokkos::Timer timer;
