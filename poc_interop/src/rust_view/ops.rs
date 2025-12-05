@@ -138,7 +138,7 @@ pub mod tests {
     }
 
     pub fn performance_test() {
-        let n = 6;
+        let n = 8;
         for i in 0..n {
             let a = RustView::<'_, f64, Dim2, DeviceSpace, LayoutRight>::zeros(&[64*2_i32.pow(i) as usize, 64*2_i32.pow(i) as usize]);
             let b = RustView::<'_, f64, Dim2, DeviceSpace, LayoutRight>::zeros(&[64*2_i32.pow(i) as usize, 64*2_i32.pow(i) as usize]);
