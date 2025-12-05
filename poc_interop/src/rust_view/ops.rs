@@ -22,8 +22,7 @@ pub fn dot<'a, T>(
     r: &mut RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
     x: &RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
     y: &RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
-)
-where
+) where
     T: data_type::RustViewDataType<'a, T>,
 {
     ffi::dot(r.get_mut(), x.get(), y.get())
@@ -110,7 +109,7 @@ pub mod tests {
         let x = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[6], &mut data3);
 
         let mut res = [0.0];
-        let mut r = RustView::<'_, f64, Dim1,DeviceSpace, LayoutRight>::from_shape(&[1], &mut res);
+        let mut r = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[1], &mut res);
 
         dot(&mut r, &x, &y);
 
@@ -139,7 +138,12 @@ pub mod tests {
     }
 
     pub fn performance_test() {
-        let n = 8;
-        ffi::cpp_perf_test(n);
+        let n = 6;
+        for i in 0..n {
+            let a = RustView::<'_, f64, Dim2, DeviceSpace, LayoutRight>::zeros(&[64*2_i32.pow(i) as usize, 64*2_i32.pow(i) as usize]);
+            let b = RustView::<'_, f64, Dim2, DeviceSpace, LayoutRight>::zeros(&[64*2_i32.pow(i) as usize, 64*2_i32.pow(i) as usize]);
+            ffi::cpp_perf_test(a.get(), b.get(), 64*2_i32.pow(i), 64*2_i32.pow(i));
+        }
+        
     }
 }

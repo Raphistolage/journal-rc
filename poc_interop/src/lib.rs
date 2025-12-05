@@ -17,7 +17,7 @@ mod tests {
     #[test]
     fn tests_caller() {
         shared_array_view::kokkos_initialize();
-        
+
         // opaque_view tests
         opaque_view::tests::create_opaque_view_test();
         opaque_view::tests::simple_kernel_opaque_view_test();

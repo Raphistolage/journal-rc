@@ -10,7 +10,7 @@ mod test_ffi {
         dimensions: Vec<usize>,
         memSpace: MemSpace,
         layout: Layout,
-        data: &mut [T],
+        data: &[T],
     ) -> OpaqueView {
         unimplemented!();
     }

@@ -47,6 +47,11 @@ fn replace_generic(ty: &mut Type, var: &str) {
             } else {
                 replace_generic(&mut pnter.elem, var);
             }
+        },
+        Type::Tuple(tuple) => {
+            for elem in tuple.elems.iter_mut() {
+                replace_generic(elem, var);
+            }
         }
         _ => ()
     }

@@ -36,9 +36,9 @@ pub fn y_ax_device(y: &ffi::OpaqueView, a: &ffi::OpaqueView, x: &ffi::OpaqueView
 
 #[cfg(test)]
 pub mod tests {
-    use crate::rust_view::ffi::{create_view_f64, create_view_i32};
     use crate::common_types::Layout;
     use crate::common_types::MemSpace;
+    use crate::rust_view::ffi::{create_view_f64, create_view_i32};
 
     use super::*;
 

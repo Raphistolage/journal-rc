@@ -4,9 +4,9 @@ fn main() {
 
     let _ = templated_parser::bridge("src/rust_view/functions_ffi.rs");
 
-
     let mut dst_config = Config::new("Release");
-    let modifieid_dst_config = dst_config.configure_arg("-DCMAKE_BUILD_TYPE=Release")
+    let modifieid_dst_config = dst_config
+        .configure_arg("-DCMAKE_BUILD_TYPE=Release")
         .configure_arg(format!(
             "-DOUT_DIR={}",
             std::env::var("OUT_DIR").expect("out_dir not defined")
@@ -18,12 +18,13 @@ fn main() {
         .configure_arg("-DCMAKE_POSITION_INDEPENDENT_CODE=ON");
 
     #[cfg(feature = "cuda")]
-    let final_dst_config = modifieid_dst_config.configure_arg("-DKokkos_ENABLE_CUDA=ON").build_arg("KOKKOS_DEVICES=Cuda");
+    let final_dst_config = modifieid_dst_config
+        .configure_arg("-DKokkos_ENABLE_CUDA=ON")
+        .build_arg("KOKKOS_DEVICES=Cuda");
     #[cfg(feature = "omp")]
     let final_dst_config = modifieid_dst_config.build_arg("KOKKOS_DEVICES=OpenMP");
 
     let dst = final_dst_config.build();
-
 
     println!("cargo:rustc-link-search=native={}", dst.display());
     println!("cargo:rustc-link-lib=functionsFfi");

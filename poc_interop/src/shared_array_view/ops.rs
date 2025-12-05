@@ -1,5 +1,3 @@
-use ndarray::{ArrayBase, Dim, IxDynImpl, ViewRepr};
-
 use super::ffi;
 use super::handle::*;
 use super::types::*;
@@ -28,14 +26,10 @@ where
     let shared_arr1 = arr1.to_shared_array(MemSpace::HostSpace);
     let shared_arr2 = arr2.to_shared_array(MemSpace::HostSpace);
 
-    let shared_result = unsafe { ffi::dot(&shared_arr1, &shared_arr2) };
-    shared_result
+    unsafe { ffi::dot(&shared_arr1, &shared_arr2) }
 }
 
-pub fn matrix_vector_product<T, U>(
-    arr1: &T,
-    arr2: &U,
-) -> SharedArrayView
+pub fn matrix_vector_product<T, U>(arr1: &T, arr2: &U) -> SharedArrayView
 where
     T: ToSharedArray<Dim = ndarray::Ix2>,
     U: ToSharedArray<Dim = ndarray::Ix1>,
@@ -43,9 +37,7 @@ where
     let shared_arr1 = arr1.to_shared_array(MemSpace::HostSpace);
     let shared_arr2 = arr2.to_shared_array(MemSpace::HostSpace);
 
-    let shared_result = unsafe { ffi::matrix_vector_product(&shared_arr1, &shared_arr2) };
-
-    shared_result
+    unsafe { ffi::matrix_vector_product(&shared_arr1, &shared_arr2) }
 }
 
 pub fn matrix_product<T>(arr1: &T, arr2: &T) -> SharedArrayView
@@ -54,7 +46,6 @@ where
 {
     let shared_arr1 = arr1.to_shared_array(MemSpace::DeviceSpace);
     let shared_arr2 = arr2.to_shared_array(MemSpace::DeviceSpace);
-
 
     unsafe { ffi::matrix_product(&shared_arr1, &shared_arr2) }
 }
