@@ -139,7 +139,7 @@ pub mod tests {
     }
 
     pub fn performance_test() {
-        let n = 1;
+        let n = 8;
         ffi::cpp_perf_test(n);
     }
 }

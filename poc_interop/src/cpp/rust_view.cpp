@@ -89,7 +89,7 @@ namespace rust_view {
 
         auto y_view = *y_view_ptr;
         auto a_view = *a_view_ptr;
-        auto x_view = *x_view_ptr; // TODO FIX DOUBLE FREE
+        auto x_view = *x_view_ptr;
 
         int N = A.shape[0];
         int M = A.shape[1];
@@ -142,46 +142,68 @@ namespace rust_view {
     void cpp_perf_test(int n) {
         for (size_t u = 0; u < n; u++)
         {
-            using ExecSpace = Kokkos::DefaultExecutionSpace;
+            const int N = 64*std::pow(2, u);
+            const int M = 64*std::pow(2, u);
 
-            const int N = 8192; // large rows
-            const int M = 8192; // large cols
+            std::cout << "Starting timer for perf_test with matrices of size : " << N << " x " << M <<" .\n";
 
-            // Device views
-            Kokkos::View<double**, Kokkos::LayoutRight, ExecSpace> A("A", N, M);
-            Kokkos::View<double**, Kokkos::LayoutRight, ExecSpace> B("B", N, M);
-            Kokkos::View<double**, Kokkos::LayoutRight, ExecSpace> C("C", N, M);
+            Kokkos::Timer timer;
 
-            // Initialize A and B
+            Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> A("A", N, M);
+            Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::DefaultExecutionSpace::memory_space> B("B", M, N);
+            Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> C("C", N, N);
+
+            Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace> result_host("result_host", N, M);
+
             Kokkos::parallel_for(
                 "InitAB",
-                Kokkos::MDRangePolicy<ExecSpace, Kokkos::Rank<2>>({0,0}, {N,M}),
+                Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0,0}, {N,M}),
                 KOKKOS_LAMBDA(int i, int j){
-                    A(i,j) = i * 0.0001 + j * 0.0002;
-                    B(i,j) = i * 0.0003 - j * 0.0004;
+                    A(i,j) = 1.0*(i + j);
+                    B(i,j) = 2.0*(i + j);
                 }
             );
 
-            // Heavy computation: C = sin(A) + cos(B)
             Kokkos::parallel_for(
                 "ComputeC",
-                Kokkos::MDRangePolicy<ExecSpace, Kokkos::Rank<2>>({0,0}, {N,M}),
+                Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0,0}, {N,M}),
                 KOKKOS_LAMBDA(int i, int j){
-                    double tmp = 0;
-                    // small inner loop to increase GPU work per thread
-                    for(int k=0;k<128;k++){
-
-                        tmp += Kokkos::sin(A(i,j) + k*0.01) * Kokkos::cos(B(i,j) + k*0.02);
+                    double r = 0;
+                    for (size_t k = 0; k < A.extent(1); k++)
+                    {
+                        r += A(i,k)*B(k,j);
                     }
-                    C(i,j) = tmp;
+                    C(i,j) = r;
                 }
             );
 
-            Kokkos::fence(); // ensure completion
+            Kokkos::fence();
 
-            //TODO : verif valeurs.
+            std::cout << "Finished matrix product of size : " << N << " : " << M << " in " << timer.seconds() << " seconds. \n";
 
-            std::cout << "Finished GPU-friendly test\n";
+            Kokkos::deep_copy(result_host, C);
+            // Kokkos::View<bool[1], Kozkkos::HostSpace> flag("flag");
+            // flag(0) = true;
+
+            // Kokkos::parallel_for(
+            //     Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0,0}, {N,M}),
+            //     KOKKOS_LAMBDA(int i, int j){
+            //         double ref = 0.0;
+            //         for (int k = 0; k < M; k++) {
+            //             ref += (i + k) * 2.0 * (k + j);
+            //         }
+            //         if (result_host(i, j) != ref) {
+            //             flag(0) = false;
+            //             break;
+            //         }
+            //     }
+            // );
+
+            // Kokkos::fence();
+
+            // bool is_result_correct = flag(0);
+
+            std::cout << "The result of line 1 is  : " << result_host(0,0) << " , " << result_host(0,1) << " , " << result_host(0,2) << " , " << result_host(0,3) << " , " << result_host(0,4) << " , " << result_host(0,5) << " , " << result_host(0,6) << " \n";
         }
         
     }
