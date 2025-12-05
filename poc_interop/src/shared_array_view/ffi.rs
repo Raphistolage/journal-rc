@@ -9,8 +9,16 @@ unsafe extern "C" {
         shared_arr1: &mut SharedArrayViewMut,
         shared_arr2: &SharedArrayView,
     ) -> Errors;
-    pub unsafe fn get_device_ptr(data_ptr: *const c_void, array_size: usize, data_size: i32) -> *const c_void;
-    pub unsafe fn get_device_ptr_mut(data_ptr: *mut c_void, array_size: usize, data_size: i32) -> *mut c_void;
+    pub unsafe fn get_device_ptr(
+        data_ptr: *const c_void,
+        array_size: usize,
+        data_size: i32,
+    ) -> *const c_void;
+    pub unsafe fn get_device_ptr_mut(
+        data_ptr: *mut c_void,
+        array_size: usize,
+        data_size: i32,
+    ) -> *mut c_void;
     pub unsafe fn dot(
         shared_arr1: &SharedArrayView,
         shared_arr2: &SharedArrayView,

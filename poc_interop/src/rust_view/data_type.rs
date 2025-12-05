@@ -1,17 +1,15 @@
 use std::fmt::Debug;
 
-use crate::{
-    Layout, MemSpace,
-};
+use crate::{Layout, MemSpace};
 
 use super::{OpaqueView, ffi};
 
-pub trait RustViewDataType<'a, T>: Debug {
+pub trait RustViewDataType<'a, T>: Debug + Default + Clone + Copy {
     fn create_opaque_view(
         dimensions: Vec<usize>,
         mem_space: MemSpace,
         layout: Layout,
-        data: &'a mut [T],
+        data: &[T],
     ) -> OpaqueView;
 }
 
@@ -20,7 +18,7 @@ impl<'a> RustViewDataType<'a, f64> for f64 {
         dimensions: Vec<usize>,
         mem_space: MemSpace,
         layout: Layout,
-        data: &'a mut [f64],
+        data: &[f64],
     ) -> OpaqueView {
         ffi::create_view_f64(dimensions, mem_space.into(), layout.into(), data)
     }
@@ -31,7 +29,7 @@ impl<'a> RustViewDataType<'a, f32> for f32 {
         dimensions: Vec<usize>,
         mem_space: MemSpace,
         layout: Layout,
-        data: &'a mut [f32],
+        data: &[f32],
     ) -> OpaqueView {
         ffi::create_view_f32(dimensions, mem_space.into(), layout.into(), data)
     }
@@ -42,7 +40,7 @@ impl<'a> RustViewDataType<'a, i32> for i32 {
         dimensions: Vec<usize>,
         mem_space: MemSpace,
         layout: Layout,
-        data: &'a mut [i32],
+        data: &[i32],
     ) -> OpaqueView {
         ffi::create_view_i32(dimensions, mem_space.into(), layout.into(), data)
     }

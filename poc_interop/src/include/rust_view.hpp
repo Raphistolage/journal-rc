@@ -144,6 +144,6 @@ namespace rust_view {
     double y_ax(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
     double y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
 
-    void cpp_perf_test(int n);
+    void cpp_perf_test(const OpaqueView& a_opaque, const OpaqueView& b_opaque, int n, int m);
     // void deep_copy(const RustViewWrapper& view1, const RustViewWrapper& view2);
 }

@@ -139,73 +139,54 @@ namespace rust_view {
         );
     }
 
-    void cpp_perf_test(int n) {
-        for (size_t u = 0; u < n; u++)
-        {
-            const int N = 64*std::pow(2, u);
-            const int M = 64*std::pow(2, u);
+    void cpp_perf_test(const OpaqueView& a_opaque, const OpaqueView& b_opaque, int n, int m) {
 
-            std::cout << "Starting timer for perf_test with matrices of size : " << N << " x " << M <<" .\n";
+        const int N = n;
+        const int M = m;
 
-            Kokkos::Timer timer;
+        std::cout << "Starting timer for perf_test with matrices of size : " << N << " x " << M <<" .\n";
 
-            Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> A("A", N, M);
-            Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::DefaultExecutionSpace::memory_space> B("B", M, N);
-            Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> C("C", N, N);
+        Kokkos::Timer timer;
 
-            Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace> result_host("result_host", N, M);
+        auto* A_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, DeviceMemorySpace>*>(a_opaque.view->get_view());
+        auto* B_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutLeft, DeviceMemorySpace>*>(b_opaque.view->get_view());
 
-            Kokkos::parallel_for(
-                "InitAB",
-                Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0,0}, {N,M}),
-                KOKKOS_LAMBDA(int i, int j){
-                    A(i,j) = 1.0*(i + j);
-                    B(i,j) = 2.0*(i + j);
+        auto& A = *A_view_ptr;
+        auto& B = *B_view_ptr;
+
+        Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> C("C", N, N);
+
+        Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace> result_host("result_host", N, M);
+
+        Kokkos::parallel_for(
+            "InitAB",
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0,0}, {N,M}),
+            KOKKOS_LAMBDA(int i, int j){
+                A(i,j) = 1.0*(i + j);
+                B(i,j) = 2.0*(i + j);
+            }
+        );
+
+        Kokkos::parallel_for(
+            "ComputeC",
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0,0}, {N,M}),
+            KOKKOS_LAMBDA(int i, int j){
+                double r = 0;
+                for (size_t k = 0; k < A.extent(1); k++)
+                {
+                    r += A(i,k)*B(k,j);
                 }
-            );
+                C(i,j) = r;
+            }
+        );
 
-            Kokkos::parallel_for(
-                "ComputeC",
-                Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0,0}, {N,M}),
-                KOKKOS_LAMBDA(int i, int j){
-                    double r = 0;
-                    for (size_t k = 0; k < A.extent(1); k++)
-                    {
-                        r += A(i,k)*B(k,j);
-                    }
-                    C(i,j) = r;
-                }
-            );
+        Kokkos::fence();
 
-            Kokkos::fence();
+        std::cout << "Finished matrix product of size : " << N << " : " << M << " in " << timer.seconds() << " seconds. \n";
 
-            std::cout << "Finished matrix product of size : " << N << " : " << M << " in " << timer.seconds() << " seconds. \n";
+        Kokkos::deep_copy(result_host, C);
 
-            Kokkos::deep_copy(result_host, C);
-            // Kokkos::View<bool[1], Kozkkos::HostSpace> flag("flag");
-            // flag(0) = true;
-
-            // Kokkos::parallel_for(
-            //     Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0,0}, {N,M}),
-            //     KOKKOS_LAMBDA(int i, int j){
-            //         double ref = 0.0;
-            //         for (int k = 0; k < M; k++) {
-            //             ref += (i + k) * 2.0 * (k + j);
-            //         }
-            //         if (result_host(i, j) != ref) {
-            //             flag(0) = false;
-            //             break;
-            //         }
-            //     }
-            // );
-
-            // Kokkos::fence();
-
-            // bool is_result_correct = flag(0);
-
-            std::cout << "The result of line 1 is  : " << result_host(0,0) << " , " << result_host(0,1) << " , " << result_host(0,2) << " , " << result_host(0,3) << " , " << result_host(0,4) << " , " << result_host(0,5) << " , " << result_host(0,6) << " \n";
-        }
-        
+        std::cout << "The result of line 1 is  : " << result_host(0,0) << " , " << result_host(0,1) << " , " << result_host(0,2) << " , " << result_host(0,3) << " , " << result_host(0,4) << " , " << result_host(0,5) << " , " << result_host(0,6) << " \n";   
     }
 
 }

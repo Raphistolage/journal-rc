@@ -39,7 +39,7 @@ mod ffi {
         fn matrix_product(a: &OpaqueView, b: &OpaqueView, c: &mut OpaqueView);
         fn dot(r: &mut OpaqueView, x: &OpaqueView, y: &OpaqueView);
 
-        fn cpp_perf_test(n: i32);
+        fn cpp_perf_test(a_opaque: &OpaqueView, b_opaque: &OpaqueView, n: i32, m: i32);
 
         fn y_ax(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
         fn y_ax_device(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;

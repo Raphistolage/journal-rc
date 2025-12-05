@@ -48,6 +48,20 @@ impl<'a, T: RustViewDataType<'a, T>, D: Dimension, M: MemorySpace, L: LayoutType
         )
     }
 
+    pub fn zeros<U: Into<D>>(shapes: U) -> Self {
+        let mem_space = M::default();
+        let layout = L::default();
+        let shapes: D = shapes.into();
+        let mut v = vec![T::default(); shapes.size()];
+        Self(
+            T::create_opaque_view(shapes.into(), mem_space.to_space(), layout.to_layout(), v.as_mut_slice()),
+            std::marker::PhantomData,
+            std::marker::PhantomData,
+            std::marker::PhantomData,
+            std::marker::PhantomData,
+        )
+    }
+
     pub fn get(&self) -> &OpaqueView {
         &self.0
     }

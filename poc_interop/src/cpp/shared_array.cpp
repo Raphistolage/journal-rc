@@ -178,7 +178,6 @@ extern "C" {
             throw std::runtime_error("Unsupported data type.");
             break;
         }
-        
     }
     
     SharedArrayView matrix_product(const SharedArrayView &shared__arr1, const SharedArrayView &shared_arr2) {
@@ -261,7 +260,6 @@ extern "C" {
             );
         }
     }
-
 
     void cpp_var_rust_func_test() {
         double data[6] = {0.0,1.0,2.0,3.0,4.0,5.0};

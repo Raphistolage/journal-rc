@@ -8,11 +8,15 @@ use super::ffi;
 use super::types::*;
 
 pub fn kokkos_initialize() {
-    unsafe {ffi::kokkos_initialize();}
+    unsafe {
+        ffi::kokkos_initialize();
+    }
 }
 
 pub fn kokkos_finalize() {
-    unsafe {ffi::kokkos_finalize();}
+    unsafe {
+        ffi::kokkos_finalize();
+    }
 }
 
 pub trait RustDataType {
@@ -34,7 +38,6 @@ impl RustDataType for i32 {
         DataType::Signed
     }
 }
-
 
 pub trait ToSharedArray {
     type Dim: ndarray::Dimension;
@@ -68,7 +71,10 @@ where
     }
 }
 
-pub fn to_shared_array_mut<'a, T, D>(arr: &'a mut ndarray::ArrayViewMut<T, D>, mem_space: MemSpace) -> SharedArrayViewMut
+pub fn to_shared_array_mut<'a, T, D>(
+    arr: &'a mut ndarray::ArrayViewMut<T, D>,
+    mem_space: MemSpace,
+) -> SharedArrayViewMut
 where
     D: ndarray::Dimension + 'a,
     T: RustDataType,
@@ -93,22 +99,24 @@ where
         }
     } else {
         SharedArrayViewMut {
-            ptr: unsafe{ffi::get_device_ptr_mut(data_ptr, array_size, size_of::<T>() as i32)},
+            ptr: unsafe { ffi::get_device_ptr_mut(data_ptr, array_size, size_of::<T>() as i32) },
             size: size_of::<T>() as i32,
             data_type: T::data_type(),
             rank: rank as i32,
             shape,
-            mem_space: mem_space,
+            mem_space,
             layout: Layout::LayoutRight,
             is_mut: true,
             allocated_by_cpp: true,
             shape_by_cpp: false,
         }
     }
-
 }
 
-pub fn to_shared_array<'a, T, D>(arr: &'a ndarray::ArrayView<T, D>, mem_space: MemSpace) -> SharedArrayView
+pub fn to_shared_array<'a, T, D>(
+    arr: &'a ndarray::ArrayView<T, D>,
+    mem_space: MemSpace,
+) -> SharedArrayView
 where
     D: ndarray::Dimension + 'a,
     T: RustDataType,
@@ -117,7 +125,7 @@ where
     let shape = arr.shape().as_ptr();
     let data_ptr = arr.as_ptr() as *const c_void;
     let array_size = arr.len();
-    
+
     if mem_space == MemSpace::HostSpace {
         SharedArrayView {
             ptr: data_ptr,
@@ -133,19 +141,18 @@ where
         }
     } else {
         SharedArrayView {
-            ptr: unsafe {ffi::get_device_ptr(data_ptr, array_size, size_of::<T>() as i32)},
+            ptr: unsafe { ffi::get_device_ptr(data_ptr, array_size, size_of::<T>() as i32) },
             size: size_of::<T>() as i32,
             data_type: T::data_type(),
             rank: rank as i32,
             shape,
-            mem_space: mem_space,
+            mem_space,
             layout: Layout::LayoutRight,
             is_mut: false,
             allocated_by_cpp: true,
             shape_by_cpp: false,
         }
     }
-    
 }
 
 pub fn from_shared(
@@ -178,12 +185,16 @@ pub fn from_shared_mut(
 
 impl Drop for SharedArrayView {
     fn drop(&mut self) {
-        unsafe {ffi::free_shared_array(self);}
+        unsafe {
+            ffi::free_shared_array(self);
+        }
     }
 }
 
 impl Drop for SharedArrayViewMut {
     fn drop(&mut self) {
-        unsafe {ffi::free_shared_array_mut(self);}
+        unsafe {
+            ffi::free_shared_array_mut(self);
+        }
     }
 }
