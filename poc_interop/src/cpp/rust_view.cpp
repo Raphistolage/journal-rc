@@ -112,7 +112,7 @@ namespace rust_view {
         return result;
     }
 
-    void many_y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x, int L) {
+    double many_y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x, int L) {
         if (y.rank != 1 || A.rank != 2 || x.rank != 1) {
             std::cout << "Ranks : y : " << y.rank << " A: " << A.rank << " x: " << x.rank <<" \n";
             throw std::runtime_error("Bad ranks of views.");
@@ -131,52 +131,30 @@ namespace rust_view {
         auto a_view = *a_view_ptr;
         auto x_view = *x_view_ptr;
 
-        Kokkos::parallel_for("many_y_ax_team",
-        Kokkos::TeamPolicy<>(L, Kokkos::AUTO()),
-        KOKKOS_LAMBDA(const Kokkos::TeamPolicy<>::member_type& team) {
-            double result_iter = 0.0;
+        Kokkos::View<double[1]> result_view("final_result");
 
-            Kokkos::parallel_reduce(
-                Kokkos::TeamThreadRange(team, N),
-                [&](int j, double& update) {
+        Kokkos::parallel_for(L, KOKKOS_LAMBDA(int l) {
+            double result = 0;
 
-                    double temp2 = 0.0;
+            for(int j=0; j<N; ++j) {
+                double tmp = 0;
+                for(int i=0; i<M; ++i)
+                    tmp += a_view(j,i) * x_view(i);
+                result += y_view(j) * tmp;
+            }
 
-                    Kokkos::parallel_reduce(
-                        Kokkos::ThreadVectorRange(team, M),
-                        [&](int i, double& inner) {
-                            inner += a_view(j,i) * x_view(i);
-                        },
-                        temp2
-                    );
-
-                    update += y_view(j) * temp2;
-                },
-                result_iter
-            );
-
-            Kokkos::parallel_for(
-                Kokkos::TeamThreadRange(team, N),
-                [&](int j) {
-                    y_view(j) += 1.0;
-                }
-            );
-
-            Kokkos::parallel_for(
-                Kokkos::TeamThreadRange(team, M),
-                [&](int i) {
-                    x_view(i) += 1.0;
-                }
-            );
-
-            Kokkos::parallel_for(
-                Kokkos::TeamThreadRange(team, N),
-                [&](int j) {
-                    for(int i = 0; i < M; i++)
-                        a_view(j,i) += 1.0;
-                }
-            );
+            if(l == L-1) {
+                result_view(0) = result;
+                Kokkos::printf("FInal result before passing : %f", result);
+            }
         });
+                   
+        Kokkos::fence();
+
+        double* final_result = new double[1];
+        Kokkos::View<double*, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>final_unmanaged(final_result);
+        Kokkos::deep_copy(final_unmanaged, result_view);
+        return *final_result;
     }
 
     void matrix_product(const OpaqueView& A, const OpaqueView& B, OpaqueView& C) {
