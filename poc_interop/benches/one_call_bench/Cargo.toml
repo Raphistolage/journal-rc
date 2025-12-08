@@ -1,8 +1,8 @@
 [package]
-name = "many_calls_bench"
+name = "one_call_bench"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-poc_interop = { path = "../../." }
+poc_interop = { path = "../../."}
 ndarray = "0.16.1"
