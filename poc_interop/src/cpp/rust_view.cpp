@@ -131,7 +131,7 @@ namespace rust_view {
         auto a_view = *a_view_ptr;
         auto x_view = *x_view_ptr;
 
-        Kokkos::View<double[1]> final_result_view("final_result");
+        Kokkos::View<double[1]> result_view("final_result");
 
         Kokkos::parallel_for(L, KOKKOS_LAMBDA(int l) {
             double result = 0;
@@ -143,14 +143,8 @@ namespace rust_view {
                 result += y_view(j) * tmp;
             }
 
-            for(int j=0; j<N; ++j) y_view(j) += 1;
-            for(int i=0; i<M; ++i) x_view(i) += 1;
-            for(int j=0; j<N; ++j)
-                for(int i=0; i<M; ++i)
-                    a_view(j,i) += 1;
-
             if(l == L-1) {
-                final_result_view(0) = result;
+                result_view(0) = result;
                 Kokkos::printf("FInal result before passing : %f", result);
             }
         });
@@ -159,7 +153,7 @@ namespace rust_view {
 
         double* final_result = new double[1];
         Kokkos::View<double*, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>final_unmanaged(final_result);
-        Kokkos::deep_copy(final_unmanaged, final_result_view);
+        Kokkos::deep_copy(final_unmanaged, result_view);
         return *final_result;
     }
 
