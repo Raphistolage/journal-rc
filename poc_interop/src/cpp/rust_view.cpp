@@ -143,7 +143,6 @@ namespace rust_view {
                 result += y_view(j) * tmp;
             }
 
-            // Updates
             for(int j=0; j<N; ++j) y_view(j) += 1;
             for(int i=0; i<M; ++i) x_view(i) += 1;
             for(int j=0; j<N; ++j)
@@ -152,6 +151,7 @@ namespace rust_view {
 
             if(l == L-1) {
                 final_result_view(0) = result;
+                Kokkos::printf("FInal result before passing : %f", result);
             }
         });
                    
