@@ -18,6 +18,15 @@ pub fn y_ax_device<L1: LayoutType, L2: LayoutType, L3: LayoutType>(
     ffi::y_ax_device(y.get(), a.get(), x.get())
 }
 
+pub fn many_y_ax_device<L1: LayoutType, L2: LayoutType, L3: LayoutType>(
+    y: &RustView<'_, f64, Dim1, DeviceSpace, L1>,
+    a: &RustView<'_, f64, Dim2, DeviceSpace, L2>,
+    x: &RustView<'_, f64, Dim1, DeviceSpace, L3>,
+    L: i32) 
+{
+    ffi::many_y_ax_device(y.get(), a.get(), x.get(), L);
+}
+
 pub fn dot<'a, T>(
     r: &mut RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
     x: &RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
