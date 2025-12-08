@@ -8,7 +8,7 @@ use ndarray::{ArrayView, ArrayView1, ArrayView2};
 fn main() {
     println!("One call with Kokkos kernel :");
     let timer = Instant::now();
-    const N: i32 = 5_000_000;
+    const N: i32 = 500_000_000;
     kokkos_initialize();
     {   
         let mut data1 = [2.0, 2.0, 3.0, 4.0, 5.0,2.0, 2.0, 3.0, 4.0, 5.0,2.0, 2.0, 3.0, 4.0, 5.0,2.0, 2.0, 3.0, 4.0, 5.0,2.0, 2.0, 3.0, 4.0, 5.0,2.0, 2.0, 3.0, 4.0, 5.0];

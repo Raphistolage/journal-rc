@@ -133,54 +133,25 @@ namespace rust_view {
 
         Kokkos::View<double[1]> final_result_view("final_result");
 
-        Kokkos::parallel_for("many_y_ax_team",
-        Kokkos::TeamPolicy<>(L, Kokkos::AUTO()),
-        KOKKOS_LAMBDA(const Kokkos::TeamPolicy<>::member_type& team) {
-            double result_iter = 0.0;
+        Kokkos::parallel_for(L, KOKKOS_LAMBDA(int l) {
+            double result = 0;
 
-            Kokkos::parallel_reduce(
-                Kokkos::TeamThreadRange(team, N),
-                [&](int j, double& update) {
+            for(int j=0; j<N; ++j) {
+                double tmp = 0;
+                for(int i=0; i<M; ++i)
+                    tmp += a_view(j,i) * x_view(i);
+                result += y_view(j) * tmp;
+            }
 
-                    double temp2 = 0.0;
+            // Updates
+            for(int j=0; j<N; ++j) y_view(j) += 1;
+            for(int i=0; i<M; ++i) x_view(i) += 1;
+            for(int j=0; j<N; ++j)
+                for(int i=0; i<M; ++i)
+                    a_view(j,i) += 1;
 
-                    Kokkos::parallel_reduce(
-                        Kokkos::ThreadVectorRange(team, M),
-                        [&](int i, double& inner) {
-                            inner += a_view(j,i) * x_view(i);
-                        },
-                        temp2
-                    );
-
-                    update += y_view(j) * temp2;
-                },
-                result_iter
-            );
-
-            Kokkos::parallel_for(
-                Kokkos::TeamThreadRange(team, N),
-                [&](int j) {
-                    y_view(j) += 1.0;
-                }
-            );
-
-            Kokkos::parallel_for(
-                Kokkos::TeamThreadRange(team, M),
-                [&](int i) {
-                    x_view(i) += 1.0;
-                }
-            );
-
-            Kokkos::parallel_for(
-                Kokkos::TeamThreadRange(team, N),
-                [&](int j) {
-                    for(int i = 0; i < M; i++)
-                        a_view(j,i) += 1.0;
-                }
-            );
-
-            if (team.league_rank() == L - 1) {
-                final_result_view(0) = result_iter;
+            if(l == L-1) {
+                final_result_view(0) = result;
             }
         });
                    
