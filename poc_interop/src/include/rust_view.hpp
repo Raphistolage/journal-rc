@@ -143,7 +143,7 @@ namespace rust_view {
     void matrix_product(const OpaqueView& A, const OpaqueView& B, OpaqueView& C);
     double y_ax(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
     double y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x);
-    void many_y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x, int L);
+    double many_y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x, int L);
 
     void cpp_perf_test(const OpaqueView& a_opaque, const OpaqueView& b_opaque, int n, int m);
     // void deep_copy(const RustViewWrapper& view1, const RustViewWrapper& view2);

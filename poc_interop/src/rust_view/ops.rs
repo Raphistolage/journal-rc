@@ -22,9 +22,9 @@ pub fn many_y_ax_device<L1: LayoutType, L2: LayoutType, L3: LayoutType>(
     y: &RustView<'_, f64, Dim1, DeviceSpace, L1>,
     a: &RustView<'_, f64, Dim2, DeviceSpace, L2>,
     x: &RustView<'_, f64, Dim1, DeviceSpace, L3>,
-    L: i32) 
+    L: i32) -> f64
 {
-    ffi::many_y_ax_device(y.get(), a.get(), x.get(), L);
+    ffi::many_y_ax_device(y.get(), a.get(), x.get(), L)
 }
 
 pub fn dot<'a, T>(

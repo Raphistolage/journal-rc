@@ -112,7 +112,7 @@ namespace rust_view {
         return result;
     }
 
-    void many_y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x, int L) {
+    double many_y_ax_device(const OpaqueView& y, const OpaqueView& A, const OpaqueView& x, int L) {
         if (y.rank != 1 || A.rank != 2 || x.rank != 1) {
             std::cout << "Ranks : y : " << y.rank << " A: " << A.rank << " x: " << x.rank <<" \n";
             throw std::runtime_error("Bad ranks of views.");
@@ -130,6 +130,8 @@ namespace rust_view {
         auto y_view = *y_view_ptr;
         auto a_view = *a_view_ptr;
         auto x_view = *x_view_ptr;
+
+        Kokkos::View<double[1]> final_result_view("final_result");
 
         Kokkos::parallel_for("many_y_ax_team",
         Kokkos::TeamPolicy<>(L, Kokkos::AUTO()),
@@ -176,7 +178,18 @@ namespace rust_view {
                         a_view(j,i) += 1.0;
                 }
             );
+
+            if (team.league_rank() == L - 1) {
+                final_result_view(0) = result_iter;
+            }
         });
+                   
+        Kokkos::fence();
+
+        double* final_result = new double[1];
+        Kokkos::View<double*, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>final_unmanaged(final_result);
+        Kokkos::deep_copy(final_unmanaged, final_result_view);
+        return *final_result;
     }
 
     void matrix_product(const OpaqueView& A, const OpaqueView& B, OpaqueView& C) {
