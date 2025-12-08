@@ -8,4 +8,4 @@ poc_interop = { path = "../../."}
 ndarray = "0.16.1"
 
 [features]
-cuda = ["poc_interop:cuda"]
+cuda = ["poc_interop/cuda"]
