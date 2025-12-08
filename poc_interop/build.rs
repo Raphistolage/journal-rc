@@ -17,12 +17,13 @@ fn main() {
         ))
         .configure_arg("-DCMAKE_POSITION_INDEPENDENT_CODE=ON");
 
+    #[cfg(feature = "omp")]
+    let final_dst_config = modifieid_dst_config.build_arg("KOKKOS_DEVICES=OpenMP");
     #[cfg(feature = "cuda")]
     let final_dst_config = modifieid_dst_config
         .configure_arg("-DKokkos_ENABLE_CUDA=ON")
         .build_arg("KOKKOS_DEVICES=Cuda");
-    #[cfg(feature = "omp")]
-    let final_dst_config = modifieid_dst_config.build_arg("KOKKOS_DEVICES=OpenMP");
+
 
     let dst = final_dst_config.build();
 

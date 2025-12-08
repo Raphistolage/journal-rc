@@ -43,6 +43,7 @@ mod ffi {
 
         fn y_ax(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
         fn y_ax_device(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView) -> f64;
+        fn many_y_ax_device(y: &OpaqueView, a: &OpaqueView, x: &OpaqueView, L: i32);
     }
 }
 
