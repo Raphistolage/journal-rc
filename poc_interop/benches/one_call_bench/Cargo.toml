@@ -4,8 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-poc_interop = { path = "../../."}
+poc_interop = { path = "../../.", default-features = false}
 ndarray = "0.16.1"
 
 [features]
 cuda = ["poc_interop/cuda"]
+omp = ["poc_interop/omp"]
