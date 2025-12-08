@@ -6,3 +6,6 @@ edition = "2024"
 [dependencies]
 poc_interop = { path = "../../."}
 ndarray = "0.16.1"
+
+[features]
+cuda = ["poc_interop:cuda"]
