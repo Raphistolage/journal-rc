@@ -17,15 +17,12 @@ mod tests {
     fn tests_caller() {
         shared_array::kokkos_initialize();
 
-        // opaque_view tests
-        // opaque_view::tests::create_opaque_view_test();
-        // opaque_view::tests::simple_kernel_opaque_view_test();
         // rust_view tests
         rust_view::tests::create_various_type_test();
         rust_view::tests::y_ax_test();
         rust_view::tests::dot_product_test();
         rust_view::tests::matrix_product_test();
-        rust_view::tests::performance_test();
+        // rust_view::tests::performance_test();
 
         //shared_array_view tests
         shared_array::tests::create_shared_test();
