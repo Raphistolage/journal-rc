@@ -1,0 +1,12 @@
+[package]
+name = "one_call_bench"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+krokkos = { path = "../../.", default-features = false}
+ndarray = "0.16.1"
+
+[features]
+cuda = ["krokkos/cuda"]
+omp = ["krokkos/omp"]

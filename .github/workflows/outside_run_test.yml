@@ -17,8 +17,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build
-      working-directory: ./test_poc_interop
+      working-directory: ./test_krokkos
       run: cargo build --verbose
-    - name: Run extern proj using poc_interop
-      working-directory: ./test_poc_interop
+    - name: Run extern proj using krokkos
+      working-directory: ./test_krokkos
       run: cargo run --verbose
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
