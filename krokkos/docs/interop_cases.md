@@ -4,7 +4,7 @@
 - [x] Instantiate Rust variable (that implements toShared) 
     - cast to SharedArray (non-owning)
     - call C++ function on it 
-    - cast it into Kokkos::mdspan on Host (non-owning)
+    - cast it into std::mdspan on Host (non-owning)
     - call Kokkos kernel on it (ExecSpace = HostSpace) 
     - read modified value from rust.
 
@@ -16,7 +16,7 @@ https://github.com/Raphistolage/journal-rc/blob/e8c6f2e592f050d2f19661df79695b1c
     - cast to SharedArrayMut (non-owning, mutable) or ArrayView (owning, consuming the variable)
     - move the data to device 
     - call C++ function on it 
-    - cast it into Kokkos::View on Device or Kokkos::mdspan on Host (own a copy on device)
+    - cast it into Kokkos::View on Device or std::mdspan on Host (own a copy on device)
     - call Kokkos kernel on it (ExecSpace = Cuda,HIP...) 
     - copy to SharedArrayMut (non-owning) or cast to ArrayView (owning)
     - read modified value from Rust OR receive new ArrayView on rust side.
@@ -98,7 +98,7 @@ return func(shared_arr1, shared_arr2);
 }
 ```
 
-- [x] Instantiate Kokkos::mdspan (non-owning) on C++ side with some data.
+- [x] Instantiate std::mdspan (non-owning) on C++ side with some data.
     - cast to SharedArray (toShared, non-owning) 
     - call Rust function on it 
     - cast it into ndarray (or anything that implements fromShared, non-owning) 
@@ -107,7 +107,7 @@ return func(shared_arr1, shared_arr2);
 
 https://github.com/Raphistolage/journal-rc/blob/173ff2285faebba416d71ba1ce5a83c143943b48/poc_interop/src/cpp/mdspan_interop.cpp#L325-L336
 
-- [x] Instantiate Kokkos::mdspan (non-owning) on C++ side with some data.
+- [x] Instantiate std::mdspan (non-owning) on C++ side with some data.
     - cast to SharedArrayMut (toSharedMut, non-owning, mutable) 
     - call Rust function on it 
     - cast it into ndarray (or anything that implements fromSharedMut, non-owning, mutable) 
