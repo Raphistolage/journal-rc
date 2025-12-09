@@ -22,7 +22,16 @@ jobs:
     - name: Run extern proj using krokkos
       working-directory: ./test_krokkos
       run: cargo run --verbose
-    - name: Upload coverage reports to Codecov
+    - name: Set up Node
+      uses: actions/setup-node@v4
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run tests
+      run: npx jest --coverage
+
+    - name: Upload results to Codecov
       uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
