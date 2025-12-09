@@ -1,4 +1,5 @@
-use krokkos::{Dim1, Dim2, DeviceSpace, LayoutRight, RustView, many_y_ax_device, kokkos_finalize, kokkos_initialize};
+use krokkos::rust_view::{Dim1, Dim2, DeviceSpace, LayoutRight, RustView, y_ax_device,};
+use krokkos::{kokkos_finalize, kokkos_initialize};
 
 use std::time::Instant;
 use ndarray::{ArrayView, ArrayView1, ArrayView2};
@@ -19,7 +20,7 @@ fn main() {
         let mut data3 = [4.0, 2.0,4.0, 2.0,4.0, 2.0,4.0, 2.0,4.0, 2.0,4.0, 2.0,4.0, 2.0,4.0, 2.0,4.0, 2.0,4.0, 2.0];
         let x = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[20], &mut data3);
 
-        let result = many_y_ax_device(&y, &a, &x, N);
+        let _ = many_y_ax_device(&y, &a, &x, N);
         println!("Result final : {}", result);
     }
     kokkos_finalize();

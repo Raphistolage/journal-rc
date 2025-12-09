@@ -1,4 +1,5 @@
-use krokkos::{Dim1, Dim2, DeviceSpace, LayoutRight, RustView, y_ax_device, kokkos_finalize, kokkos_initialize};
+use krokkos::rust_view::{Dim1, Dim2, DeviceSpace, LayoutRight, RustView, y_ax_device,};
+use krokkos::{kokkos_finalize, kokkos_initialize};
 
 use std::time::Instant;
 use ndarray::{ArrayView, ArrayView1, ArrayView2};
@@ -23,12 +24,12 @@ fn main() {
     for i in 0..N
     {   
         let data1 = [2.0+(i as f64), 2.0+(i as f64), 3.0+(i as f64), 4.0+(i as f64), 5.0+(i as f64)];
-        let y = ArrayView::from_shape((5), &data1).unwrap();
+        let y = ArrayView::from_shape(5, &data1).unwrap();
         let data2 = [3.0+(i as f64), 2.0+(i as f64), 3.0+(i as f64), 4.0+(i as f64), 5.0+(i as f64), 6.0+(i as f64), 7.0+(i as f64), 8.0+(i as f64), 9.0+(i as f64), 10.0+(i as f64)];
         let a = ArrayView::from_shape((5,2), &data2).unwrap();
         let data3 = [4.0+(i as f64), 2.0+(i as f64)];
-        let x = ArrayView::from_shape((2), &data3).unwrap();
-        let result = y_ax_rust(&y, &a, &x);
+        let x = ArrayView::from_shape(2, &data3).unwrap();
+        let _ = y_ax_rust(&y, &a, &x);
     }
 
     let total_time = timer.elapsed().as_secs_f64();
