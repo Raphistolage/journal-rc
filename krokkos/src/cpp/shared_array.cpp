@@ -1,0 +1,325 @@
+#include <cstddef>
+#include <vector>
+#include <iostream>
+#include <memory>
+#include <Kokkos_Core.hpp>
+#include <cassert>
+#include <utility>
+#include <cstdlib>
+
+#include "shared_array.hpp"
+
+extern "C" {
+    Errors deep_copy(SharedArrayMut& shared__arr1, const SharedArray& shared_arr2) {
+        int rank1 = shared__arr1.rank;
+        int rank2 = shared_arr2.rank;
+        const size_t* shape1 = shared__arr1.shape;
+        const size_t* shape2 = shared_arr2.shape;
+        
+        if (rank1 != rank2){
+            std::cout << "Both views should be of same rank. \n Deep copy aborted." << "\n";
+            return Errors::IncompatibleRanks;
+        }
+
+        switch (rank1)
+        {
+            case 1: {
+                if (shape1[0] != shape2[0])
+                {
+                    std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
+                    return Errors::IncompatibleShapes;
+                }
+                auto arr1 = mdspan_from_shared_mut<1>(shared__arr1);
+                auto arr2 = mdspan_from_shared<1>(shared_arr2);
+                for (size_t i = 0; i < shape1[0]; i++)
+                {
+                    arr1[i] = arr2[i];
+                }
+                break;
+            }
+            case 2: {
+                if (shape1[0] != shape2[0] || shape1[1] != shape2[1])
+                {
+                    std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
+                    return Errors::IncompatibleShapes;
+                }
+                auto arr1 = mdspan_from_shared_mut<2>(shared__arr1);
+                auto arr2 = mdspan_from_shared<2>(shared_arr2);
+                for (size_t i = 0; i < shape1[0]; i++)
+                {
+                    for (size_t j = 0; j < shape1[1]; j++)
+                    {
+                        arr1(i, j) = arr2(i, j);
+                    }
+                }
+                break;
+            }
+            case 3: {
+                if (shape1[0] != shape2[0] || shape1[1] != shape2[1] || shape1[2] != shape2[2])
+                {
+                    std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
+                    return Errors::IncompatibleShapes;
+                }
+                auto arr1 = mdspan_from_shared_mut<3>(shared__arr1);
+                auto arr2 = mdspan_from_shared<3>(shared_arr2);
+                for (size_t i = 0; i < shape1[0]; i++)
+                {
+                    for (size_t j = 0; j < shape1[1]; j++)
+                    {
+                        for (size_t k = 0; k < shape1[2]; k++)
+                        {
+                            arr1(i,j,k) = arr2(i,j,k);
+                        }
+                    }
+                }
+                break;
+            }
+            default:
+                break;
+        }
+        return Errors::NoErrors;
+    }
+
+    const void* get_device_ptr(const void* data_ptr, size_t array_size, int data_size) {
+
+        const uint8_t* typed_ptr = static_cast<const uint8_t*>(data_ptr);
+        Kokkos::View<const uint8_t*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(typed_ptr, array_size*data_size);
+
+        uint8_t* device_ptr = static_cast<uint8_t*>(Kokkos::kokkos_malloc(array_size*data_size));
+        Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, array_size*data_size);
+        
+        Kokkos::deep_copy(device_view, host_view);
+        return device_ptr;
+    }
+
+    void* get_device_ptr_mut(void* data_ptr, size_t array_size, int data_size) {
+
+        uint8_t* typed_ptr = static_cast<uint8_t*>(data_ptr);
+        Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(typed_ptr, array_size*data_size);
+
+        uint8_t* device_ptr = static_cast<uint8_t*>(Kokkos::kokkos_malloc(array_size*data_size));
+        Kokkos::View<uint8_t*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, array_size*data_size);
+
+        Kokkos::deep_copy(device_view, host_view);
+        return device_ptr;
+    }
+
+    SharedArray dot(const SharedArray &shared__arr1, const SharedArray &shared_arr2) {
+        if (shared__arr1.size != shared_arr2.size || shared__arr1.data_type != shared_arr2.data_type)
+        {
+            throw std::runtime_error("Incompatible data types inside vectors");
+        }
+
+        switch (shared__arr1.data_type)
+        {
+        case DataType::Float:
+            switch (shared__arr1.size)
+            {
+            case 4:
+                return templated_dot<float>(shared__arr1, shared_arr2);
+                break;
+            case 8:
+                return templated_dot<double>(shared__arr1, shared_arr2);
+            default:
+                throw std::runtime_error("Unsupported data type.");
+                break;
+            }
+            break;
+        case DataType::Signed:
+            switch (shared__arr1.size)
+            {
+            case 4:
+                return templated_dot<int32_t>(shared__arr1, shared_arr2);
+                break;
+            default:
+                throw std::runtime_error("Unsupported data type.");
+                break;
+            }
+            break;
+        default:
+            throw std::runtime_error("Unsupported data type.");
+            break;
+        }
+    }
+
+    SharedArray matrix_vector_product(const SharedArray &shared__arr1, const SharedArray &shared_arr2) {
+        if (shared__arr1.size != shared_arr2.size || shared__arr1.data_type != shared_arr2.data_type)
+        {
+            throw std::runtime_error("Incompatible data types inside vector/matrix");
+        }
+
+        switch (shared__arr1.data_type)
+        {
+        case DataType::Float:
+            switch (shared__arr1.size)
+            {
+            case 4:
+                return templated_matrix_vector_product<float>(shared__arr1, shared_arr2);
+                break;
+            case 8:
+                return templated_matrix_vector_product<double>(shared__arr1, shared_arr2);
+            default:
+                throw std::runtime_error("Unsupported data type.");
+                break;
+            }
+            break;
+        case DataType::Signed:
+            switch (shared__arr1.size)
+            {
+            case 4:
+                return templated_matrix_vector_product<int32_t>(shared__arr1, shared_arr2);
+                break;
+            default:
+                throw std::runtime_error("Unsupported data type.");
+                break;
+            }
+            break;
+        default:
+            throw std::runtime_error("Unsupported data type.");
+            break;
+        }
+    }
+    
+    SharedArray matrix_product(const SharedArray &shared__arr1, const SharedArray &shared_arr2) {
+        if (shared__arr1.size != shared_arr2.size || shared__arr1.data_type != shared_arr2.data_type)
+        {
+            throw std::runtime_error("Incompatible data types inside matrices");
+        }
+
+        switch (shared__arr1.data_type)
+        {
+        case DataType::Float:
+            switch (shared__arr1.size)
+            {
+            case 4:
+                return templated_matrix_product<float>(shared__arr1, shared_arr2);
+                break;
+            case 8:
+                return templated_matrix_product<double>(shared__arr1, shared_arr2);
+            default:
+                throw std::runtime_error("Unsupported data type.");
+                break;
+            }
+            break;
+        case DataType::Signed:
+            switch (shared__arr1.size)
+            {
+            case 4:
+                return templated_matrix_product<int32_t>(shared__arr1, shared_arr2);
+                break;
+            default:
+                throw std::runtime_error("Unsupported data type.");
+                break;
+            }
+            break;
+        default:
+            throw std::runtime_error("Unsupported data type.");
+            break;
+        }
+        
+    }
+
+    void mutable_matrix_product(SharedArrayMut &shared__arr1, const SharedArray &shared_arr2, const SharedArray &shared_arr3) {
+        if (shared_arr2.shape[1] != shared_arr3.shape[0] || shared__arr1.shape[0] != shared_arr2.shape[0] || shared__arr1.shape[1] != shared_arr3.shape[1]) {
+            throw std::runtime_error("Incompatible sizes of matrices.");
+        } else if (shared__arr1.rank != 2 || shared_arr2.rank != 2 || shared_arr3.rank != 2) {
+            throw std::runtime_error("The arrayViews are not of rank 2.");
+        }
+
+        if (shared__arr1.mem_space == shared_arr2.mem_space && shared_arr2.mem_space == shared_arr3.mem_space && shared__arr1.mem_space == MemSpace::HostSpace) {
+            std::cout << "Mutable matrix product \n";
+            auto mat1 = mdspan_from_shared_mut<2, double>(shared__arr1);
+            auto mat2 = mdspan_from_shared<2, double>(shared_arr2);
+            auto mat3 = mdspan_from_shared<2, double>(shared_arr2);
+
+            Kokkos::parallel_for("mutable_host_matrix_product", Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0,0}, {mat2.extent(0), mat3.extent(1)}), KOKKOS_LAMBDA (const int i, const int j) {
+                    double r = 0;
+                    for (size_t k = 0; k < mat1.extent(1); k++)
+                    {
+                        r += mat2(i,k)*mat3(k,j);
+                    }
+                    mat1(i,j) = r;
+                }
+            ); 
+        } else {
+            throw std::runtime_error("Can only mutate rust data on host.");
+        }
+    }
+
+    void bad_modifier(SharedArrayMut &shared_arr) {
+        if (shared_arr.rank == 2 && shared_arr.mem_space == MemSpace::HostSpace) {
+            auto mat1 = mdspan_from_shared_mut<2, double>(shared_arr);
+
+            int N = mat1.extent(0);
+            int M = mat1.extent(1);
+
+            using mdrange_policy = Kokkos::MDRangePolicy< Kokkos::Rank<2> >;
+            Kokkos::parallel_for( "init_A", mdrange_policy({0,0}, {N,M}), KOKKOS_LAMBDA ( const int j , const int i ) {
+                    mat1(j,i) += 1;
+                }
+            );
+        }
+    }
+
+    void cpp_var_rust_func_test() {
+        double data[6] = {0.0,1.0,2.0,3.0,4.0,5.0};
+        double expected = 15.0;
+
+        auto arr = Kokkos::mdspan<double, Kokkos::dextents<size_t, 2>>(data, 2, 3); // 2x3 matrix.
+
+        SharedArray shared_arr = to_shared<2,double>(arr, true);
+
+        double result = mat_reduce(shared_arr);
+
+        assert(expected == result);
+    }
+
+    void cpp_var_rust_func_mutable_test() {
+        double data[6] = {0.0,1.0,2.0,3.0,4.0,5.0};
+        double expected[6] = {1.0,2.0,3.0,4.0,5.0,6.0};
+
+        auto arr = Kokkos::mdspan<double, Kokkos::dextents<size_t, 2>>(data, 2, 3); // 2x3 matrix.
+
+        SharedArrayMut shared_arr = to_shared_mut<2,double>(arr, true);
+
+        mat_add_one(shared_arr);
+        for (int i = 0; i < 6; i++)
+        {
+            assert(data[i] == expected[i]);
+        }
+    }
+
+    void free_shared_array(SharedArray &shared_arr) {
+        if (shared_arr.allocated_by_cpp)
+        {
+            if (shared_arr.mem_space != MemSpace::HostSpace) {
+                std::cout << "Freeing the shared array mut on device \n";
+                Kokkos::kokkos_free(const_cast<void*>(shared_arr.ptr));
+            } else {
+                free(const_cast<void*>(shared_arr.ptr));
+            }
+        }
+
+        if (shared_arr.shape_by_cpp)
+        {
+            free(const_cast<size_t*>(shared_arr.shape));
+        }
+    }
+
+    void free_shared_array_mut(SharedArrayMut &shared_arr) {
+        if (shared_arr.allocated_by_cpp)
+        {
+            if (shared_arr.mem_space != MemSpace::HostSpace) {
+                std::cout << "Freeing the shared array mut on device \n";
+                Kokkos::kokkos_free(shared_arr.ptr);
+            } else {
+                free(shared_arr.ptr);
+            }
+        }
+
+        if (shared_arr.shape_by_cpp)
+        {
+            free(const_cast<size_t*>(shared_arr.shape));
+        }
+    }
+}
