@@ -89,7 +89,6 @@ SharedArrayMut to_shared_mut(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>>
     {
         shape[i] = fromMds.extent(i);
     }
-    Layout layout = Layout::LayoutStride;
     DataType datatype = DataType::Unsigned;
     if (std::is_unsigned_v<T> == false)
     {
@@ -100,19 +99,35 @@ SharedArrayMut to_shared_mut(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>>
             datatype = DataType::Signed;
         }
     }
-    // TODO : Une maniere de detecter si layout_left ou layout_right ?
-    return SharedArrayMut {
-        fromMds.data_handle(),
-        sizeof(T),
-        datatype, 
-        rank,
-        shape,
-        mem_space,
-        layout,
-        true,
-        allocated_by_cpp,
-        true
-    };
+
+    if (std::is_same_v<typename decltype(fromMds)::layout_type, Kokkos::layout_right>)
+    {
+        return SharedArrayMut {
+            fromMds.data_handle(),
+            sizeof(T),
+            datatype, 
+            rank,
+            shape,
+            mem_space,
+            Layout::LayoutRight,
+            true,
+            allocated_by_cpp,
+            true
+        };
+    } else {
+        return SharedArrayMut {
+            fromMds.data_handle(),
+            sizeof(T),
+            datatype, 
+            rank,
+            shape,
+            mem_space,
+            Layout::LayoutLeft,
+            true,
+            allocated_by_cpp,
+            true
+        };
+    }
 }
 
 template <int D, typename T>
@@ -134,19 +149,35 @@ SharedArray to_shared(Kokkos::mdspan<T, Kokkos::dextents<std::size_t, D>> fromMd
             datatype = DataType::Signed;
         }
     }
-    // TODO : Une maniere de detecter si layout_left ou layout_right ?
-    return SharedArray {
-        fromMds.data_handle(),
-        sizeof(T),
-        datatype, 
-        rank,
-        shape,
-        mem_space,
-        layout,
-        false,
-        allocated_by_cpp,
-        true
-    };
+
+    if (std::is_same_v<typename decltype(fromMds)::layout_type, Kokkos::layout_right>)
+    {
+        return SharedArray {
+            fromMds.data_handle(),
+            sizeof(T),
+            datatype, 
+            rank,
+            shape,
+            mem_space,
+            Layout::LayoutRight,
+            false,
+            allocated_by_cpp,
+            true
+        };
+    } else {
+        return SharedArray {
+            fromMds.data_handle(),
+            sizeof(T),
+            datatype, 
+            rank,
+            shape,
+            mem_space,
+            Layout::LayoutLeft,
+            false,
+            allocated_by_cpp,
+            true
+        };
+    }
 }
 
 template <typename T = double>

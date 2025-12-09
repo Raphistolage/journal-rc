@@ -30,8 +30,6 @@ mod tests {
         shared_array::tests::matrix_product_test();
         shared_array::tests::vector_product_test();
         shared_array::tests::mutable_matrix_product_test();
-        // shared_array_view::tests::mat_reduce_test_cpp();
-        // shared_array_view::tests::mat_add_one_cpp_test();
 
         shared_array::kokkos_finalize();
     }

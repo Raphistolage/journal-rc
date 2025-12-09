@@ -16,7 +16,6 @@ fn y_ax_rust(y: &ArrayView1<f64>, a: &ArrayView2<f64>, x: &ArrayView1<f64>) -> f
     return result
 }
 
-
 fn main() {
     println!("Many calls with pure rust for y_ax operation.");
     let timer = Instant::now();
