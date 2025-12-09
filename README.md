@@ -18,7 +18,7 @@ TODO : Proper setup guide
 **poc_interop**
 has all the different approach to this problem :
 - **OpaqueView** : An opaque type (opaque to Rust) that can only be created by a call to a C++ constructor with data from Rust caller (data: impl Into<Vec<f64>>>), that holds a **Kokkos::View** (unmanaged).
-- **SharedArrayView** : A **non-owning** struct shared through Cxx bridge. This aims to be a lightweight wrapper around the data raw pointer that can be easily casted **to** and **from** a **Kokkos::View**.
+- **SharedArray** : A **non-owning** struct shared through Cxx bridge. This aims to be a lightweight wrapper around the data raw pointer that can be easily casted **to** and **from** a **Kokkos::View**.
 - **RustView** : A lightweight, strongly typed, wrapper around **OpaqueView** that enables idiomatic and safe Rust manipulation of the Kokkos::View.
 
 **Templated_macro** is a procedural macro attribute that generates a **cxx bridge** to link a **templated C++ function** to strongly typed **rust functions.**
