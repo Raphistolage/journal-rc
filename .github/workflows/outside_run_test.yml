@@ -22,3 +22,7 @@ jobs:
     - name: Run extern proj using poc_interop
       working-directory: ./test_poc_interop
       run: cargo run --verbose
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
