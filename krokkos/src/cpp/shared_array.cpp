@@ -9,8 +9,8 @@
 
 #include "shared_array.hpp"
 
-extern "C" {
-    Errors deep_copy(SharedArrayMut& shared__arr1, const SharedArray& shared_arr2) {
+namespace shared_array {
+    int deep_copy(SharedArrayMut_f64& shared__arr1, const SharedArray_f64& shared_arr2) {
         int rank1 = shared__arr1.rank;
         int rank2 = shared_arr2.rank;
         const size_t* shape1 = shared__arr1.shape;
@@ -18,7 +18,7 @@ extern "C" {
         
         if (rank1 != rank2){
             std::cout << "Both views should be of same rank. \n Deep copy aborted." << "\n";
-            return Errors::IncompatibleRanks;
+            return 1;
         }
 
         switch (rank1)
@@ -27,7 +27,7 @@ extern "C" {
                 if (shape1[0] != shape2[0])
                 {
                     std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
-                    return Errors::IncompatibleShapes;
+                    return 2;
                 }
                 auto arr1 = mdspan_from_shared_mut<1>(shared__arr1);
                 auto arr2 = mdspan_from_shared<1>(shared_arr2);
@@ -41,7 +41,7 @@ extern "C" {
                 if (shape1[0] != shape2[0] || shape1[1] != shape2[1])
                 {
                     std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
-                    return Errors::IncompatibleShapes;
+                    return 2;
                 }
                 auto arr1 = mdspan_from_shared_mut<2>(shared__arr1);
                 auto arr2 = mdspan_from_shared<2>(shared_arr2);
@@ -58,7 +58,7 @@ extern "C" {
                 if (shape1[0] != shape2[0] || shape1[1] != shape2[1] || shape1[2] != shape2[2])
                 {
                     std::cout << "Both views should have same shapes \n Deep copy aborted." << "\n";
-                    return Errors::IncompatibleShapes;
+                    return 2;
                 }
                 auto arr1 = mdspan_from_shared_mut<3>(shared__arr1);
                 auto arr2 = mdspan_from_shared<3>(shared_arr2);
@@ -77,7 +77,7 @@ extern "C" {
             default:
                 break;
         }
-        return Errors::NoErrors;
+        return 0;
     }
 
     const void* get_device_ptr(const void* data_ptr, size_t array_size, int data_size) {
@@ -104,7 +104,7 @@ extern "C" {
         return device_ptr;
     }
 
-    SharedArray dot(const SharedArray &shared__arr1, const SharedArray &shared_arr2) {
+    SharedArray_f64 dot(const SharedArray_f64 &shared__arr1, const SharedArray_f64 &shared_arr2) {
         if (shared__arr1.size != shared_arr2.size || shared__arr1.data_type != shared_arr2.data_type)
         {
             throw std::runtime_error("Incompatible data types inside vectors");
@@ -142,7 +142,7 @@ extern "C" {
         }
     }
 
-    SharedArray matrix_vector_product(const SharedArray &shared__arr1, const SharedArray &shared_arr2) {
+    SharedArray_f64 matrix_vector_product(const SharedArray_f64 &shared__arr1, const SharedArray_f64 &shared_arr2) {
         if (shared__arr1.size != shared_arr2.size || shared__arr1.data_type != shared_arr2.data_type)
         {
             throw std::runtime_error("Incompatible data types inside vector/matrix");
@@ -180,7 +180,7 @@ extern "C" {
         }
     }
     
-    SharedArray matrix_product(const SharedArray &shared__arr1, const SharedArray &shared_arr2) {
+    SharedArray_f64 matrix_product(const SharedArray_f64 &shared__arr1, const SharedArray_f64 &shared_arr2) {
         if (shared__arr1.size != shared_arr2.size || shared__arr1.data_type != shared_arr2.data_type)
         {
             throw std::runtime_error("Incompatible data types inside matrices");
@@ -219,7 +219,7 @@ extern "C" {
         
     }
 
-    void mutable_matrix_product(SharedArrayMut &shared__arr1, const SharedArray &shared_arr2, const SharedArray &shared_arr3) {
+    void mutable_matrix_product(SharedArrayMut_f64 &shared__arr1, const SharedArray_f64 &shared_arr2, const SharedArray_f64 &shared_arr3) {
         if (shared_arr2.shape[1] != shared_arr3.shape[0] || shared__arr1.shape[0] != shared_arr2.shape[0] || shared__arr1.shape[1] != shared_arr3.shape[1]) {
             throw std::runtime_error("Incompatible sizes of matrices.");
         } else if (shared__arr1.rank != 2 || shared_arr2.rank != 2 || shared_arr3.rank != 2) {
@@ -246,7 +246,7 @@ extern "C" {
         }
     }
 
-    void bad_modifier(SharedArrayMut &shared_arr) {
+    void bad_modifier(SharedArrayMut_f64 &shared_arr) {
         if (shared_arr.rank == 2 && shared_arr.mem_space == MemSpace::HostSpace) {
             auto mat1 = mdspan_from_shared_mut<2, double>(shared_arr);
 
@@ -267,7 +267,7 @@ extern "C" {
 
         auto arr = Kokkos::mdspan<double, Kokkos::dextents<size_t, 2>>(data, 2, 3); // 2x3 matrix.
 
-        SharedArray shared_arr = to_shared<2,double>(arr, true);
+        SharedArray_f64 shared_arr = to_shared<2,double>(arr, true);
 
         double result = mat_reduce(shared_arr);
 
@@ -280,7 +280,7 @@ extern "C" {
 
         auto arr = Kokkos::mdspan<double, Kokkos::dextents<size_t, 2>>(data, 2, 3); // 2x3 matrix.
 
-        SharedArrayMut shared_arr = to_shared_mut<2,double>(arr, true);
+        SharedArrayMut_f64 shared_arr = to_shared_mut<2,double>(arr, true);
 
         mat_add_one(shared_arr);
         for (int i = 0; i < 6; i++)
@@ -289,7 +289,7 @@ extern "C" {
         }
     }
 
-    void free_shared_array(SharedArray &shared_arr) {
+    void free_shared_array(SharedArray_f64 &shared_arr) {
         if (shared_arr.allocated_by_cpp)
         {
             if (shared_arr.mem_space != MemSpace::HostSpace) {
@@ -306,7 +306,7 @@ extern "C" {
         }
     }
 
-    void free_shared_array_mut(SharedArrayMut &shared_arr) {
+    void free_shared_array_mut(SharedArrayMut_f64 &shared_arr) {
         if (shared_arr.allocated_by_cpp)
         {
             if (shared_arr.mem_space != MemSpace::HostSpace) {

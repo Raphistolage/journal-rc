@@ -4,7 +4,7 @@ use crate::{Layout, MemSpace};
 
 use super::{OpaqueView, ffi};
 
-pub trait RustViewDataType<'a, T>: Debug + Default + Clone + Copy {
+pub trait DTType<T>: Debug + Default + Clone + Copy {
     fn create_opaque_view(
         dimensions: Vec<usize>,
         mem_space: MemSpace,
@@ -13,7 +13,7 @@ pub trait RustViewDataType<'a, T>: Debug + Default + Clone + Copy {
     ) -> OpaqueView;
 }
 
-impl<'a> RustViewDataType<'a, f64> for f64 {
+impl DTType<f64> for f64 {
     fn create_opaque_view(
         dimensions: Vec<usize>,
         mem_space: MemSpace,
@@ -24,7 +24,7 @@ impl<'a> RustViewDataType<'a, f64> for f64 {
     }
 }
 
-impl<'a> RustViewDataType<'a, f32> for f32 {
+impl DTType<f32> for f32 {
     fn create_opaque_view(
         dimensions: Vec<usize>,
         mem_space: MemSpace,
@@ -35,7 +35,7 @@ impl<'a> RustViewDataType<'a, f32> for f32 {
     }
 }
 
-impl<'a> RustViewDataType<'a, i32> for i32 {
+impl DTType<i32> for i32 {
     fn create_opaque_view(
         dimensions: Vec<usize>,
         mem_space: MemSpace,

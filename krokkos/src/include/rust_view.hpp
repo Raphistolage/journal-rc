@@ -13,8 +13,12 @@ namespace rust_view{
         virtual ~IView() = default;     
         virtual const void*  get(rust::slice<const size_t> i, bool is_host) = 0;
         virtual void* get_view() = 0;
-        virtual SharedArray view_to_shared() = 0;
-        virtual SharedArrayMut view_to_shared_mut() = 0;
+        // virtual SharedArray_f64 view_to_shared() = 0;
+        // virtual SharedArray_f32 view_to_shared() = 0;
+        // virtual SharedArray_i32 view_to_shared() = 0;
+        // virtual SharedArrayMut_f64 view_to_shared() = 0;
+        // virtual SharedArrayMut_f32 view_to_shared() = 0;
+        // virtual SharedArrayMut_i32 view_to_shared() = 0;
     };
 }
 
@@ -98,45 +102,45 @@ namespace rust_view {
             }
         }
 
-        SharedArray view_to_shared() override {
-            auto host_mirror = Kokkos::create_mirror_view(view);
-            int rank = view.rank();
-            size_t* shape = new size_t[rank];
-            for (int i = 0; i < rank; i++)
-            {
-                shape[i] = view.extent(i);
-            }
-            return SharedArray{
-                host_mirror.data(),
-                8,
-                DataType::Float,
-                rank,
-                shape,
-                MemSpace::HostSpace,
-                Layout::LayoutRight,
-                false,
-            };
-        }
+        // SharedArray_f64 view_to_shared() override {
+        //     auto host_mirror = Kokkos::create_mirror_view(view);
+        //     int rank = view.rank();
+        //     size_t* shape = new size_t[rank];
+        //     for (int i = 0; i < rank; i++)
+        //     {
+        //         shape[i] = view.extent(i);
+        //     }
+        //     return SharedArray{
+        //         host_mirror.data(),
+        //         8,
+        //         DataType::Float,
+        //         rank,
+        //         shape,
+        //         MemSpace::HostSpace,
+        //         Layout::LayoutRight,
+        //         false,
+        //     };
+        // }
 
-        SharedArrayMut view_to_shared_mut() override {
-            auto host_mirror = Kokkos::create_mirror_view(view);
-            int rank = view.rank();
-            size_t* shape = new size_t[rank];
-            for (int i = 0; i < rank; i++)
-            {
-                shape[i] = view.extent(i);
-            }
-            return SharedArrayMut{
-                host_mirror.data(),
-                8,
-                DataType::Float,
-                rank,
-                shape,
-                MemSpace::HostSpace,
-                Layout::LayoutRight,
-                true,
-            };
-        }
+        // SharedArrayMut view_to_shared_mut() override {
+        //     auto host_mirror = Kokkos::create_mirror_view(view);
+        //     int rank = view.rank();
+        //     size_t* shape = new size_t[rank];
+        //     for (int i = 0; i < rank; i++)
+        //     {
+        //         shape[i] = view.extent(i);
+        //     }
+        //     return SharedArrayMut{
+        //         host_mirror.data(),
+        //         8,
+        //         DataType::Float,
+        //         rank,
+        //         shape,
+        //         MemSpace::HostSpace,
+        //         Layout::LayoutRight,
+        //         true,
+        //     };
+        // }
     };
 
     void dot(OpaqueView& r, const OpaqueView& x, const OpaqueView& y);

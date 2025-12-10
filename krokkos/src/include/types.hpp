@@ -24,48 +24,4 @@ extern "C" {
         LayoutStride = 2,
     };
 
-    struct SharedArrayMut{
-        void* ptr;
-
-        int size;
-
-        DataType data_type;
-
-        int rank;
-
-        const size_t* shape;
-        
-        MemSpace mem_space;
-
-        Layout layout;
-
-        const bool is_mut;
-
-        const bool allocated_by_cpp;
-
-        const bool shape_by_cpp;
-
-    };
-
-    struct SharedArray{
-        const void* ptr;
-
-        int size;
-
-        DataType data_type;
-
-        int rank;
-
-        const size_t* shape;
-        
-        MemSpace mem_space;
-
-        Layout layout;
-
-        const bool is_mut;
-
-        const bool allocated_by_cpp;
-
-        const bool shape_by_cpp;
-    };
 }

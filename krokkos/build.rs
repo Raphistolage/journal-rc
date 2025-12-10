@@ -1,8 +1,10 @@
 use cmake::Config;
 fn main() {
     let _ = cxx_build::bridge("src/rust_view/ffi.rs");
+    let _ = cxx_build::bridge("src/shared_array/ffi.rs");
 
     let _ = templated_parser::bridge("src/rust_view/functions_ffi.rs");
+    let _ = templated_parser::bridge("src/shared_array/functions_ffi.rs");
 
     let mut dst_config = Config::new("Release");
     let modifieid_dst_config = dst_config
@@ -29,7 +31,7 @@ fn main() {
     println!("cargo:rustc-link-search=native={}", dst.display());
     println!("cargo:rustc-link-lib=functionsFfi");
     println!("cargo:rustc-link-lib=rustView");
-    println!("cargo:rustc-link-lib=SharedArray");
+    println!("cargo:rustc-link-lib=sharedArray");
     println!("cargo:rustc-link-lib=kokkosHandles");
     println!("cargo:rustc-link-arg=-Wl,-rpath={}", dst.display());
 

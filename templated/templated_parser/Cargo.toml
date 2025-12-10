@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 quote = "1"
-syn = { version = "2", features = ["full", "extra-traits"] }
+syn = { version = "2", features = ["full", "extra-traits", "printing"] }
 cc = "1.0"
 proc-macro2 = "1.0.103"
 cxx-build = "1.0"
