@@ -1,5 +1,5 @@
 #[cxx::bridge(namespace = "rust_view")]
-mod ffi {
+mod rust_view_ffi {
 
     #[derive(Debug, PartialEq)]
     #[repr(u8)]

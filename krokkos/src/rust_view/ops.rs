@@ -32,7 +32,7 @@ pub fn dot<'a, T>(
     x: &RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
     y: &RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
 ) where
-    T: data_type::RustViewDataType<'a, T>,
+    T: data_type::DTType<'a, T>,
 {
     ffi::dot(r.get_mut(), x.get(), y.get())
 }

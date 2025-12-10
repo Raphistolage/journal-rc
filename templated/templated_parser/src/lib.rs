@@ -1,6 +1,7 @@
 use std::path::{Path, PathBuf};
 use std::fs;
 
+use syn::ItemStruct;
 use syn::{Block, FnArg, Ident, Item, ItemFn, PathSegment, ReturnType, Token, Type, punctuated::Punctuated, token::{Brace}};
 use proc_macro2::{Span};
 use quote::{quote};
@@ -80,20 +81,19 @@ pub fn bridge(rust_source_file: impl AsRef<Path>) -> cc::Build {
             }
 
             if is_templated {
-                let mut to_write: String = String::default();
-                to_write.push_str("#[cxx::bridge(namespace = \"functions\")]\n");
-                to_write.push_str(&format!("mod {}_ffi {{\n", module.ident.to_string()));
-                to_write.push_str("unsafe extern \"C++\" {\n");
-                to_write.push_str("include!(\"functions.hpp\");\n");
-                to_write.push_str("include!(\"rust_view.hpp\");\n\n");
-                to_write.push_str("#[namespace = \"rust_view\"]\n");
-                to_write.push_str("type OpaqueView = crate::rust_view::ffi::OpaqueView;\n\n");
-                to_write.push_str("#[namespace = \"rust_view\"]\n");
-                to_write.push_str("type MemSpace = crate::rust_view::ffi::MemSpace;\n\n");
-                to_write.push_str("#[namespace = \"rust_view\"]\n");
-                to_write.push_str("type Layout = crate::rust_view::ffi::Layout;\n\n");
+                let mut to_write_func: String = String::default();
+
+                to_write_func.push_str("unsafe extern \"C++\" {\n");
+                to_write_func.push_str("include!(\"functions.hpp\");\n");
+                to_write_func.push_str("include!(\"functions_shared_array.hpp\");\n");
+                to_write_func.push_str("include!(\"rust_view.hpp\");\n");
+                to_write_func.push_str("include!(\"shared_array.hpp\");\n\n");
+
+                let mut to_write_structs = String::default();
 
                 let mut export_string = format!("pub use {}_ffi::{{", module.ident.to_string());
+
+                let mut has_shared_structs = false;
 
                 if let Some(content) =  module.content{
                     for mod_item in content.1 {
@@ -125,38 +125,82 @@ pub fn bridge(rust_source_file: impl AsRef<Path>) -> cc::Build {
 
                                 for input in func.sig.inputs.iter_mut(){
                                     if let FnArg::Typed(pat) = input {
-                                        replace_generic(&mut *pat.ty, var);
+                                        replace_generic(&mut pat.ty, var);
                                     }
                                 }
 
                                 if let ReturnType::Type(_, boxed_type) = &mut func.sig.output{
-                                    replace_generic(&mut **boxed_type, var);
+                                    replace_generic(&mut *boxed_type, var);
                                 }
 
                                 let var_func_ident = format!("{}_{}",func.sig.ident.to_string(), var);
                                 export_string.push_str(&var_func_ident);
                                 export_string.push(',');
-                                to_write.push_str(&format!("#[rust_name = \"{}\"]\n", var_func_ident));
+                                to_write_func.push_str(&format!("#[rust_name = \"{}\"]\n", var_func_ident));
                                 let mut stringed_func = quote! {#func}.to_string();
                                 stringed_func.truncate(stringed_func.len()-3);
                                 stringed_func.push(';');
-                                to_write.push_str(&stringed_func);
-                                to_write.push_str("\n\n");
+                                to_write_func.push_str(&stringed_func);
+                                to_write_func.push_str("\n\n");
                             }
+                        }else if let Item::Struct(item_struct) = mod_item {
+                            if ! has_shared_structs {
+                                has_shared_structs = true;
+                            }
+                            let mut is_varianted = false;
+                            let mut struct_variants: Vec<String> = vec![];
+                            for attr in &item_struct.attrs {
+                                if attr.path().get_ident().expect("bad attribute") == "variants" {
+                                    let current_variants = attr.parse_args_with(Punctuated::<PathSegment, Token![,]>::parse_terminated).unwrap();
+                                    for variant in current_variants {
+                                        struct_variants.push(variant.ident.to_string());
+                                    }
+                                    is_varianted = true;
+                                    break;
+                                }
+                            }
+
+                            if !is_varianted {
+                                struct_variants = variants.clone();
+                            }
+
+                            for var in struct_variants.iter() {
+                                let mut struc = item_struct.clone();
+
+                                for field in struc.fields.iter_mut(){
+                                    replace_generic(&mut field.ty, var);
+                                }
+
+                                struc.ident = Ident::new(&format!("{}_{}",struc.ident.to_string(), var), Span::call_site());
+                                let stringed_struc = quote! {#struc}.to_string();
+                                to_write_structs.push_str(&stringed_struc);
+                                to_write_structs.push_str("\n\n");
+
+                            }
+                        }else {
+                            let stringed_element = quote! {#mod_item}.to_string();
+                            to_write_func.push_str(&stringed_element);
                         }
                     }
+
+                    let mut to_write_full = String::default();
+                    to_write_full.push_str("#[cxx::bridge(namespace = \"functions\")]\n");
+                    to_write_full.push_str(&format!("mod {}_ffi {{\n\n", module.ident.to_string()));
+
+                    to_write_full.push_str(&to_write_structs);
+                    to_write_full.push_str(&to_write_func);
 
                     if export_string.ends_with(',') {
                         _ = export_string.pop().unwrap();
                     }
                     
                     export_string.push_str("};");
-                    to_write.push_str("}\n}\n");
-                    to_write.push_str(&export_string);
+                    to_write_full.push_str("}\n}\n");
+                    to_write_full.push_str(&export_string);
 
                     let output_file = Path::new(&out_dir).join(format!("{}_ffi.rs",module.ident.to_string()));
                     
-                    std::fs::write(&output_file, to_write).unwrap();
+                    std::fs::write(&output_file, to_write_full).unwrap();
                     output_files.push(output_file);
                 }
             }

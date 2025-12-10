@@ -14,7 +14,7 @@ pub use memory_space::*;
 pub use ops::*;
 
 use std::ops::Index;
-pub struct RustView<'a, T: RustViewDataType<'a, T>, D: Dimension, M: MemorySpace, L: LayoutType>(
+pub struct RustView<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType>(
     OpaqueView,
     std::marker::PhantomData<D>,
     std::marker::PhantomData<M>,
@@ -22,7 +22,7 @@ pub struct RustView<'a, T: RustViewDataType<'a, T>, D: Dimension, M: MemorySpace
     std::marker::PhantomData<&'a mut T>,
 );
 
-impl<'a, T: RustViewDataType<'a, T>, D: Dimension, M: MemorySpace, L: LayoutType>
+impl<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType>
     RustView<'a, T, D, M, L>
 {
     pub fn from_shape<U: Into<D>>(shapes: U, v: &'a mut [T]) -> Self {

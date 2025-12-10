@@ -28,15 +28,17 @@ target_link_libraries(kokkosHandles PUBLIC Kokkos::kokkos)
 set_target_properties(kokkosHandles PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # SharedArray
-add_library(SharedArray SHARED ../src/cpp/shared_array.cpp)
+add_library(sharedArray SHARED ../src/cpp/shared_array.cpp ${OUT_DIR}/cxxbridge/sources/${PKG_NAME}/src/shared_array/ffi.rs.cc)
 
-target_link_libraries(SharedArray PUBLIC kokkosHandles)
+target_link_libraries(sharedArray PUBLIC kokkosHandles)
 
-target_include_directories(SharedArray PUBLIC     
+target_include_directories(sharedArray PUBLIC 
+    ${OUT_DIR}/cxxbridge/include/rust
+    ${OUT_DIR}/cxxbridge/include/${PKG_NAME}/src/shared_array/    
     ../src/include
 )
 
-set_target_properties(SharedArray PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(sharedArray PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # RustView
 add_library(rustView SHARED ../src/cpp/rust_view.cpp ${OUT_DIR}/cxxbridge/sources/${PKG_NAME}/src/rust_view/ffi.rs.cc)
@@ -54,16 +56,18 @@ set_target_properties(rustView PROPERTIES POSITION_INDEPENDENT_CODE ON)
 # Functions ffi
 add_library(functionsFfi SHARED 
     ../src/cpp/functions.cpp 
-    ${OUT_DIR}/cxxbridge/sources/${PKG_NAME}/${OUT_DIR}/test_ffi_ffi.rs.cc
+    ../src/cpp/functions_shared_array.cpp
+    ${OUT_DIR}/cxxbridge/sources/${PKG_NAME}/${OUT_DIR}/rust_view_ffi_ffi.rs.cc
+    ${OUT_DIR}/cxxbridge/sources/${PKG_NAME}/${OUT_DIR}/shared_array_ffi_ffi.rs.cc
 )
 
-target_link_libraries(functionsFfi PUBLIC rustView)
+target_link_libraries(functionsFfi PUBLIC rustView sharedArray)
 
 target_include_directories(functionsFfi PUBLIC ${OUT_DIR}/cxxbridge/include/${PKG_NAME}/${OUT_DIR}/)
 
 set_target_properties(functionsFfi PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 install(TARGETS kokkosHandles DESTINATION .)
-install(TARGETS SharedArray DESTINATION .)
+install(TARGETS sharedArray DESTINATION .)
 install(TARGETS rustView DESTINATION .)
 install(TARGETS functionsFfi DESTINATION .)

@@ -6,6 +6,7 @@ use ndarray::{ArrayView, ArrayViewMut, IxDyn};
 
 use super::ffi;
 use super::types::*;
+use supper::{SharedArray, SharedArrayMut};
 
 pub fn kokkos_initialize() {
     unsafe {
@@ -17,6 +18,38 @@ pub fn kokkos_finalize() {
     unsafe {
         ffi::kokkos_finalize();
     }
+}
+
+pub trait SharedArrayT {
+    type T;
+}
+
+impl SharedArrayT for SharedArray_f64 {
+    type T = f64;
+}
+
+impl SharedArrayT for SharedArray_f32 {
+    type T = f32;
+}
+
+impl SharedArrayT for SharedArray_i32 {
+    type T = i32;
+}
+
+pub trait SharedArrayMutT {
+    type T;
+}
+
+impl SharedArrayMutT for SharedArrayMut_f64 {
+    type T = f64;
+}
+
+impl SharedArrayMutT for SharedArrayMut_f32 {
+    type T = f32;
+}
+
+impl SharedArrayMutT for SharedArrayMut_i32 {
+    type T = i32;
 }
 
 pub trait RustDataType {
@@ -183,16 +216,20 @@ pub fn from_shared_mut(
 
 impl Drop for SharedArray {
     fn drop(&mut self) {
-        unsafe {
-            ffi::free_shared_array(self);
+        if self.allocated_by_cpp || self.shape_by_cpp {
+            unsafe {
+                ffi::free_shared_array(self);
+            }
         }
     }
 }
 
 impl Drop for SharedArrayMut {
     fn drop(&mut self) {
-        unsafe {
-            ffi::free_shared_array_mut(self);
+        if self.allocated_by_cpp || self.shape_by_cpp {
+            unsafe {
+                ffi::free_shared_array_mut(self);
+            }
         }
     }
 }
