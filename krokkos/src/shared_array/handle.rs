@@ -189,36 +189,26 @@ where
     }
 }
 
-impl<D, S, Dim, M, L> TryFrom<SharedArray<S, Dim, M, L>> for Array<S::T, D>
+impl<S, Dim, M, L> From<SharedArray<S, Dim, M, L>> for Array<S::T, IxDyn>
 where
-    D: ndarray::Dimension,
     S: SharedArrayT,
     Dim: Dimension,
     M: MemorySpace,
     L: LayoutType,
 {
-    type Error = &'static str;
-    fn try_from(value: SharedArray<S, Dim, M, L>) -> Result<Self, Self::Error> {
-        if D::default().ndim() != Dim::default().ndim() as usize {
-            Err("Incompatible dimensions")
-        } else {
-            // TODO : Handle le cas o`u le shared_array est sur gpu, dans ce cas faut deep_copy cqu'il a dans gpu_ptr into cpu_vec puis faire Array::from_shape_vec`
-            Ok(Array::<S::T,D>::from_shape_vec(value.1.slice().into(), value.0.get_cpu_vec()).unwrap())
-        }
+    fn from(value: SharedArray<S, Dim, M, L>) -> Self {
+        // TODO : Handle le cas o`u le shared_array est sur gpu, dans ce cas faut deep_copy cqu'il a dans gpu_ptr into cpu_vec puis faire Array::from_shape_vec`
+        let shapes = value.1.slice().into();
+        Array::<S::T,IxDyn>::from_shape_vec(IxDyn(shapes), value.0.get_cpu_vec()).unwrap()
     }
 }
 
-impl<S, D, M, L> Drop for SharedArray<S, D, M, L>
-where
-    S: SharedArrayT,
-    D: Dimension,
-    M: MemorySpace,
-    L: LayoutType,
+impl Drop for SharedArray_f64
 {
     fn drop(&mut self) {
-        if self.0.is_allocated_by_cpp() {
+        if self.allocated_by_cpp {
             unsafe {
-                free_shared_array(self.0);
+                free_shared_array(self);
             }
         }
     }
