@@ -3,13 +3,13 @@
 
 #include <iostream>
 
-using rust_view::OpaqueView;
-
-namespace functions {
+namespace rust_view_functions {
 
     using rust_view::MemSpace;
+    using rust_view::Layout;
     using rust_view::IView;
     using rust_view::ViewHolder;
+    using rust_view::OpaqueView;
 
     #ifdef KOKKOS_ENABLE_CUDA
         using DeviceMemorySpace = Kokkos::CudaSpace;
@@ -54,7 +54,7 @@ namespace functions {
                 case 2: {
                     switch (layout)
                     {
-                    case LayoutRight:{
+                    case Layout::LayoutRight:{
                             Kokkos::View<T**, Kokkos::LayoutRight, Kokkos::HostSpace> host_view("host_view", dimensions[0], dimensions[1]);
                             Kokkos::View<const T**, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> rust_view(data.data(), dimensions[0], dimensions[1]);
                             Kokkos::deep_copy(host_view, rust_view);
@@ -62,7 +62,7 @@ namespace functions {
                                 host_view); 
                         }
                         break;
-                    case LayoutLeft:{
+                    case Layout::LayoutLeft:{
                             Kokkos::View<T**, Kokkos::LayoutLeft, Kokkos::HostSpace> host_view("host_view", dimensions[0], dimensions[1]);
                             Kokkos::View<const T**, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> rust_view(data.data(), dimensions[0], dimensions[1]);
                             Kokkos::deep_copy(host_view, rust_view);
@@ -78,7 +78,7 @@ namespace functions {
                 case 3: {
                     switch (layout)
                     {
-                    case LayoutRight: {
+                    case Layout::LayoutRight: {
                             Kokkos::View<T***, Kokkos::LayoutRight, Kokkos::HostSpace> host_view("host_view", dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::View<const T***, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> rust_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::deep_copy(host_view, rust_view);
@@ -86,7 +86,7 @@ namespace functions {
                                 host_view);
                         }
                         break;
-                    case LayoutLeft: {
+                    case Layout::LayoutLeft: {
                             Kokkos::View<T***, Kokkos::LayoutLeft, Kokkos::HostSpace> host_view("host_view", dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::View<const T***, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> rust_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::deep_copy(host_view, rust_view);
@@ -115,7 +115,7 @@ namespace functions {
                 case 1: {
                     switch (layout)
                     {
-                    case LayoutRight:{
+                    case Layout::LayoutRight:{
                             Kokkos::View<T*, Kokkos::LayoutRight, DeviceMemorySpace> device_view("device_view",dimensions[0]);
                             Kokkos::View<const T*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0]);
                             Kokkos::deep_copy(device_view, host_view);
@@ -123,7 +123,7 @@ namespace functions {
                                 device_view, true);
                         }
                         break;
-                    case LayoutLeft:{
+                    case Layout::LayoutLeft:{
                             Kokkos::View<T*, Kokkos::LayoutLeft, DeviceMemorySpace> device_view("device_view",dimensions[0]);
                             Kokkos::View<const T*, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0]);
                             Kokkos::deep_copy(device_view, host_view);
@@ -140,7 +140,7 @@ namespace functions {
                 case 2: {
                     switch (layout)
                     {
-                    case LayoutRight:{
+                    case Layout::LayoutRight:{
                             Kokkos::View<T**, Kokkos::LayoutRight, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1]);
                             Kokkos::View<const T**, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1]);
                             Kokkos::deep_copy(device_view, host_view);
@@ -148,7 +148,7 @@ namespace functions {
                                 device_view, true);  
                         }   
                         break;
-                    case LayoutLeft:{
+                    case Layout::LayoutLeft:{
                                 Kokkos::View<T**, Kokkos::LayoutLeft, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1]);
                                 Kokkos::View<const T**, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1]);
                                 Kokkos::deep_copy(device_view, host_view);
@@ -165,7 +165,7 @@ namespace functions {
                 case 3: {
                     switch (layout)
                     {
-                    case LayoutRight:{
+                    case Layout::LayoutRight:{
                             Kokkos::View<T***, Kokkos::LayoutRight, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::View<const T***, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::deep_copy(device_view, host_view);
@@ -173,7 +173,7 @@ namespace functions {
                                 device_view, true);
                         }
                         break;
-                    case LayoutLeft:{
+                    case Layout::LayoutLeft:{
                             Kokkos::View<T***, Kokkos::LayoutLeft, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::View<const T***, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::deep_copy(device_view, host_view);
@@ -201,7 +201,7 @@ namespace functions {
     }
 }
 
-extern "C" {
-    SharedArray view_to_shared_c(const OpaqueView* opaqueView);
-    SharedArrayMut view_to_shared_mut_c(const OpaqueView* opaqueView);
-}
+// extern "C" {
+//     SharedArray view_to_shared_c(const OpaqueView* opaqueView);
+//     SharedArrayMut view_to_shared_mut_c(const OpaqueView* opaqueView);
+// }

@@ -57,8 +57,35 @@ set_target_properties(rustView PROPERTIES POSITION_INDEPENDENT_CODE ON)
 add_library(functionsFfi SHARED 
     ../src/cpp/functions.cpp 
     ../src/cpp/functions_shared_array.cpp
-    ${OUT_DIR}/cxxbridge/sources/${PKG_NAME}/${OUT_DIR}/rust_view_ffi_ffi.rs.cc
-    ${OUT_DIR}/cxxbridge/sources/${PKG_NAME}/${OUT_DIR}/shared_array_ffi_ffi.rs.cc
+    ${OUT_DIR}/cxxbridge/sources/${PKG_NAME}/${OUT_DIR}/shared_array_functions_ffi.rs.cc
+)
+
+target_link_libraries(sharedArrayFunctionsFfi PUBLIC kokkosHandles sharedFfiTypes)
+
+target_include_directories(sharedArrayFunctionsFfi PUBLIC 
+    ${OUT_DIR}/cxxbridge/include/${PKG_NAME}/${OUT_DIR}/
+    ../src/include/
+)
+
+set_target_properties(sharedArrayFunctionsFfi PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+# SharedArray
+add_library(sharedArray SHARED ../src/cpp/shared_array.cpp ${OUT_DIR}/cxxbridge/sources/${PKG_NAME}/src/shared_array/ffi.rs.cc)
+
+target_link_libraries(sharedArray PUBLIC sharedArrayFunctionsFfi)
+
+target_include_directories(sharedArray PUBLIC 
+    ${OUT_DIR}/cxxbridge/include/rust
+    ${OUT_DIR}/cxxbridge/include/${PKG_NAME}/src/shared_array/    
+    ../src/include/
+)
+
+set_target_properties(sharedArray PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+# RustView_Functions ffi
+add_library(rustViewFunctionsFfi SHARED 
+    ../src/cpp/functions.cpp
+    ${OUT_DIR}/cxxbridge/sources/${PKG_NAME}/${OUT_DIR}/rust_view_functions_ffi.rs.cc
 )
 
 target_link_libraries(functionsFfi PUBLIC rustView sharedArray)
