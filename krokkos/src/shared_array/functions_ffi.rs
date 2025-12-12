@@ -1,28 +1,26 @@
 use templated_macro::templated;
 
 #[templated(f64, f32, i32)]
-mod shared_array_ffi {
+mod shared_array_functions {
 
-    #[namespace = "shared_array"]
-    type DataType = crate::shared_array::ffi::DataType;
+    #[namespace = "shared_ffi_types"]
+    type DataType = crate::shared_array::shared_ffi_types::DataType;
 
-    #[namespace = "shared_array"]
-    type MemSpace = crate::shared_array::ffi::MemSpace;
+    #[namespace = "shared_ffi_types"]
+    type MemSpace = crate::shared_array::shared_ffi_types::MemSpace;
 
-    #[namespace = "shared_array"]
-    type Layout = crate::shared_array::ffi::Layout;
+    #[namespace = "shared_ffi_types"]
+    type Layout = crate::shared_array::shared_ffi_types::Layout;
 
     #[derive(Debug, Clone)]
     pub struct SharedArray {
-        pub ptr: *const T,
+        pub cpu_vec: Vec<T>,
 
-        pub size: i32, // size of the type of the pointer (in bytes : 1, 2, 4, 8, 16)
-
-        pub data_type: DataType,
+        pub gpu_ptr: *mut T,
 
         pub rank: i32,
 
-        pub shape: *const usize,
+        pub shape: Vec<usize>,
 
         pub mem_space: MemSpace,
 
@@ -31,42 +29,13 @@ mod shared_array_ffi {
         pub is_mut: bool, // Only useful for C++ side.
 
         pub allocated_by_cpp: bool,
-
-        pub shape_by_cpp: bool,
     }
 
-    #[derive(Debug, Clone)]
-    pub struct SharedArrayMut {
-        pub ptr: *mut T,
-
-        pub size: i32, // size of the type of the pointer (in bytes : 1, 2, 4, 8, 16)
-
-        pub data_type: DataType,
-
-        pub rank: i32,
-
-        pub shape: *const usize,
-
-        pub mem_space: MemSpace,
-
-        pub layout: Layout,
-
-        pub is_mut: bool, // Only useful for C++ side.
-
-        pub allocated_by_cpp: bool,
-
-        pub shape_by_cpp: bool,
+    pub unsafe fn get_device_ptr(data_ptr: *const T, array_size: usize) -> *const T {
+        unimplemented!()
     }
 
-    pub unsafe fn get_device_ptr(
-        data_ptr: *const T,
-        array_size: usize,
-        data_size: i32,
-    ) -> *const T {unimplemented!()}
-
-    pub unsafe fn get_device_ptr_mut(
-        data_ptr: *mut T,
-        array_size: usize,
-        data_size: i32,
-    ) -> *mut T {unimplemented!()}
+    pub unsafe fn get_device_ptr_mut(data_ptr: *mut T, array_size: usize) -> *mut T {
+        unimplemented!()
+    }
 }
