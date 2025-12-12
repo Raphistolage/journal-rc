@@ -15,13 +15,13 @@ mod shared_array_ffi {
         #[namespace = "shared_ffi_types"]
         type Layout = crate::shared_array::shared_ffi_types::Layout;
 
-        #[namespace = "shared_array"]
+        #[namespace = "shared_array_functions"]
         type SharedArray_f64 = crate::shared_array::functions_ffi::SharedArray_f64;
 
-        #[namespace = "shared_array"]
+        #[namespace = "shared_array_functions"]
         type SharedArray_f32 = crate::shared_array::functions_ffi::SharedArray_f32;
 
-        #[namespace = "shared_array"]
+        #[namespace = "shared_array_functions"]
         type SharedArray_i32 = crate::shared_array::functions_ffi::SharedArray_i32;
 
         pub unsafe fn kokkos_finalize();
