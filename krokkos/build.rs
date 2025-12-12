@@ -1,10 +1,11 @@
 use cmake::Config;
 fn main() {
+    let _ = cxx_build::bridge("src/shared_array/shared_ffi_types.rs");
     let _ = cxx_build::bridge("src/rust_view/ffi.rs");
     let _ = cxx_build::bridge("src/shared_array/ffi.rs");
 
-    let _ = templated_parser::bridge("src/rust_view/functions_ffi.rs");
-    let _ = templated_parser::bridge("src/shared_array/functions_ffi.rs");
+    let _ = templated_parser::bridge("src/rust_view/functions_ffi.rs", 2);
+    let _ = templated_parser::bridge("src/shared_array/functions_ffi.rs", 1);
 
     let mut dst_config = Config::new("Release");
     let modifieid_dst_config = dst_config
@@ -29,8 +30,9 @@ fn main() {
     let dst = final_dst_config.build();
 
     println!("cargo:rustc-link-search=native={}", dst.display());
-    println!("cargo:rustc-link-lib=functionsFfi");
+    println!("cargo:rustc-link-lib=rustViewFunctionsFfi");
     println!("cargo:rustc-link-lib=rustView");
+    println!("cargo:rustc-link-lib=sharedArrayFunctionsFfi");
     println!("cargo:rustc-link-lib=sharedArray");
     println!("cargo:rustc-link-lib=kokkosHandles");
     println!("cargo:rustc-link-arg=-Wl,-rpath={}", dst.display());
@@ -43,4 +45,5 @@ fn main() {
     println!("cargo:rerun-if-changed=src/include/rust_view.hpp");
     println!("cargp:rerun-if-changed=src/include/shared_array.hpp");
     println!("cargo:rerun-if-changed=src/cpp/shared_array.cpp");
+    println!("cargo:rerun-if-changed=src/include/functions_shared_array.hpp");
 }
