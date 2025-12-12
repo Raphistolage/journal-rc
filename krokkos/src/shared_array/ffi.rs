@@ -57,6 +57,7 @@ mod shared_array_ffi {
     }
 }
 
+use ndarray::IxDyn;
 pub use shared_array_ffi::*;
 
 // Warning not ffi-safe, mais en réalité ca l'est, opaqueView est handled par Cxx à la compil.
@@ -67,26 +68,26 @@ pub use shared_array_ffi::*;
 //     pub fn view_to_shared_mut_c(opaque_view: &OpaqueView) -> SharedArrayMut;
 // }
 
-pub fn mat_reduce(shared_arr: SharedArray_f64) -> f64 {
-    let arr = shared_arr.into();
+// pub fn mat_reduce(shared_arr: SharedArray) -> f64 {
+//     let arr: ndarray::Array<f64,IxDyn> = shared_arr.into();
 
-    let mut result = 0.0_f64;
+//     let mut result = 0.0_f64;
 
-    for i in 0..arr.dim()[0] {
-        for j in 0..arr.dim()[1] {
-            result += arr[[i, j]];
-        }
-    }
+//     for i in 0..arr.dim()[0] {
+//         for j in 0..arr.dim()[1] {
+//             result += arr[[i, j]];
+//         }
+//     }
 
-    result
-}
+//     result
+// }
 
-pub fn mat_add_one(shared_arr: SharedArray_f64) {
-    let mut arr = shared_arr.into();
+// pub fn mat_add_one(shared_arr: SharedArray_f64) {
+//     let mut arr = shared_arr.into();
 
-    for i in 0..arr.dim()[0] {
-        for j in 0..arr.dim()[1] {
-            arr[[i, j]] += 1.0;
-        }
-    }
-}
+//     for i in 0..arr.dim()[0] {
+//         for j in 0..arr.dim()[1] {
+//             arr[[i, j]] += 1.0;
+//         }
+//     }
+// }

@@ -1,6 +1,6 @@
 use std::ptr::null;
 
-use ndarray::{Array, IxDyn, ShapeBuilder};
+use ndarray::{Array, IxDyn};
 
 use crate::rust_view::{Dimension, LayoutType, MemorySpace};
 
@@ -189,14 +189,29 @@ where
     }
 }
 
-impl<S, Dim, M, L> From<SharedArray<S, Dim, M, L>> for Array<S::T, IxDyn>
+
+
+// impl<S,D,M,L> From<Array<S::T, IxDyn>> for SharedArray<S, D, M, L> 
+// where
+//     S: SharedArrayT,
+//     D: Dimension,
+//     M: MemorySpace,
+//     L: LayoutType, 
+// {
+//     fn from(value: Array<S::T, IxDyn>) -> Self {
+//         let shapes: D = D::try_from_slice(value.shape()).unwrap();
+//         SharedArray::<S, D, M, L>::from_shape_vec(shapes,value.into_raw_vec_and_offset().0.into())
+//     }
+// }
+
+impl<S, D, M, L> From<SharedArray<S, D, M, L>> for Array<S::T, IxDyn>
 where
     S: SharedArrayT,
-    Dim: Dimension,
+    D: Dimension,
     M: MemorySpace,
     L: LayoutType,
 {
-    fn from(value: SharedArray<S, Dim, M, L>) -> Self {
+    fn from(value: SharedArray<S, D, M, L>) -> Self {
         // TODO : Handle le cas o`u le shared_array est sur gpu, dans ce cas faut deep_copy cqu'il a dans gpu_ptr into cpu_vec puis faire Array::from_shape_vec`
         let shapes = value.1.slice().into();
         Array::<S::T,IxDyn>::from_shape_vec(IxDyn(shapes), value.0.get_cpu_vec()).unwrap()
