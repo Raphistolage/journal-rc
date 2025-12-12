@@ -29,7 +29,6 @@ mod tests {
         shared_array::tests::matrix_vector_prod_test();
         shared_array::tests::matrix_product_test();
         shared_array::tests::vector_product_test();
-        shared_array::tests::mutable_matrix_product_test();
 
         shared_array::kokkos_finalize_ops();
     }

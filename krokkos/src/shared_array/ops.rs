@@ -1,11 +1,7 @@
-use crate::rust_view::{Dimension, LayoutType, MemorySpace};
-use crate::shared_array::SharedArray;
-
-use super::super::rust_view::{OpaqueView, ffi::create_view_f64};
+use crate::rust_view::{Dim1, Dim2, Dimension, LayoutType, MemorySpace};
+use crate::shared_array::{SharedArray, SharedArray_f64};
 use super::ffi;
-use super::handle::*;
 use super::types::*;
-use std::slice;
 
 // pub fn opaque_view_to_shared(opaque_view: &OpaqueView) -> SharedArray {
 //     unsafe { ffi::view_to_shared_c(opaque_view) }
@@ -31,16 +27,14 @@ use std::slice;
 //     create_view_f64(dimensions, mem_space.into(), layout.into(), slice)
 // }
 
-pub fn deep_copy<T, S, D, M, L>(arr1: &mut T, arr2: &T) -> Result<(), Errors>
+pub fn deep_copy<D, M, L>(arr1: &mut SharedArray<SharedArray_f64, D, M, L>, arr2: &SharedArray<SharedArray_f64, D, M, L>) -> Result<(), Errors>
 where
-    S: SharedArrayT,
     D: Dimension,
     M: MemorySpace,
     L: LayoutType,
-    T: TryInto<&SharedArray<S, D, M, L>>,
 {
-    let mut shared_arr1: &SharedArray<S, D, M, L> = arr1.try_into().unwrap();
-    let shared_arr2 = arr2.try_into().unwrap();
+    let mut shared_arr1 = &mut arr1.0;
+    let shared_arr2 = &arr2.0;
     let result = unsafe { ffi::deep_copy(&mut shared_arr1, &shared_arr2) };
     if result == 0 {
         Ok(())
@@ -51,58 +45,49 @@ where
     }
 }
 
-pub fn dot<T, S, D, M, L>(arr1: &T, arr2: &T) -> f64
+pub fn dot<D, M, L>(arr1: &SharedArray<SharedArray_f64, D, M, L>, arr2: &SharedArray<SharedArray_f64, D, M, L>) -> f64
 where
-    S: SharedArrayT,
     D: Dimension,
     M: MemorySpace,
     L: LayoutType,
-    T: TryInto<SharedArray<S, D, M, L>>,
 {
-    let shared_arr1 = arr1.try_into().unwrap();
-    let shared_arr2 = arr2.try_into().unwrap();
+    let shared_arr1 = &arr1.0;
+    let shared_arr2 = &arr2.0;
 
     unsafe { ffi::dot(&shared_arr1, &shared_arr2) }
 }
 
-pub fn matrix_vector_product<T, S, D, M, L>(res: &mut T, arr1: &T, arr2: &T)
+pub fn matrix_vector_product<M, L>(res: &mut SharedArray<SharedArray_f64, Dim1, M, L>, arr1: &SharedArray<SharedArray_f64, Dim2, M, L>, arr2: &SharedArray<SharedArray_f64, Dim1, M, L>)
 where
-    S: SharedArrayT,
-    D: Dimension,
     M: MemorySpace,
     L: LayoutType,
-    T: TryInto<SharedArray<S, D, M, L>>,
 {
-    let mut res_arr = res.try_into().unwrap();
-    let shared_arr1 = arr1.try_into().unwrap();
-    let shared_arr2 = arr2.try_into().unwrap();
+    let mut res_arr = &mut res.0;
+    let shared_arr1 = &arr1.0;
+    let shared_arr2 = &arr2.0;
 
     unsafe { ffi::matrix_vector_product(&mut res_arr, &shared_arr1, &shared_arr2) }
 }
 
-pub fn matrix_product<T, S, D, M, L>(res: &mut T, arr1: &T, arr2: &T)
+pub fn matrix_product<M, L>(res: &mut SharedArray<SharedArray_f64, Dim2, M, L>, arr1: &SharedArray<SharedArray_f64, Dim2, M, L>, arr2: &SharedArray<SharedArray_f64, Dim2, M, L>)
 where
-    S: SharedArrayT,
-    D: Dimension,
     M: MemorySpace,
     L: LayoutType,
-    T: TryInto<SharedArray<S, D, M, L>>,
 {
-    let mut res_arr = res.try_into().unwrap();
-    let shared_arr1 = arr1.try_into().unwrap();
-    let shared_arr2 = arr2.try_into().unwrap();
+    let mut res_arr = &mut res.0;
+    let shared_arr1 = & arr1.0;
+    let shared_arr2 = & arr2.0;
 
     unsafe { ffi::matrix_product(&mut res_arr, &shared_arr1, &shared_arr2) }
 }
 
-pub fn bad_modifier<S, D, M, L>(arr: &impl TryInto<SharedArray<S, D, M, L>>)
+pub fn bad_modifier<S, D, M, L>(arr: &mut SharedArray<SharedArray_f64, D, M, L>)
 where
-    S: SharedArrayT,
     D: Dimension,
     M: MemorySpace,
     L: LayoutType,
 {
-    let mut shared_arr = arr.try_into().unwrap();
+    let mut shared_arr = &mut arr.0;
 
     unsafe {
         ffi::bad_modifier(&mut shared_arr);
@@ -111,103 +96,92 @@ where
 
 #[cfg(test)]
 pub mod tests {
-    use ndarray::{ArrayView, ArrayViewMut, ShapeBuilder};
+    use ndarray::{Array, IxDyn, ShapeBuilder};
+
+    use crate::rust_view::{Dim1, Dim2, HostSpace, LayoutRight};
 
     use super::*;
 
     pub fn create_shared_test() {
-        let mut v = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+        let v = vec![1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
         let c = v.clone();
-        let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let s = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
 
-        let mut arr1 = ArrayViewMut::from_shape((2, 6).strides((1, 2)), &mut v).unwrap();
-        let arr2 = ArrayView::from_shape((2, 6).strides((1, 2)), &s).unwrap();
+        let arr1 = Array::from_shape_vec(IxDyn(&[2, 6]), v).unwrap();
 
-        let arr3 = ArrayView::from_shape((2, 6).strides((1, 2)), &c).unwrap();
+        let arr3 = Array::from_shape_vec(IxDyn(&[2, 6]), c.clone()).unwrap();
 
         assert_eq!(arr1, arr3);
 
-        let _ = deep_copy(&mut arr1, &arr2);
+        let mut shared_arr1: SharedArray::<SharedArray_f64,Dim2,HostSpace,LayoutRight> = arr1.try_into().unwrap();
+        let shared_arr2 = SharedArray::<SharedArray_f64,Dim2,HostSpace,LayoutRight>::from_shape_vec(&[2,6], s);
 
-        assert_eq!(arr1, arr2);
-        assert_ne!(arr1, arr3);
+        let _ = deep_copy(&mut shared_arr1, &shared_arr2);
+
+        let n_arr1: Array<f64, IxDyn> = shared_arr1.into();
+        let n_arr2: Array<f64, IxDyn> = shared_arr2.into();
+
+        assert_eq!(n_arr1, n_arr2);
+        assert_ne!(n_arr1, arr3);
     }
 
     pub fn matrix_vector_prod_test() {
-        let v = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let arr1 = ArrayView::from_shape((2, 6), &v).unwrap();
-        let arr2 = ArrayView::from_shape(6, &s).unwrap();
+        let v = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let s = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let arr1 = SharedArray::<SharedArray_f64,Dim2,HostSpace,LayoutRight>::from_shape_vec(&[2,6], v);
+        let arr2 = SharedArray::<SharedArray_f64,Dim1,HostSpace,LayoutRight>::from_shape_vec(&[6], s);
+        let mut result_shared_arr = SharedArray::<SharedArray_f64,Dim1,HostSpace,LayoutRight>::zeros(&[2]);
 
-        let result_shared = matrix_vector_product(&arr1, &arr2);
-        let result = from_shared(&result_shared);
+        matrix_vector_product(&mut result_shared_arr, &arr1, &arr2);
 
-        let expected_slice = [55.0, 145.0];
-        let expected = ArrayView::from_shape(2, &expected_slice)
+        let expected_slice = vec![55.0, 145.0];
+        let expected = Array::from_shape_vec(2, expected_slice)
             .unwrap()
             .into_dyn();
-
-        assert_eq!(result, expected);
+        let result_arr: Array<f64, IxDyn> = result_shared_arr.into();
+        assert_eq!(result_arr, expected);
     }
 
     pub fn vector_product_test() {
-        let v = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let s = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let arr1 = ArrayView::from_shape((6).strides(1), &v).unwrap();
-        let arr2 = ArrayView::from_shape((6).strides(1), &s).unwrap();
+        let v = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let s = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let arr1 = SharedArray::<SharedArray_f64,Dim1,HostSpace,LayoutRight>::from_shape_vec(&[6], v);
+        let arr2 = SharedArray::<SharedArray_f64,Dim1,HostSpace,LayoutRight>::from_shape_vec(&[6], s);
 
-        let result_shared = dot(&arr1, &arr2);
-        let result = from_shared(&result_shared);
+        let result = dot(&arr1, &arr2);
 
-        let expected_slice = [55.0];
-        let expected = ArrayView::from_shape(1, &expected_slice)
-            .unwrap()
-            .into_dyn();
-
-        assert_eq!(result, expected);
+        assert_eq!(result, 55.0);
     }
 
     pub fn matrix_product_test() {
-        let v: [f64; 12] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let s: [f64; 12] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let arr1 = ArrayView::from_shape((3, 2), &v).unwrap();
-        let arr2 = ArrayView::from_shape((2, 2), &s).unwrap();
+        let v = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let s = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let arr1 = SharedArray::<SharedArray_f64,Dim2,HostSpace,LayoutRight>::from_shape_vec(&[3,2], v);
+        let arr2 = SharedArray::<SharedArray_f64,Dim2,HostSpace,LayoutRight>::from_shape_vec(&[2,2], s);
+        let mut result_shared_arr = SharedArray::<SharedArray_f64,Dim2,HostSpace,LayoutRight>::zeros(&[3,2]);
 
-        let expected_slice = [2.0, 3.0, 6.0, 11.0, 10.0, 19.0];
-        let expected = ArrayView::from_shape((3, 2), &expected_slice)
+
+        let expected_slice = vec![2.0, 3.0, 6.0, 11.0, 10.0, 19.0];
+        let expected = Array::from_shape_vec((3, 2), expected_slice)
             .unwrap()
             .into_dyn();
 
-        let shared_result = matrix_product(&arr1, &arr2);
+        matrix_product(&mut result_shared_arr, &arr1, &arr2);
 
-        let array_result = from_shared(&shared_result);
+        let array_result: Array<f64, IxDyn> = result_shared_arr.into();
 
         assert_eq!(array_result, expected);
     }
 
-    pub fn mutable_matrix_product_test() {
-        let mut a: [f64; 6] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
-        let b: [f64; 6] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
-        let c: [f64; 6] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0];
-        let expected_slice = [2.0, 3.0, 6.0, 11.0, 10.0, 19.0];
-        let mut arr1 = ArrayViewMut::from_shape((3, 2), &mut a).unwrap();
-        let arr2 = ArrayView::from_shape((3, 2), &b).unwrap();
-        let arr3 = ArrayView::from_shape((2, 2), &c).unwrap();
-        {
-            mutable_matrix_product(&mut arr1, &arr2, &arr3);
-        }
-        assert_eq!(a, expected_slice);
-    }
+    // pub fn mat_reduce_test_cpp() {
+    //     unsafe {
+    //         ffi::cpp_var_rust_func_test();
+    //     }
+    // }
 
-    pub fn mat_reduce_test_cpp() {
-        unsafe {
-            ffi::cpp_var_rust_func_test();
-        }
-    }
-
-    pub fn mat_add_one_cpp_test() {
-        unsafe {
-            ffi::cpp_var_rust_func_mutable_test();
-        }
-    }
+    // pub fn mat_add_one_cpp_test() {
+    //     unsafe {
+    //         ffi::cpp_var_rust_func_mutable_test();
+    //     }
+    // }
 }
