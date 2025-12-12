@@ -5,4 +5,3 @@ pub enum Errors {
     IncompatibleRanks = 1,
     IncompatibleShapes = 2,
 }
-

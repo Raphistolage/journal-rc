@@ -1,55 +1,150 @@
-use std::mem::size_of;
-use std::os::raw::c_void;
-use std::slice::{from_raw_parts, from_raw_parts_mut};
+use std::ptr::null;
 
-use ndarray::{ArrayView, ArrayViewMut, IxDyn};
+use ndarray::{Array, IxDyn, ShapeBuilder};
 
-use super::ffi;
-use super::types::*;
-use supper::{SharedArray, SharedArrayMut};
+use crate::rust_view::{Dimension, LayoutType, MemorySpace};
 
-pub fn kokkos_initialize() {
+use super::SharedArray;
+use super::ffi::{
+    DataType, Layout, MemSpace, SharedArray_f32, SharedArray_f64, SharedArray_i32,
+    free_shared_array, kokkos_finalize, kokkos_initialize,
+};
+
+pub fn kokkos_initialize_ops() {
     unsafe {
-        ffi::kokkos_initialize();
+        kokkos_initialize();
     }
 }
 
-pub fn kokkos_finalize() {
+pub fn kokkos_finalize_ops() {
     unsafe {
-        ffi::kokkos_finalize();
+        kokkos_finalize();
     }
 }
 
 pub trait SharedArrayT {
-    type T;
+    type T: Default + Clone;
+
+    fn from_shape_vec(
+        shapes: Vec<usize>,
+        v: Vec<Self::T>,
+        mem_space: MemSpace,
+        layout: Layout,
+    ) -> Self;
+
+    fn get_cpu_vec(&self) -> Vec<Self::T>;
+    fn is_allocated_by_cpp(&self) -> bool;
 }
 
 impl SharedArrayT for SharedArray_f64 {
     type T = f64;
+
+    fn from_shape_vec(
+        shapes: Vec<usize>,
+        v: Vec<Self::T>,
+        mem_space: MemSpace,
+        layout: Layout,
+    ) -> SharedArray_f64 {
+        SharedArray_f64 {
+            cpu_vec: v,
+
+            gpu_ptr: null::<f64>() as *mut f64,
+
+            rank: shapes.len() as i32,
+
+            shape: shapes,
+
+            mem_space,
+
+            layout,
+
+            is_mut: false,
+
+            allocated_by_cpp: false,
+        }
+    }
+
+    fn get_cpu_vec(&self) -> Vec<Self::T> {
+        self.cpu_vec.clone()
+    }
+
+    fn is_allocated_by_cpp(&self) -> bool {
+        self.allocated_by_cpp
+    }
 }
 
 impl SharedArrayT for SharedArray_f32 {
     type T = f32;
+
+    fn from_shape_vec(
+        shapes: Vec<usize>,
+        v: Vec<Self::T>,
+        mem_space: MemSpace,
+        layout: Layout,
+    ) -> SharedArray_f32 {
+        SharedArray_f32 {
+            cpu_vec: v,
+
+            gpu_ptr: null::<f32>() as *mut f32,
+
+            rank: shapes.len() as i32,
+
+            shape: shapes,
+
+            mem_space,
+
+            layout,
+
+            is_mut: false,
+
+            allocated_by_cpp: false,
+        }
+    }
+
+    fn get_cpu_vec(&self) -> Vec<Self::T> {
+        self.cpu_vec.clone()
+    }
+
+    fn is_allocated_by_cpp(&self) -> bool {
+        self.allocated_by_cpp
+    }
 }
 
 impl SharedArrayT for SharedArray_i32 {
     type T = i32;
-}
 
-pub trait SharedArrayMutT {
-    type T;
-}
+    fn from_shape_vec(
+        shapes: Vec<usize>,
+        v: Vec<Self::T>,
+        mem_space: MemSpace,
+        layout: Layout,
+    ) -> SharedArray_i32 {
+        SharedArray_i32 {
+            cpu_vec: v,
 
-impl SharedArrayMutT for SharedArrayMut_f64 {
-    type T = f64;
-}
+            gpu_ptr: null::<i32>() as *mut i32,
 
-impl SharedArrayMutT for SharedArrayMut_f32 {
-    type T = f32;
-}
+            rank: shapes.len() as i32,
 
-impl SharedArrayMutT for SharedArrayMut_i32 {
-    type T = i32;
+            shape: shapes,
+
+            mem_space,
+
+            layout,
+
+            is_mut: false,
+
+            allocated_by_cpp: false,
+        }
+    }
+
+    fn get_cpu_vec(&self) -> Vec<Self::T> {
+        self.cpu_vec.clone()
+    }
+
+    fn is_allocated_by_cpp(&self) -> bool {
+        self.allocated_by_cpp
+    }
 }
 
 pub trait RustDataType {
@@ -72,163 +167,58 @@ impl RustDataType for i32 {
     }
 }
 
-pub trait ToSharedArray {
-    type Dim: ndarray::Dimension;
-    fn to_shared_array(&self, mem_space: MemSpace) -> SharedArray;
-}
-
-pub trait ToSharedArrayMut {
-    type Dim: ndarray::Dimension;
-    fn to_shared_array_mut(&mut self, mem_space: MemSpace) -> SharedArrayMut;
-}
-
-impl<'a, D> ToSharedArray for ndarray::ArrayView<'a, f64, D>
+impl<D, S, Dim, M, L> TryFrom<Array<S::T, D>> for SharedArray<S, Dim, M, L>
 where
-    D: ndarray::Dimension + 'a,
-    // T: RustDataType,     TODO : utiliser ca pour passer en generic.
+    D: ndarray::Dimension,
+    S: SharedArrayT,
+    Dim: Dimension,
+    M: MemorySpace,
+    L: LayoutType,
 {
-    type Dim = D;
-    fn to_shared_array(&self, mem_space: MemSpace) -> SharedArray {
-        to_shared_array(self, mem_space)
-    }
-}
-
-impl<'a, D> ToSharedArrayMut for ndarray::ArrayViewMut<'a, f64, D>
-where
-    D: ndarray::Dimension + 'a,
-    // T: RustDataType,     TODO : utiliser ca pour passer en generic.
-{
-    type Dim = D;
-    fn to_shared_array_mut(&mut self, mem_space: MemSpace) -> SharedArrayMut {
-        to_shared_array_mut(self, mem_space)
-    }
-}
-
-pub fn to_shared_array_mut<'a, T, D>(
-    arr: &'a mut ndarray::ArrayViewMut<T, D>,
-    mem_space: MemSpace,
-) -> SharedArrayMut
-where
-    D: ndarray::Dimension + 'a,
-    T: RustDataType,
-{
-    let rank = arr.ndim();
-    let shape = arr.shape().as_ptr();
-    let data_ptr = arr.as_mut_ptr() as *mut c_void;
-    let array_size = arr.len();
-
-    if mem_space == MemSpace::HostSpace {
-        SharedArrayMut {
-            ptr: data_ptr,
-            size: size_of::<T>() as i32,
-            data_type: T::data_type(),
-            rank: rank as i32,
-            shape,
-            mem_space: MemSpace::HostSpace,
-            layout: Layout::LayoutRight,
-            is_mut: true,
-            allocated_by_cpp: false,
-            shape_by_cpp: false,
-        }
-    } else {
-        SharedArrayMut {
-            ptr: unsafe { ffi::get_device_ptr_mut(data_ptr, array_size, size_of::<T>() as i32) },
-            size: size_of::<T>() as i32,
-            data_type: T::data_type(),
-            rank: rank as i32,
-            shape,
-            mem_space,
-            layout: Layout::LayoutRight,
-            is_mut: true,
-            allocated_by_cpp: true,
-            shape_by_cpp: false,
+    type Error = &'static str;
+    fn try_from(value: Array<S::T, D>) -> Result<Self, Self::Error> {
+        if D::default().ndim() != Dim::default().ndim() as usize {
+            Err("Incompatible dimensions")
+        } else {
+            let shapes: Dim = Dim::try_from_slice(value.shape()).unwrap();
+            Ok(SharedArray::<S, Dim, M, L>::from_shape_vec(
+                shapes,
+                value.into_raw_vec_and_offset().0.into(),
+            ))
         }
     }
 }
 
-pub fn to_shared_array<'a, T, D>(
-    arr: &'a ndarray::ArrayView<T, D>,
-    mem_space: MemSpace,
-) -> SharedArray
+impl<D, S, Dim, M, L> TryFrom<SharedArray<S, Dim, M, L>> for Array<S::T, D>
 where
-    D: ndarray::Dimension + 'a,
-    T: RustDataType,
+    D: ndarray::Dimension,
+    S: SharedArrayT,
+    Dim: Dimension,
+    M: MemorySpace,
+    L: LayoutType,
 {
-    let rank = arr.ndim();
-    let shape = arr.shape().as_ptr();
-    let data_ptr = arr.as_ptr() as *const c_void;
-    let array_size = arr.len();
-
-    if mem_space == MemSpace::HostSpace {
-        SharedArray {
-            ptr: data_ptr,
-            size: size_of::<T>() as i32,
-            data_type: T::data_type(),
-            rank: rank as i32,
-            shape,
-            mem_space: MemSpace::HostSpace,
-            layout: Layout::LayoutRight,
-            is_mut: false,
-            allocated_by_cpp: false,
-            shape_by_cpp: false,
-        }
-    } else {
-        SharedArray {
-            ptr: unsafe { ffi::get_device_ptr(data_ptr, array_size, size_of::<T>() as i32) },
-            size: size_of::<T>() as i32,
-            data_type: T::data_type(),
-            rank: rank as i32,
-            shape,
-            mem_space,
-            layout: Layout::LayoutRight,
-            is_mut: false,
-            allocated_by_cpp: true,
-            shape_by_cpp: false,
+    type Error = &'static str;
+    fn try_from(value: SharedArray<S, Dim, M, L>) -> Result<Self, Self::Error> {
+        if D::default().ndim() != Dim::default().ndim() as usize {
+            Err("Incompatible dimensions")
+        } else {
+            // TODO : Handle le cas o`u le shared_array est sur gpu, dans ce cas faut deep_copy cqu'il a dans gpu_ptr into cpu_vec puis faire Array::from_shape_vec`
+            Ok(Array::<S::T,D>::from_shape_vec(value.1.slice().into(), value.0.get_cpu_vec()).unwrap())
         }
     }
 }
 
-pub fn from_shared(shared_array: &SharedArray) -> ndarray::ArrayView<'static, f64, ndarray::IxDyn> {
-    if shared_array.mem_space != MemSpace::HostSpace {
-        panic!("Cannot cast from a SharedArray that is not on host space.");
-    }
-
-    let shape: &[usize] = unsafe { from_raw_parts(shared_array.shape, shared_array.rank as usize) };
-    let len = shape.iter().product();
-    let v = unsafe { from_raw_parts(shared_array.ptr as *const f64, len) };
-
-    ArrayView::from_shape(IxDyn(shape), v).unwrap()
-}
-
-pub fn from_shared_mut(
-    shared_array: &SharedArrayMut,
-) -> ndarray::ArrayViewMut<'static, f64, ndarray::IxDyn> {
-    if shared_array.mem_space != MemSpace::HostSpace {
-        panic!("Cannot cast from a SharedArray that is not on host space.");
-    }
-
-    let shape: &[usize] = unsafe { from_raw_parts(shared_array.shape, shared_array.rank as usize) };
-    let len = shape.iter().product();
-    let v = unsafe { from_raw_parts_mut(shared_array.ptr as *mut f64, len) };
-
-    ArrayViewMut::from_shape(IxDyn(shape), v).unwrap()
-}
-
-impl Drop for SharedArray {
+impl<S, D, M, L> Drop for SharedArray<S, D, M, L>
+where
+    S: SharedArrayT,
+    D: Dimension,
+    M: MemorySpace,
+    L: LayoutType,
+{
     fn drop(&mut self) {
-        if self.allocated_by_cpp || self.shape_by_cpp {
+        if self.0.is_allocated_by_cpp() {
             unsafe {
-                ffi::free_shared_array(self);
-            }
-        }
-    }
-}
-
-impl Drop for SharedArrayMut {
-    fn drop(&mut self) {
-        if self.allocated_by_cpp || self.shape_by_cpp {
-            unsafe {
-                ffi::free_shared_array_mut(self);
+                free_shared_array(self.0);
             }
         }
     }
