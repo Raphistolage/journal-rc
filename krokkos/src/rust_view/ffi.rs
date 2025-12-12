@@ -33,8 +33,6 @@ mod rust_view_ffi {
     unsafe extern "C++" {
         include!("rust_view.hpp");
         type IView;
-        type MemSpace;
-        type Layout;
 
         fn matrix_product(a: &OpaqueView, b: &OpaqueView, c: &mut OpaqueView);
         fn dot(r: &mut OpaqueView, x: &OpaqueView, y: &OpaqueView);
@@ -47,29 +45,29 @@ mod rust_view_ffi {
     }
 }
 
-pub use ffi::*;
+pub use rust_view_ffi::*;
 
 pub use super::functions_ffi::*;
 
-impl From<ffi::MemSpace> for crate::common_types::MemSpace {
-    fn from(mem_space: ffi::MemSpace) -> Self {
+impl From<rust_view_ffi::MemSpace> for crate::common_types::MemSpace {
+    fn from(mem_space: rust_view_ffi::MemSpace) -> Self {
         unsafe { std::mem::transmute(mem_space) }
     }
 }
 
-impl From<crate::common_types::MemSpace> for ffi::MemSpace {
+impl From<crate::common_types::MemSpace> for rust_view_ffi::MemSpace {
     fn from(mem_space: crate::common_types::MemSpace) -> Self {
         unsafe { std::mem::transmute(mem_space) }
     }
 }
 
-impl From<ffi::Layout> for crate::common_types::Layout {
-    fn from(layout: ffi::Layout) -> Self {
+impl From<rust_view_ffi::Layout> for crate::common_types::Layout {
+    fn from(layout: rust_view_ffi::Layout) -> Self {
         unsafe { std::mem::transmute(layout) }
     }
 }
 
-impl From<crate::common_types::Layout> for ffi::Layout {
+impl From<crate::common_types::Layout> for rust_view_ffi::Layout {
     fn from(layout: crate::common_types::Layout) -> Self {
         unsafe { std::mem::transmute(layout) }
     }

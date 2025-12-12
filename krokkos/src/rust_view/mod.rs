@@ -22,9 +22,7 @@ pub struct RustView<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutTyp
     std::marker::PhantomData<&'a mut T>,
 );
 
-impl<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType>
-    RustView<'a, T, D, M, L>
-{
+impl<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType> RustView<'a, T, D, M, L> {
     pub fn from_shape<U: Into<D>>(shapes: U, v: &'a mut [T]) -> Self {
         let mem_space = M::default();
         let layout = L::default();

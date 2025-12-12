@@ -3,11 +3,10 @@
 #include <Kokkos_Core.hpp>
 #include <string>
 #include <iostream>
-#include "types.hpp"
 
 namespace rust_view{
-    using ::MemSpace;
-    using ::Layout;
+    // using ::MemSpace;
+    // using ::Layout;
 
     struct IView {
         virtual ~IView() = default;     
