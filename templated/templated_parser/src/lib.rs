@@ -1,16 +1,23 @@
 use std::path::{Path, PathBuf};
 use std::fs;
 
-use syn::ItemStruct;
-use syn::{Block, FnArg, Ident, Item, ItemFn, PathSegment, ReturnType, Token, Type, punctuated::Punctuated, token::{Brace}};
+use syn::{GenericArgument, PathArguments};
+use syn::{Block, FnArg, Ident, Item, ItemFn, ItemStruct, PathSegment, ReturnType, Token, Type, punctuated::Punctuated, token::{Brace}};
 use proc_macro2::{Span};
 use quote::{quote};
 
 fn replace_generic(ty: &mut Type, var: &str) {
     match ty {
         Type::Path(path) => {
-            if path.path.segments.len() == 1 && path.path.segments.first().unwrap().ident == "T" {
+            let segment = path.path.segments.first_mut().unwrap();
+            if segment.ident == "T" {
                 path.path.segments.first_mut().unwrap().ident = Ident::new(var, Span::call_site());
+            } else if segment.ident == "Vec" {
+                if let PathArguments::AngleBracketed(generics) = &mut segment.arguments {
+                    if let Some(GenericArgument::Type(inner_type)) = generics.args.first_mut() {
+                        replace_generic(inner_type, var);
+                    }
+                }
             }
         },
         Type::Reference(reference ) => {
@@ -53,12 +60,12 @@ fn replace_generic(ty: &mut Type, var: &str) {
             for elem in tuple.elems.iter_mut() {
                 replace_generic(elem, var);
             }
-        }
+        },
         _ => ()
     }
 }
 
-pub fn bridge(rust_source_file: impl AsRef<Path>) -> cc::Build {
+pub fn bridge(rust_source_file: impl AsRef<Path>, which_ffi: i32) -> cc::Build {
     let content = fs::read_to_string(rust_source_file).expect("unable to read file");
     let ast = syn::parse_file(&content).expect("unable to parse file");
     let out_dir = std::env::var("OUT_DIR").expect("OUT_DIR not set");
@@ -84,11 +91,14 @@ pub fn bridge(rust_source_file: impl AsRef<Path>) -> cc::Build {
                 let mut to_write_func: String = String::default();
 
                 to_write_func.push_str("unsafe extern \"C++\" {\n");
-                to_write_func.push_str("include!(\"functions.hpp\");\n");
-                to_write_func.push_str("include!(\"functions_shared_array.hpp\");\n");
-                to_write_func.push_str("include!(\"rust_view.hpp\");\n");
-                to_write_func.push_str("include!(\"shared_array.hpp\");\n\n");
-
+                if which_ffi == 1 {
+                    // to_write_func.push_str("include!(\"shared_array.hpp\");\n\n");
+                    to_write_func.push_str("include!(\"functions_shared_array.hpp\");\n");
+                } else if which_ffi == 2 {
+                    to_write_func.push_str("include!(\"functions.hpp\");\n");
+                    to_write_func.push_str("include!(\"rust_view.hpp\");\n");
+                }
+                
                 let mut to_write_structs = String::default();
 
                 let mut export_string = format!("pub use {}_ffi::{{", module.ident.to_string());
@@ -175,6 +185,8 @@ pub fn bridge(rust_source_file: impl AsRef<Path>) -> cc::Build {
                                 let stringed_struc = quote! {#struc}.to_string();
                                 to_write_structs.push_str(&stringed_struc);
                                 to_write_structs.push_str("\n\n");
+                                export_string.push_str(&struc.ident.to_string());
+                                export_string.push(',');
 
                             }
                         }else {
@@ -184,7 +196,7 @@ pub fn bridge(rust_source_file: impl AsRef<Path>) -> cc::Build {
                     }
 
                     let mut to_write_full = String::default();
-                    to_write_full.push_str("#[cxx::bridge(namespace = \"functions\")]\n");
+                    to_write_full.push_str(&format!("#[cxx::bridge(namespace = \"{}\")]\n", module.ident.to_string()));
                     to_write_full.push_str(&format!("mod {}_ffi {{\n\n", module.ident.to_string()));
 
                     to_write_full.push_str(&to_write_structs);
