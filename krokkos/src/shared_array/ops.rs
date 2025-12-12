@@ -1,98 +1,111 @@
+use crate::rust_view::{Dimension, LayoutType, MemorySpace};
+use crate::shared_array::SharedArray;
+
 use super::super::rust_view::{OpaqueView, ffi::create_view_f64};
 use super::ffi;
 use super::handle::*;
 use super::types::*;
 use std::slice;
 
-pub fn opaque_view_to_shared(opaque_view: &OpaqueView) -> SharedArray {
-    unsafe { ffi::view_to_shared_c(opaque_view) }
-}
+// pub fn opaque_view_to_shared(opaque_view: &OpaqueView) -> SharedArray {
+//     unsafe { ffi::view_to_shared_c(opaque_view) }
+// }
 
-pub fn opaque_view_to_shared_mut(opaque_view: &OpaqueView) -> SharedArrayMut {
-    unsafe { ffi::view_to_shared_mut_c(opaque_view) }
-}
+// pub fn opaque_view_to_shared_mut(opaque_view: &OpaqueView) -> SharedArrayMut {
+//     unsafe { ffi::view_to_shared_mut_c(opaque_view) }
+// }
 
-pub fn shared_arr_to_opaque_view(shared_arr: &SharedArrayMut) -> OpaqueView {
-    let mem_space = shared_arr.mem_space;
-    let layout = shared_arr.layout;
-    let mut dimensions: Vec<usize> = Vec::new();
-    let mut len: usize = 1;
-    let shape_slice: &[usize] =
-        unsafe { std::slice::from_raw_parts(shared_arr.shape, shared_arr.rank as usize) };
+// pub fn shared_arr_to_opaque_view(shared_arr: &SharedArrayMut) -> OpaqueView {
+//     let mem_space = shared_arr.mem_space;
+//     let layout = shared_arr.layout;
+//     let mut dimensions: Vec<usize> = Vec::new();
+//     let mut len: usize = 1;
+//     let shape_slice: &[usize] =
+//         unsafe { std::slice::from_raw_parts(shared_arr.shape, shared_arr.rank as usize) };
 
-    for i in 0..shared_arr.rank {
-        dimensions.push(shape_slice[i as usize]);
-        len *= shape_slice[i as usize];
-    }
-    let slice = unsafe { slice::from_raw_parts_mut(shared_arr.ptr as *mut f64, len) };
-    create_view_f64(dimensions, mem_space.into(), layout.into(), slice)
-}
+//     for i in 0..shared_arr.rank {
+//         dimensions.push(shape_slice[i as usize]);
+//         len *= shape_slice[i as usize];
+//     }
+//     let slice = unsafe { slice::from_raw_parts_mut(shared_arr.ptr as *mut f64, len) };
+//     create_view_f64(dimensions, mem_space.into(), layout.into(), slice)
+// }
 
-pub fn deep_copy<U, T>(arr1: &mut U, arr2: &T) -> Result<(), Errors>
+pub fn deep_copy<T, S, D, M, L>(arr1: &mut T, arr2: &T) -> Result<(), Errors>
 where
-    T: ToSharedArray,
-    U: ToSharedArrayMut,
+    S: SharedArrayT,
+    D: Dimension,
+    M: MemorySpace,
+    L: LayoutType,
+    T: TryInto<&SharedArray<S, D, M, L>>,
 {
-    let mut shared_arr1 = arr1.to_shared_array_mut(MemSpace::HostSpace);
-    let shared_arr2 = arr2.to_shared_array(MemSpace::HostSpace);
+    let mut shared_arr1: &SharedArray<S, D, M, L> = arr1.try_into().unwrap();
+    let shared_arr2 = arr2.try_into().unwrap();
     let result = unsafe { ffi::deep_copy(&mut shared_arr1, &shared_arr2) };
-    if result == Errors::NoErrors {
+    if result == 0 {
         Ok(())
-    } else if result == Errors::IncompatibleRanks {
+    } else if result == 1 {
         Err(Errors::IncompatibleRanks)
     } else {
         Err(Errors::IncompatibleShapes)
     }
 }
 
-pub fn dot<T>(arr1: &T, arr2: &T) -> SharedArray
+pub fn dot<T, S, D, M, L>(arr1: &T, arr2: &T) -> f64
 where
-    T: ToSharedArray,
+    S: SharedArrayT,
+    D: Dimension,
+    M: MemorySpace,
+    L: LayoutType,
+    T: TryInto<SharedArray<S, D, M, L>>,
 {
-    let shared_arr1 = arr1.to_shared_array(MemSpace::HostSpace);
-    let shared_arr2 = arr2.to_shared_array(MemSpace::HostSpace);
+    let shared_arr1 = arr1.try_into().unwrap();
+    let shared_arr2 = arr2.try_into().unwrap();
 
     unsafe { ffi::dot(&shared_arr1, &shared_arr2) }
 }
 
-pub fn matrix_vector_product<T, U>(arr1: &T, arr2: &U) -> SharedArray
+pub fn matrix_vector_product<T, S, D, M, L>(res: &mut T, arr1: &T, arr2: &T)
 where
-    T: ToSharedArray<Dim = ndarray::Ix2>,
-    U: ToSharedArray<Dim = ndarray::Ix1>,
+    S: SharedArrayT,
+    D: Dimension,
+    M: MemorySpace,
+    L: LayoutType,
+    T: TryInto<SharedArray<S, D, M, L>>,
 {
-    let shared_arr1 = arr1.to_shared_array(MemSpace::HostSpace);
-    let shared_arr2 = arr2.to_shared_array(MemSpace::HostSpace);
+    let mut res_arr = res.try_into().unwrap();
+    let shared_arr1 = arr1.try_into().unwrap();
+    let shared_arr2 = arr2.try_into().unwrap();
 
-    unsafe { ffi::matrix_vector_product(&shared_arr1, &shared_arr2) }
+    unsafe { ffi::matrix_vector_product(&mut res_arr, &shared_arr1, &shared_arr2) }
 }
 
-pub fn matrix_product<T>(arr1: &T, arr2: &T) -> SharedArray
+pub fn matrix_product<T, S, D, M, L>(res: &mut T, arr1: &T, arr2: &T)
 where
-    T: ToSharedArray<Dim = ndarray::Ix2>,
+    S: SharedArrayT,
+    D: Dimension,
+    M: MemorySpace,
+    L: LayoutType,
+    T: TryInto<SharedArray<S, D, M, L>>,
 {
-    let shared_arr1 = arr1.to_shared_array(MemSpace::DeviceSpace);
-    let shared_arr2 = arr2.to_shared_array(MemSpace::DeviceSpace);
+    let mut res_arr = res.try_into().unwrap();
+    let shared_arr1 = arr1.try_into().unwrap();
+    let shared_arr2 = arr2.try_into().unwrap();
 
-    unsafe { ffi::matrix_product(&shared_arr1, &shared_arr2) }
+    unsafe { ffi::matrix_product(&mut res_arr, &shared_arr1, &shared_arr2) }
 }
 
-pub fn mutable_matrix_product<U, T>(arr1: &mut U, arr2: &T, arr3: &T)
+pub fn bad_modifier<S, D, M, L>(arr: &impl TryInto<SharedArray<S, D, M, L>>)
 where
-    T: ToSharedArray<Dim = ndarray::Ix2>,
-    U: ToSharedArrayMut<Dim = ndarray::Ix2>,
+    S: SharedArrayT,
+    D: Dimension,
+    M: MemorySpace,
+    L: LayoutType,
 {
-    let shared_arr1 = arr1.to_shared_array_mut(MemSpace::HostSpace);
-    let shared_arr2 = arr2.to_shared_array(MemSpace::HostSpace);
-    let shared_arr3 = arr3.to_shared_array(MemSpace::HostSpace);
-
-    unsafe { ffi::mutable_matrix_product(&shared_arr1, &shared_arr2, &shared_arr3) };
-}
-
-pub fn bad_modifier(arr: &impl ToSharedArray<Dim = ndarray::Ix2>) {
-    let shared_arr = arr.to_shared_array(MemSpace::HostSpace);
+    let mut shared_arr = arr.try_into().unwrap();
 
     unsafe {
-        ffi::bad_modifier(&shared_arr);
+        ffi::bad_modifier(&mut shared_arr);
     }
 }
 
