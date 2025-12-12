@@ -1,14 +1,13 @@
 #pragma once
-#include "shared_array.hpp"
 
+#include <Kokkos_Core.hpp>
 #include <iostream>
+#include "shared_ffi_types.rs.h"
 
-using rust_view::OpaqueView;
-
-namespace functions {
-    using shared_array::MemSpace;
-    using shared_array::DataType;
-    using shared_array::Layout;
+namespace shared_array_functions {
+    using shared_ffi_types::MemSpace;
+    using shared_ffi_types::DataType;
+    using shared_ffi_types::Layout;
 
     #ifdef KOKKOS_ENABLE_CUDA
         using DeviceMemorySpace = Kokkos::CudaSpace;
@@ -31,13 +30,12 @@ namespace functions {
     }
 
     template <typename T>
-    T* get_device_ptr_mut(T* data_ptr, size_t array_size, int data_size) {
+    T* get_device_ptr_mut(T* data_ptr, size_t array_size) {
 
-        T* typed_ptr = static_cast<T*>(data_ptr);
-        Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(typed_ptr, array_size*data_size);
+        Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data_ptr, array_size);
 
-        T* device_ptr = static_cast<T*>(Kokkos::kokkos_malloc(array_size*data_size));
-        Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, array_size*data_size);
+        T* device_ptr = static_cast<T*>(Kokkos::kokkos_malloc(array_size));
+        Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space, Kokkos::MemoryTraits<Kokkos::Unmanaged>> device_view(device_ptr, array_size);
 
         Kokkos::deep_copy(device_view, host_view);
         return device_ptr;

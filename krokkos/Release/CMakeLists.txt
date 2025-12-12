@@ -27,18 +27,13 @@ target_link_libraries(kokkosHandles PUBLIC Kokkos::kokkos)
 
 set_target_properties(kokkosHandles PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-# SharedArray
-add_library(sharedArray SHARED ../src/cpp/shared_array.cpp ${OUT_DIR}/cxxbridge/sources/${PKG_NAME}/src/shared_array/ffi.rs.cc)
+# SharedFfiTypes
 
-target_link_libraries(sharedArray PUBLIC kokkosHandles)
+add_library(sharedFfiTypes SHARED ${OUT_DIR}/cxxbridge/sources/${PKG_NAME}/src/shared_array/shared_ffi_types.rs.cc)
 
-target_include_directories(sharedArray PUBLIC 
-    ${OUT_DIR}/cxxbridge/include/rust
-    ${OUT_DIR}/cxxbridge/include/${PKG_NAME}/src/shared_array/    
-    ../src/include
-)
+target_include_directories(sharedFfiTypes PUBLIC ${OUT_DIR}/cxxbridge/include/${PKG_NAME}/src/shared_array/)
 
-set_target_properties(sharedArray PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(sharedFfiTypes PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # RustView
 add_library(rustView SHARED ../src/cpp/rust_view.cpp ${OUT_DIR}/cxxbridge/sources/${PKG_NAME}/src/rust_view/ffi.rs.cc)
@@ -53,9 +48,8 @@ target_include_directories(rustView PUBLIC
 
 set_target_properties(rustView PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-# Functions ffi
-add_library(functionsFfi SHARED 
-    ../src/cpp/functions.cpp 
+# SharedArray_Functions ffi
+add_library(sharedArrayFunctionsFfi SHARED 
     ../src/cpp/functions_shared_array.cpp
     ${OUT_DIR}/cxxbridge/sources/${PKG_NAME}/${OUT_DIR}/shared_array_functions_ffi.rs.cc
 )
@@ -88,13 +82,14 @@ add_library(rustViewFunctionsFfi SHARED
     ${OUT_DIR}/cxxbridge/sources/${PKG_NAME}/${OUT_DIR}/rust_view_functions_ffi.rs.cc
 )
 
-target_link_libraries(functionsFfi PUBLIC rustView sharedArray)
+target_link_libraries(rustViewFunctionsFfi PUBLIC rustView )
 
-target_include_directories(functionsFfi PUBLIC ${OUT_DIR}/cxxbridge/include/${PKG_NAME}/${OUT_DIR}/)
+target_include_directories(rustViewFunctionsFfi PUBLIC ${OUT_DIR}/cxxbridge/include/${PKG_NAME}/${OUT_DIR}/)
 
-set_target_properties(functionsFfi PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(rustViewFunctionsFfi PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 install(TARGETS kokkosHandles DESTINATION .)
 install(TARGETS sharedArray DESTINATION .)
+install(TARGETS sharedArrayFunctionsFfi DESTINATION .)
 install(TARGETS rustView DESTINATION .)
-install(TARGETS functionsFfi DESTINATION .)
+install(TARGETS rustViewFunctionsFfi DESTINATION .)
