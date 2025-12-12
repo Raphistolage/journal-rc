@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-pub trait Dimension: Debug + Into<Vec<usize>> {
+pub trait Dimension: Debug + Into<Vec<usize>> + Clone + Default {
     const NDIM: u8;
 
     fn ndim(&self) -> u8;
@@ -14,9 +14,11 @@ pub trait Dimension: Debug + Into<Vec<usize>> {
     fn to_vec(&self) -> Vec<usize> {
         self.slice().to_vec()
     }
+
+    fn try_from_slice(slice: &[usize]) -> Result<Self, &'static str>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Default)]
 pub struct Dim1 {
     shape: [usize; 1],
 }
@@ -53,9 +55,17 @@ impl Dimension for Dim1 {
     fn slice(&self) -> &[usize] {
         self.shapes()
     }
+
+    fn try_from_slice(slice: &[usize]) -> Result<Self, &'static str> {
+        if slice.len() == Self::NDIM as usize {
+            Ok(Dim1 { shape: [slice[0]] })
+        } else {
+            Err("Invalid size slice for Dim1")
+        }
+    }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Default)]
 pub struct Dim2 {
     shape: [usize; 2],
 }
@@ -92,9 +102,17 @@ impl Dimension for Dim2 {
     fn slice(&self) -> &[usize] {
         self.shapes()
     }
+
+    fn try_from_slice(value: &[usize]) -> Result<Self, &'static str> {
+        if value.len() == Self::NDIM as usize {
+            Ok(Dim2 { shape: [value[0], value[1]] })
+        } else {
+            Err("Invalid size slice for Dim1")
+        }
+    }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Default)]
 pub struct Dim3 {
     shape: [usize; 3],
 }
@@ -131,9 +149,17 @@ impl Dimension for Dim3 {
     fn slice(&self) -> &[usize] {
         self.shapes()
     }
+
+    fn try_from_slice(slice: &[usize]) -> Result<Self, &'static str> {
+        if slice.len() == Self::NDIM as usize {
+            Ok(Dim3 { shape: [slice[0], slice[1], slice[2]] })
+        } else {
+            Err("Invalid size slice for Dim1")
+        }
+    }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Default)]
 pub struct Dim4 {
     shape: [usize; 4],
 }
@@ -170,9 +196,17 @@ impl Dimension for Dim4 {
     fn slice(&self) -> &[usize] {
         self.shapes()
     }
+
+    fn try_from_slice(slice: &[usize]) -> Result<Self, &'static str> {
+        if slice.len() == Self::NDIM as usize {
+            Ok(Dim4 { shape: [slice[0], slice[1], slice[2], slice[3]] })
+        } else {
+            Err("Invalid size slice for Dim1")
+        }
+    }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Default)]
 pub struct Dim5 {
     shape: [usize; 5],
 }
@@ -209,9 +243,17 @@ impl Dimension for Dim5 {
     fn slice(&self) -> &[usize] {
         self.shapes()
     }
+
+    fn try_from_slice(slice: &[usize]) -> Result<Self, &'static str> {
+        if slice.len() == Self::NDIM as usize {
+            Ok(Dim5 { shape: [slice[0], slice[1], slice[2], slice[3], slice[4]] })
+        } else {
+            Err("Invalid size slice for Dim1")
+        }
+    }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Default)]
 pub struct Dim6 {
     shape: [usize; 6],
 }
@@ -248,9 +290,17 @@ impl Dimension for Dim6 {
     fn slice(&self) -> &[usize] {
         self.shapes()
     }
+
+    fn try_from_slice(slice: &[usize]) -> Result<Self, &'static str> {
+        if slice.len() == Self::NDIM as usize {
+            Ok(Dim6 { shape: [slice[0], slice[1], slice[2], slice[3], slice[4], slice[5]] })
+        } else {
+            Err("Invalid size slice for Dim1")
+        }
+    }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Default)]
 pub struct Dim7 {
     shape: [usize; 7],
 }
@@ -286,5 +336,13 @@ impl Dimension for Dim7 {
 
     fn slice(&self) -> &[usize] {
         self.shapes()
+    }
+
+    fn try_from_slice(slice: &[usize]) -> Result<Self, &'static str> {
+        if slice.len() == Self::NDIM as usize {
+            Ok(Dim7 { shape: [slice[0], slice[1], slice[2], slice[3], slice[4], slice[5], slice[6]] })
+        } else {
+            Err("Invalid size slice for Dim1")
+        }
     }
 }
