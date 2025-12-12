@@ -218,13 +218,18 @@ where
     }
 }
 
-impl Drop for SharedArray_f64
-{
-    fn drop(&mut self) {
-        if self.allocated_by_cpp {
-            unsafe {
-                free_shared_array(self);
-            }
-        }
-    }
-}
+// impl<S,D,M,L> Drop for SharedArray<S,D,M,L>
+// where 
+//     S: SharedArrayT,
+//     D: Dimension,
+//     M: MemorySpace,
+//     L: LayoutType,
+// {
+//     fn drop(&mut self) {
+//         if self.allocated_by_cpp {
+//             unsafe {
+//                 free_shared_array(self);
+//             }
+//         }
+//     }
+// }
