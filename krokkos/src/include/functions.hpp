@@ -1,15 +1,19 @@
 #pragma once
-#include "rust_view.hpp"
-
 #include <iostream>
+
+#include "rust_view.hpp"
+#include "rust_view_types.hpp"
+#include "shared_ffi_types.rs.h"
+
 
 namespace rust_view_functions {
 
-    using rust_view::MemSpace;
-    using rust_view::Layout;
-    using rust_view::IView;
+    using rust_view_types::MemSpace;
+    using rust_view_types::Layout;
+    using rust_view_types::IView;
+    using rust_view_types::OpaqueView;
+
     using rust_view::ViewHolder;
-    using rust_view::OpaqueView;
 
     #ifdef KOKKOS_ENABLE_CUDA
         using DeviceMemorySpace = Kokkos::CudaSpace;

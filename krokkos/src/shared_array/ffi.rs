@@ -1,5 +1,3 @@
-use super::super::rust_view::OpaqueView;
-
 #[cxx::bridge(namespace = "shared_array")]
 mod shared_array_ffi {
 
@@ -57,7 +55,6 @@ mod shared_array_ffi {
     }
 }
 
-use ndarray::IxDyn;
 pub use shared_array_ffi::*;
 
 // Warning not ffi-safe, mais en réalité ca l'est, opaqueView est handled par Cxx à la compil.
