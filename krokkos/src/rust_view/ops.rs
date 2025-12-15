@@ -1,6 +1,14 @@
 use super::ffi;
 use crate::rust_view::dim::{Dim1, Dim2};
-use crate::rust_view::{DeviceSpace, HostSpace, LayoutRight, LayoutType, RustView, data_type};
+use crate::rust_view::{DeviceSpace, HostSpace, LayoutRight, LayoutType, RustView, RustViewMut, data_type};
+
+pub fn kokkos_initialize_ops() {
+    ffi::kokkos_initialize();
+}
+
+pub fn kokkos_finalize_ops() {
+    ffi::kokkos_finalize();
+}
 
 pub fn y_ax(
     y: &RustView<'_, f64, Dim1, HostSpace, LayoutRight>,
@@ -28,7 +36,7 @@ pub fn many_y_ax_device<L1: LayoutType, L2: LayoutType, L3: LayoutType>(
 }
 
 pub fn dot<'a, T>(
-    r: &mut RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
+    r: &mut RustViewMut<'a, T, Dim1, DeviceSpace, LayoutRight>,
     x: &RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
     y: &RustView<'a, T, Dim1, DeviceSpace, LayoutRight>,
 ) where
@@ -40,7 +48,7 @@ pub fn dot<'a, T>(
 pub fn matrix_product_op<'a, L1: LayoutType, L2: LayoutType>(
     a: &RustView<'a, f64, Dim2, DeviceSpace, L1>,
     b: &RustView<'a, f64, Dim2, DeviceSpace, L2>,
-    c: &mut RustView<'a, f64, Dim2, DeviceSpace, L1>,
+    c: &mut RustViewMut<'a, f64, Dim2, DeviceSpace, L1>,
 ) {
     ffi::matrix_product(a.get(), b.get(), c.get_mut());
 }
@@ -71,13 +79,46 @@ pub mod tests {
 
         let view1 =
             RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[5], &mut data1);
-
         assert_eq!(ffi::get_f64(view1.get(), &[2]), &3.0_f64);
 
         let mut data2 = [1, 2, 3, 4, 5, 6];
         let view2 = RustView::<'_, i32, Dim1, HostSpace, LayoutRight>::from_shape(&[5], &mut data2);
 
         assert_eq!(ffi::get_i32(view2.get(), &[2]), &3_i32);
+    }
+
+    pub fn create_mirror_test() {
+        let data = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+
+        let view = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[6], &data);
+        let view2 = view.create_mirror();
+
+        println!("Adress view : {:p}", &view[&[0]]);
+        println!("Adress view2 : {:p}", &view2[&[0]]);
+        assert_eq!(view2[&[0]], 0.0); 
+        assert_eq!(view2.0.size, view.0.size);
+    }
+
+    pub fn create_mirror_view_test() {
+        let data = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+
+        let view = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[6], &data);
+        let view2 = view.create_mirror_view();
+
+        println!("Adress view : {:p}", &view[&[0]]);
+        println!("Adress view2 : {:p}", &view2[&[0]]);
+        assert_eq!(view[&[0]], view2[&[0]]); 
+    }
+
+    pub fn create_mirror_view_and_copy_test() {
+        let data = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+
+        let view = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[6], &data);
+        let view2 = view.create_mirror_view_and_copy();
+
+        println!("Adress view : {:p}", &view[&[0]]);
+        println!("Adress view2 : {:p}", &view2[&[0]]);
+        assert_eq!(view[&[0]], view2[&[0]]); 
     }
 
     pub fn y_ax_test() {
@@ -104,7 +145,7 @@ pub mod tests {
         let x = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[6], &mut data3);
 
         let mut res = [0.0];
-        let mut r = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[1], &mut res);
+        let mut r = RustViewMut::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[1], &mut res);
 
         dot(&mut r, &x, &y);
 
@@ -122,7 +163,7 @@ pub mod tests {
 
         let mut data3 = [0.0, 0.0, 0.0, 0.0];
         let mut mat3 =
-            RustView::<'_, f64, Dim2, DeviceSpace, LayoutRight>::from_shape(&[2, 2], &mut data3);
+            RustViewMut::<'_, f64, Dim2, DeviceSpace, LayoutRight>::from_shape(&[2, 2], &mut data3);
 
         matrix_product_op(&mat1, &mat2, &mut mat3);
 
