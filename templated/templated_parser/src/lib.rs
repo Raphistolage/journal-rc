@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 use std::fs;
 
 use syn::{GenericArgument, PathArguments};
-use syn::{Block, FnArg, Ident, Item, ItemFn, ItemStruct, PathSegment, ReturnType, Token, Type, punctuated::Punctuated, token::{Brace}};
+use syn::{Block, FnArg, Ident, Item, ItemFn, PathSegment, ReturnType, Token, Type, punctuated::Punctuated, token::{Brace}};
 use proc_macro2::{Span};
 use quote::{quote};
 

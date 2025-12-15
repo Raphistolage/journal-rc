@@ -1,6 +1,7 @@
 use cmake::Config;
 fn main() {
     let _ = cxx_build::bridge("src/shared_array/shared_ffi_types.rs");
+    let _ = cxx_build::bridge("src/rust_view/shared_ffi_types.rs");
     let _ = cxx_build::bridge("src/rust_view/ffi.rs");
     let _ = cxx_build::bridge("src/shared_array/ffi.rs");
 
@@ -32,8 +33,9 @@ fn main() {
     println!("cargo:rustc-link-search=native={}", dst.display());
     println!("cargo:rustc-link-lib=rustViewFunctionsFfi");
     println!("cargo:rustc-link-lib=rustView");
-    println!("cargo:rustc-link-lib=sharedArrayFunctionsFfi");
-    println!("cargo:rustc-link-lib=sharedArray");
+    println!("cargo:rustc-link-lib=sharedRustViewFfiTypes");
+    // println!("cargo:rustc-link-lib=sharedArrayFunctionsFfi");
+    // println!("cargo:rustc-link-lib=sharedArray");
     println!("cargo:rustc-link-lib=kokkosHandles");
     println!("cargo:rustc-link-arg=-Wl,-rpath={}", dst.display());
 
@@ -43,7 +45,9 @@ fn main() {
     println!("cargo:rerun-if-changed=src/include/functions.hpp");
     println!("cargo:rerun-if-changed=src/cpp/rust_view.cpp");
     println!("cargo:rerun-if-changed=src/include/rust_view.hpp");
-    println!("cargp:rerun-if-changed=src/include/shared_array.hpp");
-    println!("cargo:rerun-if-changed=src/cpp/shared_array.cpp");
-    println!("cargo:rerun-if-changed=src/include/functions_shared_array.hpp");
+    println!("cargo:rerun-if-changed=src/include/rust_view_types.hpp");
+
+    // println!("cargp:rerun-if-changed=src/include/shared_array.hpp");
+    // println!("cargo:rerun-if-changed=src/cpp/shared_array.cpp");
+    // println!("cargo:rerun-if-changed=src/include/functions_shared_array.hpp");
 }

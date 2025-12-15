@@ -4,26 +4,20 @@
 #include <string>
 #include <iostream>
 
-namespace rust_view{
-    // using ::MemSpace;
-    // using ::Layout;
-
-    struct IView {
-        virtual ~IView() = default;     
-        virtual const void*  get(rust::slice<const size_t> i, bool is_host) = 0;
-        virtual void* get_view() = 0;
-        // virtual SharedArray_f64 view_to_shared() = 0;
-        // virtual SharedArray_f32 view_to_shared() = 0;
-        // virtual SharedArray_i32 view_to_shared() = 0;
-        // virtual SharedArrayMut_f64 view_to_shared() = 0;
-        // virtual SharedArrayMut_f32 view_to_shared() = 0;
-        // virtual SharedArrayMut_i32 view_to_shared() = 0;
-    };
-}
-
 #include "ffi.rs.h"
+#include "rust_view_types.hpp" // Pour avoir IView
+#include "shared_ffi_types.rs.h" // Pour avoir MemSpace, Layout et OpaqueView (ces trois la sont dans le namespace "rust_view_types")
 
 namespace rust_view {
+
+    using rust_view_types::MemSpace;
+    using rust_view_types::Layout;
+    using rust_view_types::IView;
+    using rust_view_types::OpaqueView;
+
+    void kokkos_initialize();
+    void kokkos_finalize();
+
     template <typename ViewType>
     struct ViewHolder : IView {
         ViewType view;
