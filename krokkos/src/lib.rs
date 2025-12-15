@@ -4,6 +4,7 @@ pub mod shared_array;
 
 pub use common_types::*;
 // pub use shared_array::{kokkos_finalize_ops, kokkos_initialize_ops};
+pub use rust_view::{kokkos_finalize_ops, kokkos_initialize_ops};
 
 #[allow(unused_imports)]
 use std::time::Instant;
