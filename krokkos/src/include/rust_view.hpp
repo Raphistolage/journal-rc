@@ -95,46 +95,28 @@ namespace rust_view {
             }
         }
 
-        // SharedArray_f64 view_to_shared() override {
-        //     auto host_mirror = Kokkos::create_mirror_view(view);
-        //     int rank = view.rank();
-        //     size_t* shape = new size_t[rank];
-        //     for (int i = 0; i < rank; i++)
-        //     {
-        //         shape[i] = view.extent(i);
-        //     }
-        //     return SharedArray{
-        //         host_mirror.data(),
-        //         8,
-        //         DataType::Float,
-        //         rank,
-        //         shape,
-        //         MemSpace::HostSpace,
-        //         Layout::LayoutRight,
-        //         false,
-        //     };
-        // }
+        std::unique_ptr<IView> create_mirror () override {
+            auto mirror_view = Kokkos::create_mirror(view);
+            return std::make_unique<ViewHolder<ViewType>>(mirror_view);
+        }
 
-        // SharedArrayMut view_to_shared_mut() override {
-        //     auto host_mirror = Kokkos::create_mirror_view(view);
-        //     int rank = view.rank();
-        //     size_t* shape = new size_t[rank];
-        //     for (int i = 0; i < rank; i++)
-        //     {
-        //         shape[i] = view.extent(i);
-        //     }
-        //     return SharedArrayMut{
-        //         host_mirror.data(),
-        //         8,
-        //         DataType::Float,
-        //         rank,
-        //         shape,
-        //         MemSpace::HostSpace,
-        //         Layout::LayoutRight,
-        //         true,
-        //     };
-        // }
+        std::unique_ptr<IView> create_mirror_view () override {
+            auto mirror_view = Kokkos::create_mirror_view(view);
+            return std::make_unique<ViewHolder<ViewType>>(mirror_view);
+        }
+
+        std::unique_ptr<IView> create_mirror_view_and_copy () override {
+            auto mirror_view = Kokkos::create_mirror_view(view);
+            Kokkos::deep_copy(mirror_view, view);
+            return std::make_unique<ViewHolder<ViewType>>(mirror_view);
+        }
     };
+
+    void deep_copy(OpaqueView& dest, const OpaqueView& src);
+
+    OpaqueView create_mirror(const OpaqueView& src);
+    OpaqueView create_mirror_view(const OpaqueView& src);
+    OpaqueView create_mirror_view_and_copy(const OpaqueView& src);
 
     void dot(OpaqueView& r, const OpaqueView& x, const OpaqueView& y);
     void matrix_product(const OpaqueView& A, const OpaqueView& B, OpaqueView& C);

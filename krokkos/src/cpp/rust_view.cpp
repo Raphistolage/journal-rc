@@ -14,6 +14,100 @@ namespace rust_view {
         using DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space;
     #endif
 
+    void kokkos_initialize() {
+        if (!Kokkos::is_initialized()) {
+            Kokkos::initialize();
+            std::cout << "Kokkos initialized successfully!" << std::endl;
+            std::cout << "Device memory space = " << typeid(Kokkos::DefaultExecutionSpace::memory_space).name() << "\n";
+            std::cout << "Execution space: " << typeid(Kokkos::DefaultExecutionSpace).name() << "\n";
+            std::cout << "Concurrency = " << Kokkos::DefaultExecutionSpace().concurrency() << "\n";
+        } else {
+            std::cout << "Kokkos is already initialized." << std::endl;
+        }
+    }
+
+    void kokkos_finalize() {
+        if (Kokkos::is_initialized()) {
+            Kokkos::finalize();
+            std::cout << "Kokkos finalized successfully!" << std::endl;
+        } else {
+            std::cout << "Kokkos is not initialized." << std::endl;
+        }
+    }
+
+    void deep_copy(OpaqueView& dest, const OpaqueView& src) {
+        
+    }
+
+    OpaqueView create_mirror(const OpaqueView& src) {
+        if (src.mem_space == MemSpace::HostSpace)
+        {
+            return OpaqueView {
+                std::move(src.view->create_mirror()),
+                src.size,
+                src.rank,
+                src.shape,
+                MemSpace::DeviceSpace,
+                src.layout,
+            };
+        } else {
+            return OpaqueView {
+                std::move(src.view->create_mirror()),
+                src.size,
+                src.rank,
+                src.shape,
+                MemSpace::HostSpace,
+                src.layout,
+            };
+        }
+    }
+
+    OpaqueView create_mirror_view(const OpaqueView& src) {
+        if (src.mem_space == MemSpace::HostSpace)
+        {
+            return OpaqueView {
+                std::move(src.view->create_mirror_view()),
+                src.size,
+                src.rank,
+                src.shape,
+                MemSpace::DeviceSpace,
+                src.layout,
+            };
+        } else {
+            return OpaqueView {
+                std::move(src.view->create_mirror_view()),
+                src.size,
+                src.rank,
+                src.shape,
+                MemSpace::HostSpace,
+                src.layout,
+            };
+        }
+    }
+
+    OpaqueView create_mirror_view_and_copy(const OpaqueView& src) {
+        if (src.mem_space == MemSpace::HostSpace)
+        {
+            return OpaqueView {
+                std::move(src.view->create_mirror_view_and_copy()),
+                src.size,
+                src.rank,
+                src.shape,
+                MemSpace::DeviceSpace,
+                src.layout,
+            };
+        } else {
+            return OpaqueView {
+                std::move(src.view->create_mirror_view_and_copy()),
+                src.size,
+                src.rank,
+                src.shape,
+                MemSpace::HostSpace,
+                src.layout,
+            };
+        }
+    }
+
     void dot(OpaqueView& r, const OpaqueView& x, const OpaqueView& y) {
         if (y.rank != 1 || x.rank != 1) {
             std::cout << "Ranks : y : " << y.rank << " x: " << x.rank <<" \n";
