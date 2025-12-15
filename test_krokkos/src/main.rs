@@ -1,8 +1,8 @@
 use krokkos::rust_view::{Dim1, Dim2, DeviceSpace, LayoutRight, RustView, y_ax_device};
-use krokkos::{kokkos_finalize, kokkos_initialize};
+use krokkos::{kokkos_finalize_ops, kokkos_initialize_ops};
 
 fn main() {
-    kokkos_initialize();
+    kokkos_initialize_ops();
     {
         let mut data1 = [2.0, 2.0, 3.0, 4.0, 5.0];
         let y = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[5], &mut data1);
@@ -20,5 +20,5 @@ fn main() {
         println!("HEllo world!");
         println!("Result of using y_ax of rust_view : {}", result);
     }
-    kokkos_finalize();
+    kokkos_finalize_ops();
 }
