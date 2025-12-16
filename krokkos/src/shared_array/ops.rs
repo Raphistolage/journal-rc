@@ -96,7 +96,7 @@ where
 
 #[cfg(test)]
 pub mod tests {
-    use ndarray::{Array, IxDyn, ShapeBuilder};
+    use ndarray::{Array, IxDyn};
 
     use crate::rust_view::{Dim1, Dim2, HostSpace, LayoutRight};
 

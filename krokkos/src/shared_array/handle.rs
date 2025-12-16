@@ -6,8 +6,7 @@ use crate::rust_view::{Dimension, LayoutType, MemorySpace};
 
 use super::SharedArray;
 use super::ffi::{
-    DataType, Layout, MemSpace, SharedArray_f32, SharedArray_f64, SharedArray_i32,
-    free_shared_array, kokkos_finalize, kokkos_initialize,
+    DataType, Layout, MemSpace, SharedArray_f32, SharedArray_f64, SharedArray_i32, kokkos_finalize, kokkos_initialize,
 };
 
 pub fn kokkos_initialize_ops() {
@@ -217,19 +216,3 @@ where
         Array::<S::T,IxDyn>::from_shape_vec(IxDyn(shapes), value.0.get_cpu_vec()).unwrap()
     }
 }
-
-// impl<S,D,M,L> Drop for SharedArray<S,D,M,L>
-// where 
-//     S: SharedArrayT,
-//     D: Dimension,
-//     M: MemorySpace,
-//     L: LayoutType,
-// {
-//     fn drop(&mut self) {
-//         if self.allocated_by_cpp {
-//             unsafe {
-//                 free_shared_array(self);
-//             }
-//         }
-//     }
-// }
