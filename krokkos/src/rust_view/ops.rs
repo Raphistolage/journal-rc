@@ -107,7 +107,14 @@ pub mod tests {
 
         println!("Adress view : {:p}", &view[&[0]]);
         println!("Adress view2 : {:p}", &view2[&[0]]);
+
+        #[cfg(feature = "omp")] // Si on est sur host, alors DeviceSpace = HostSpace et donc create_mirror_view renvoie une View qui pointe vers la meme zone memoire que view.
         assert_eq!(view[&[0]], view2[&[0]]); 
+
+        #[cfg(feature = "cuda")] // Sinon, ca crée une nouvelle View, remplie de zéros.
+        assert_eq!(view2[&[0]], 0.0);
+
+        assert_eq!(view2.0.size, view.0.size);
     }
 
     pub fn create_mirror_view_and_copy_test() {
@@ -119,6 +126,7 @@ pub mod tests {
         println!("Adress view : {:p}", &view[&[0]]);
         println!("Adress view2 : {:p}", &view2[&[0]]);
         assert_eq!(view[&[0]], view2[&[0]]); 
+        assert_eq!(view2.0.size, view.0.size);
     }
 
     pub fn y_ax_test() {
