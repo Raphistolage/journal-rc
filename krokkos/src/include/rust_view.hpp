@@ -95,20 +95,20 @@ namespace rust_view {
             }
         }
 
-        std::unique_ptr<IView> create_mirror () override {
+        std::shared_ptr<IView> create_mirror () override {
             auto mirror_view = Kokkos::create_mirror(view);
-            return std::make_unique<ViewHolder<ViewType>>(mirror_view);
+            return std::make_shared<ViewHolder<ViewType>>(mirror_view);
         }
 
-        std::unique_ptr<IView> create_mirror_view () override {
+        std::shared_ptr<IView> create_mirror_view () override {
             auto mirror_view = Kokkos::create_mirror_view(view);
-            return std::make_unique<ViewHolder<ViewType>>(mirror_view);
+            return std::make_shared<ViewHolder<ViewType>>(mirror_view);
         }
 
-        std::unique_ptr<IView> create_mirror_view_and_copy () override {
+        std::shared_ptr<IView> create_mirror_view_and_copy () override {
             auto mirror_view = Kokkos::create_mirror_view(view);
             Kokkos::deep_copy(mirror_view, view);
-            return std::make_unique<ViewHolder<ViewType>>(mirror_view);
+            return std::make_shared<ViewHolder<ViewType>>(mirror_view);
         }
     };
 

@@ -17,7 +17,7 @@ mod rust_view_types_ffi {
     }
 
     pub struct OpaqueView {
-        view: UniquePtr<IView>,
+        view: SharedPtr<IView>,
 
         size: u32,
 

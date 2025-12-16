@@ -46,13 +46,13 @@ namespace rust_view_functions {
         }
 
         if (memSpace == MemSpace::HostSpace) {
-            std::unique_ptr<IView> view;
+            std::shared_ptr<IView> view;
             switch(rank) {
                 case 1: {
                     Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> host_view("host_view", dimensions[0]);
                     Kokkos::View<const T*, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> rust_view(data.data(), dimensions[0]);
                     Kokkos::deep_copy(host_view, rust_view);
-                    view = std::make_unique<ViewHolder<Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace>>>(host_view);
+                    view = std::make_shared<ViewHolder<Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace>>>(host_view);
                 }
                     break;
                 case 2: {
@@ -62,7 +62,7 @@ namespace rust_view_functions {
                             Kokkos::View<T**, Kokkos::LayoutRight, Kokkos::HostSpace> host_view("host_view", dimensions[0], dimensions[1]);
                             Kokkos::View<const T**, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> rust_view(data.data(), dimensions[0], dimensions[1]);
                             Kokkos::deep_copy(host_view, rust_view);
-                            view = std::make_unique<ViewHolder<Kokkos::View<T**, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
+                            view = std::make_shared<ViewHolder<Kokkos::View<T**, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
                                 host_view); 
                         }
                         break;
@@ -70,7 +70,7 @@ namespace rust_view_functions {
                             Kokkos::View<T**, Kokkos::LayoutLeft, Kokkos::HostSpace> host_view("host_view", dimensions[0], dimensions[1]);
                             Kokkos::View<const T**, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> rust_view(data.data(), dimensions[0], dimensions[1]);
                             Kokkos::deep_copy(host_view, rust_view);
-                            view = std::make_unique<ViewHolder<Kokkos::View<T**, Kokkos::LayoutLeft, Kokkos::HostSpace>>>(
+                            view = std::make_shared<ViewHolder<Kokkos::View<T**, Kokkos::LayoutLeft, Kokkos::HostSpace>>>(
                                 host_view); 
                         }
                         break;
@@ -86,7 +86,7 @@ namespace rust_view_functions {
                             Kokkos::View<T***, Kokkos::LayoutRight, Kokkos::HostSpace> host_view("host_view", dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::View<const T***, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> rust_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::deep_copy(host_view, rust_view);
-                            view = std::make_unique<ViewHolder<Kokkos::View<T***, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
+                            view = std::make_shared<ViewHolder<Kokkos::View<T***, Kokkos::LayoutRight, Kokkos::HostSpace>>>(
                                 host_view);
                         }
                         break;
@@ -94,7 +94,7 @@ namespace rust_view_functions {
                             Kokkos::View<T***, Kokkos::LayoutLeft, Kokkos::HostSpace> host_view("host_view", dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::View<const T***, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> rust_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::deep_copy(host_view, rust_view);
-                            view = std::make_unique<ViewHolder<Kokkos::View<T***, Kokkos::LayoutLeft, Kokkos::HostSpace>>>(
+                            view = std::make_shared<ViewHolder<Kokkos::View<T***, Kokkos::LayoutLeft, Kokkos::HostSpace>>>(
                                 host_view);
                         }
                         break;
@@ -114,7 +114,7 @@ namespace rust_view_functions {
                 layout,
             };
         } else {
-            std::unique_ptr<IView> view;
+            std::shared_ptr<IView> view;
             switch(rank) {
                 case 1: {
                     switch (layout)
@@ -123,7 +123,7 @@ namespace rust_view_functions {
                             Kokkos::View<T*, Kokkos::LayoutRight, DeviceMemorySpace> device_view("device_view",dimensions[0]);
                             Kokkos::View<const T*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0]);
                             Kokkos::deep_copy(device_view, host_view);
-                            view = std::make_unique<ViewHolder<Kokkos::View<T*, Kokkos::LayoutRight, DeviceMemorySpace>>>(
+                            view = std::make_shared<ViewHolder<Kokkos::View<T*, Kokkos::LayoutRight, DeviceMemorySpace>>>(
                                 device_view, true);
                         }
                         break;
@@ -131,7 +131,7 @@ namespace rust_view_functions {
                             Kokkos::View<T*, Kokkos::LayoutLeft, DeviceMemorySpace> device_view("device_view",dimensions[0]);
                             Kokkos::View<const T*, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0]);
                             Kokkos::deep_copy(device_view, host_view);
-                            view = std::make_unique<ViewHolder<Kokkos::View<T*, Kokkos::LayoutLeft, DeviceMemorySpace>>>(
+                            view = std::make_shared<ViewHolder<Kokkos::View<T*, Kokkos::LayoutLeft, DeviceMemorySpace>>>(
                                 device_view, true);
                         }
                         break;
@@ -148,7 +148,7 @@ namespace rust_view_functions {
                             Kokkos::View<T**, Kokkos::LayoutRight, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1]);
                             Kokkos::View<const T**, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1]);
                             Kokkos::deep_copy(device_view, host_view);
-                            view = std::make_unique<ViewHolder<Kokkos::View<T**, Kokkos::LayoutRight, DeviceMemorySpace>>>(
+                            view = std::make_shared<ViewHolder<Kokkos::View<T**, Kokkos::LayoutRight, DeviceMemorySpace>>>(
                                 device_view, true);  
                         }   
                         break;
@@ -156,7 +156,7 @@ namespace rust_view_functions {
                                 Kokkos::View<T**, Kokkos::LayoutLeft, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1]);
                                 Kokkos::View<const T**, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1]);
                                 Kokkos::deep_copy(device_view, host_view);
-                                view = std::make_unique<ViewHolder<Kokkos::View<T**, Kokkos::LayoutLeft, DeviceMemorySpace>>>(
+                                view = std::make_shared<ViewHolder<Kokkos::View<T**, Kokkos::LayoutLeft, DeviceMemorySpace>>>(
                                     device_view, true); 
                         }  
                         break;
@@ -173,7 +173,7 @@ namespace rust_view_functions {
                             Kokkos::View<T***, Kokkos::LayoutRight, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::View<const T***, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::deep_copy(device_view, host_view);
-                            view = std::make_unique<ViewHolder<Kokkos::View<T***, Kokkos::LayoutRight, DeviceMemorySpace>>>(
+                            view = std::make_shared<ViewHolder<Kokkos::View<T***, Kokkos::LayoutRight, DeviceMemorySpace>>>(
                                 device_view, true);
                         }
                         break;
@@ -181,7 +181,7 @@ namespace rust_view_functions {
                             Kokkos::View<T***, Kokkos::LayoutLeft, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::View<const T***, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::deep_copy(device_view, host_view);
-                            view = std::make_unique<ViewHolder<Kokkos::View<T***, Kokkos::LayoutLeft, DeviceMemorySpace>>>(
+                            view = std::make_shared<ViewHolder<Kokkos::View<T***, Kokkos::LayoutLeft, DeviceMemorySpace>>>(
                                 device_view, true);
                         }
                         break;
