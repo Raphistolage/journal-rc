@@ -24,7 +24,7 @@ namespace rust_view {
 
         ViewHolder(const ViewType& view) : view(view) {}
 
-        void* get_view() {
+        const void* get_view() const override {
             return &view;
         }
 
@@ -108,6 +108,23 @@ namespace rust_view {
             auto mirror_view = Kokkos::create_mirror_view(view);
             Kokkos::deep_copy(mirror_view, view);
             return std::make_shared<ViewHolder<decltype(mirror_view)>>(mirror_view);
+        }
+
+        void deep_copy(const IView& src) override { // This method is to perform a deep_copy between two views of the EXACT same type (in particular MemSpace)
+            auto src_view = *static_cast<const ViewType*>(src.get_view());
+            Kokkos::deep_copy(view, src_view);
+        }
+
+        void deep_copy_from_host_to_device(const IView& src) override { // This method is to perform a deep_copy from a view on host to a view on device (src on host, dest on device)
+            auto mirror_host_view = Kokkos::create_mirror_view(view); // mirror view sur host, pour avoir le type (view est sur device, donc mirror_host_view est sur host)
+            auto src_view = *static_cast<const decltype(mirror_host_view)*>(src.get_view()); // on dit donc que le type de la vue dans src c'est le type de la mirror_view
+            Kokkos::deep_copy(view, src_view);
+        }
+
+        void deep_copy_from_device_to_host(const IView& src) override {  // This method is to perform a deep_copy from a view on device to a view on host (src on device, dest on host)
+            auto mirror_device_view = Kokkos::create_mirror_view(Kokkos::DefaultExecutionSpace::memory_space(), view); // mirror view sur device, pour avoir le type (view est sur host, donc mirror_host_view est sur device)
+            auto src_view = *static_cast<const decltype(mirror_device_view)*>(src.get_view()); // on dit donc que le type de la vue dans src c'est le type de la mirror_view
+            Kokkos::deep_copy(view, src_view);
         }
     };
 

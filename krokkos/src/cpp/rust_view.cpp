@@ -28,7 +28,14 @@ namespace rust_view {
     }
 
     void deep_copy(OpaqueView& dest, const OpaqueView& src) {
-        
+        if (dest.mem_space == src.mem_space)
+        {
+            dest.view->deep_copy(*src.view);
+        } else if (dest.mem_space == MemSpace::HostSpace) {
+            dest.view->deep_copy_from_device_to_host(*src.view);
+        } else {
+            dest.view->deep_copy_from_host_to_device(*src.view);
+        }
     }
 
     OpaqueView create_mirror(const OpaqueView& src) {
@@ -108,9 +115,9 @@ namespace rust_view {
             throw std::runtime_error("Incompatible shapes.");
         }
 
-        auto* r_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(r.view->get_view());
-        auto* y_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(y.view->get_view());
-        auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(x.view->get_view());
+        auto* r_view_ptr = static_cast<const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(r.view->get_view());
+        auto* y_view_ptr = static_cast<const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(y.view->get_view());
+        auto* x_view_ptr = static_cast<const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(x.view->get_view());
 
         auto r_view = *r_view_ptr;
         auto y_view = *y_view_ptr;
@@ -135,9 +142,9 @@ namespace rust_view {
             throw std::runtime_error("Incompatible shapes.");
         }
 
-        auto* y_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace>*>(y.view->get_view());
-        auto* a_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace>*>(A.view->get_view());
-        auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace>*>(x.view->get_view());
+        auto* y_view_ptr = static_cast<const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace>*>(y.view->get_view());
+        auto* a_view_ptr = static_cast<const Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::HostSpace>*>(A.view->get_view());
+        auto* x_view_ptr = static_cast<const Kokkos::View<double*, Kokkos::LayoutLeft, Kokkos::HostSpace>*>(x.view->get_view());
 
         auto y_view = *y_view_ptr;
         auto a_view = *a_view_ptr;
@@ -169,9 +176,9 @@ namespace rust_view {
             throw std::runtime_error("Incompatible shapes.");
         }
 
-        auto* y_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(y.view->get_view());
-        auto* a_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(A.view->get_view());
-        auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(x.view->get_view());
+        auto* y_view_ptr = static_cast<const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(y.view->get_view());
+        auto* a_view_ptr = static_cast<const Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(A.view->get_view());
+        auto* x_view_ptr = static_cast<const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(x.view->get_view());
 
         auto y_view = *y_view_ptr;
         auto a_view = *a_view_ptr;
@@ -206,9 +213,9 @@ namespace rust_view {
             throw std::runtime_error("Incompatible shapes.");
         }
 
-        auto* y_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(y.view->get_view());
-        auto* a_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(A.view->get_view());
-        auto* x_view_ptr = static_cast<Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(x.view->get_view());
+        auto* y_view_ptr = static_cast<const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(y.view->get_view());
+        auto* a_view_ptr = static_cast<const Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(A.view->get_view());
+        auto* x_view_ptr = static_cast<const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(x.view->get_view());
 
         int N = A.shape[0];
         int M = A.shape[1];
@@ -251,9 +258,9 @@ namespace rust_view {
             throw std::runtime_error("Incompatible shapes.");
         }
 
-        auto* A_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(A.view->get_view());
-        auto* B_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::DefaultExecutionSpace::memory_space>*>(B.view->get_view());
-        auto* C_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(C.view->get_view());
+        auto* A_view_ptr = static_cast<const Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(A.view->get_view());
+        auto* B_view_ptr = static_cast<const Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::DefaultExecutionSpace::memory_space>*>(B.view->get_view());
+        auto* C_view_ptr = static_cast<const Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(C.view->get_view());
 
         auto& A_view = *A_view_ptr;
         auto& B_view = *B_view_ptr;
@@ -279,8 +286,8 @@ namespace rust_view {
 
         Kokkos::Timer timer;
 
-        auto* A_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(a_opaque.view->get_view());
-        auto* B_view_ptr = static_cast<Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::DefaultExecutionSpace::memory_space>*>(b_opaque.view->get_view());
+        auto* A_view_ptr = static_cast<const Kokkos::View<double**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>*>(a_opaque.view->get_view());
+        auto* B_view_ptr = static_cast<const Kokkos::View<double**, Kokkos::LayoutLeft, Kokkos::DefaultExecutionSpace::memory_space>*>(b_opaque.view->get_view());
 
         auto& A = *A_view_ptr;
         auto& B = *B_view_ptr;
