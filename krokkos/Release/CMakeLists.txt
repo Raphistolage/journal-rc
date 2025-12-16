@@ -94,7 +94,7 @@ add_library(rustViewFunctionsFfi SHARED
     ../src/cpp/functions.cpp
 )
 
-target_link_libraries(rustViewFunctionsFfi PUBLIC rustView )
+target_link_libraries(rustViewFunctionsFfi PUBLIC kokkosHandles rustView )
 
 target_include_directories(rustViewFunctionsFfi PUBLIC ${OUT_DIR}/cxxbridge/include/${PKG_NAME}/${OUT_DIR}/)
 
