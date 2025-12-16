@@ -120,18 +120,18 @@ namespace rust_view_functions {
                     switch (layout)
                     {
                     case Layout::LayoutRight:{
-                            Kokkos::View<T*, Kokkos::LayoutRight, DeviceMemorySpace> device_view("device_view",dimensions[0]);
+                            Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> device_view("device_view",dimensions[0]);
                             Kokkos::View<const T*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0]);
                             Kokkos::deep_copy(device_view, host_view);
-                            view = std::make_shared<ViewHolder<Kokkos::View<T*, Kokkos::LayoutRight, DeviceMemorySpace>>>(
+                            view = std::make_shared<ViewHolder<Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>>>(
                                 device_view);
                         }
                         break;
                     case Layout::LayoutLeft:{
-                            Kokkos::View<T*, Kokkos::LayoutLeft, DeviceMemorySpace> device_view("device_view",dimensions[0]);
+                            Kokkos::View<T*, Kokkos::LayoutLeft, Kokkos::DefaultExecutionSpace::memory_space> device_view("device_view",dimensions[0]);
                             Kokkos::View<const T*, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0]);
                             Kokkos::deep_copy(device_view, host_view);
-                            view = std::make_shared<ViewHolder<Kokkos::View<T*, Kokkos::LayoutLeft, DeviceMemorySpace>>>(
+                            view = std::make_shared<ViewHolder<Kokkos::View<T*, Kokkos::LayoutLeft, Kokkos::DefaultExecutionSpace::memory_space>>>(
                                 device_view);
                         }
                         break;
@@ -145,18 +145,18 @@ namespace rust_view_functions {
                     switch (layout)
                     {
                     case Layout::LayoutRight:{
-                            Kokkos::View<T**, Kokkos::LayoutRight, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1]);
+                            Kokkos::View<T**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> device_view("device_view", dimensions[0], dimensions[1]);
                             Kokkos::View<const T**, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1]);
                             Kokkos::deep_copy(device_view, host_view);
-                            view = std::make_shared<ViewHolder<Kokkos::View<T**, Kokkos::LayoutRight, DeviceMemorySpace>>>(
+                            view = std::make_shared<ViewHolder<Kokkos::View<T**, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>>>(
                                 device_view);  
                         }   
                         break;
                     case Layout::LayoutLeft:{
-                                Kokkos::View<T**, Kokkos::LayoutLeft, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1]);
+                                Kokkos::View<T**, Kokkos::LayoutLeft, Kokkos::DefaultExecutionSpace::memory_space> device_view("device_view", dimensions[0], dimensions[1]);
                                 Kokkos::View<const T**, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1]);
                                 Kokkos::deep_copy(device_view, host_view);
-                                view = std::make_shared<ViewHolder<Kokkos::View<T**, Kokkos::LayoutLeft, DeviceMemorySpace>>>(
+                                view = std::make_shared<ViewHolder<Kokkos::View<T**, Kokkos::LayoutLeft, Kokkos::DefaultExecutionSpace::memory_space>>>(
                                     device_view); 
                         }  
                         break;
@@ -170,18 +170,18 @@ namespace rust_view_functions {
                     switch (layout)
                     {
                     case Layout::LayoutRight:{
-                            Kokkos::View<T***, Kokkos::LayoutRight, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1], dimensions[2]);
+                            Kokkos::View<T***, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space> device_view("device_view", dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::View<const T***, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::deep_copy(device_view, host_view);
-                            view = std::make_shared<ViewHolder<Kokkos::View<T***, Kokkos::LayoutRight, DeviceMemorySpace>>>(
+                            view = std::make_shared<ViewHolder<Kokkos::View<T***, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace::memory_space>>>(
                                 device_view);
                         }
                         break;
                     case Layout::LayoutLeft:{
-                            Kokkos::View<T***, Kokkos::LayoutLeft, DeviceMemorySpace> device_view("device_view", dimensions[0], dimensions[1], dimensions[2]);
+                            Kokkos::View<T***, Kokkos::LayoutLeft, Kokkos::DefaultExecutionSpace::memory_space> device_view("device_view", dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::View<const T***, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::deep_copy(device_view, host_view);
-                            view = std::make_shared<ViewHolder<Kokkos::View<T***, Kokkos::LayoutLeft, DeviceMemorySpace>>>(
+                            view = std::make_shared<ViewHolder<Kokkos::View<T***, Kokkos::LayoutLeft, Kokkos::DefaultExecutionSpace::memory_space>>>(
                                 device_view);
                         }
                         break;
