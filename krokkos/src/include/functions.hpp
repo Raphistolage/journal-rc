@@ -124,7 +124,7 @@ namespace rust_view_functions {
                             Kokkos::View<const T*, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0]);
                             Kokkos::deep_copy(device_view, host_view);
                             view = std::make_shared<ViewHolder<Kokkos::View<T*, Kokkos::LayoutRight, DeviceMemorySpace>>>(
-                                device_view, true);
+                                device_view);
                         }
                         break;
                     case Layout::LayoutLeft:{
@@ -132,7 +132,7 @@ namespace rust_view_functions {
                             Kokkos::View<const T*, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0]);
                             Kokkos::deep_copy(device_view, host_view);
                             view = std::make_shared<ViewHolder<Kokkos::View<T*, Kokkos::LayoutLeft, DeviceMemorySpace>>>(
-                                device_view, true);
+                                device_view);
                         }
                         break;
                     default:
@@ -149,7 +149,7 @@ namespace rust_view_functions {
                             Kokkos::View<const T**, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1]);
                             Kokkos::deep_copy(device_view, host_view);
                             view = std::make_shared<ViewHolder<Kokkos::View<T**, Kokkos::LayoutRight, DeviceMemorySpace>>>(
-                                device_view, true);  
+                                device_view);  
                         }   
                         break;
                     case Layout::LayoutLeft:{
@@ -157,7 +157,7 @@ namespace rust_view_functions {
                                 Kokkos::View<const T**, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1]);
                                 Kokkos::deep_copy(device_view, host_view);
                                 view = std::make_shared<ViewHolder<Kokkos::View<T**, Kokkos::LayoutLeft, DeviceMemorySpace>>>(
-                                    device_view, true); 
+                                    device_view); 
                         }  
                         break;
                     default:
@@ -174,7 +174,7 @@ namespace rust_view_functions {
                             Kokkos::View<const T***, Kokkos::LayoutRight, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::deep_copy(device_view, host_view);
                             view = std::make_shared<ViewHolder<Kokkos::View<T***, Kokkos::LayoutRight, DeviceMemorySpace>>>(
-                                device_view, true);
+                                device_view);
                         }
                         break;
                     case Layout::LayoutLeft:{
@@ -182,7 +182,7 @@ namespace rust_view_functions {
                             Kokkos::View<const T***, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>> host_view(data.data(), dimensions[0], dimensions[1], dimensions[2]);
                             Kokkos::deep_copy(device_view, host_view);
                             view = std::make_shared<ViewHolder<Kokkos::View<T***, Kokkos::LayoutLeft, DeviceMemorySpace>>>(
-                                device_view, true);
+                                device_view);
                         }
                         break;
                     default:

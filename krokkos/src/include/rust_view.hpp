@@ -21,9 +21,8 @@ namespace rust_view {
     template <typename ViewType>
     struct ViewHolder : IView {
         ViewType view;
-        bool is_device;
 
-        ViewHolder(const ViewType& view, bool is_device = false) : view(view), is_device(is_device) {}
+        ViewHolder(const ViewType& view) : view(view) {}
 
         void* get_view() {
             return &view;
