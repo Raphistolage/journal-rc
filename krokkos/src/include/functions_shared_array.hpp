@@ -9,14 +9,6 @@ namespace shared_array_functions {
     using shared_ffi_types::DataType;
     using shared_ffi_types::Layout;
 
-    #ifdef KOKKOS_ENABLE_CUDA
-        using DeviceMemorySpace = Kokkos::CudaSpace;
-    #elif defined(KOKKOS_ENABLE_HIP)
-        using DeviceMemorySpace = Kokkos::HIPSpace;
-    #else
-        using DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space;
-    #endif
-
     template <typename T>
     const T* get_device_ptr(const T* data_ptr, size_t array_size) {
 

@@ -15,14 +15,6 @@ namespace rust_view_functions {
 
     using rust_view::ViewHolder;
 
-    #ifdef KOKKOS_ENABLE_CUDA
-        using DeviceMemorySpace = Kokkos::CudaSpace;
-    #elif defined(KOKKOS_ENABLE_HIP)
-        using DeviceMemorySpace = Kokkos::HIPSpace;
-    #else
-        using DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space;
-    #endif
-
     template <typename T>
     const T& get(const OpaqueView& view, rust::Slice<const size_t> i) {
         if (view.mem_space == MemSpace::HostSpace) {
