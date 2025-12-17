@@ -105,7 +105,9 @@ impl Dimension for Dim2 {
 
     fn try_from_slice(value: &[usize]) -> Result<Self, &'static str> {
         if value.len() == Self::NDIM as usize {
-            Ok(Dim2 { shape: [value[0], value[1]] })
+            Ok(Dim2 {
+                shape: [value[0], value[1]],
+            })
         } else {
             Err("Invalid size slice for Dim1")
         }
@@ -152,7 +154,9 @@ impl Dimension for Dim3 {
 
     fn try_from_slice(slice: &[usize]) -> Result<Self, &'static str> {
         if slice.len() == Self::NDIM as usize {
-            Ok(Dim3 { shape: [slice[0], slice[1], slice[2]] })
+            Ok(Dim3 {
+                shape: [slice[0], slice[1], slice[2]],
+            })
         } else {
             Err("Invalid size slice for Dim1")
         }
@@ -199,7 +203,9 @@ impl Dimension for Dim4 {
 
     fn try_from_slice(slice: &[usize]) -> Result<Self, &'static str> {
         if slice.len() == Self::NDIM as usize {
-            Ok(Dim4 { shape: [slice[0], slice[1], slice[2], slice[3]] })
+            Ok(Dim4 {
+                shape: [slice[0], slice[1], slice[2], slice[3]],
+            })
         } else {
             Err("Invalid size slice for Dim1")
         }
@@ -246,7 +252,9 @@ impl Dimension for Dim5 {
 
     fn try_from_slice(slice: &[usize]) -> Result<Self, &'static str> {
         if slice.len() == Self::NDIM as usize {
-            Ok(Dim5 { shape: [slice[0], slice[1], slice[2], slice[3], slice[4]] })
+            Ok(Dim5 {
+                shape: [slice[0], slice[1], slice[2], slice[3], slice[4]],
+            })
         } else {
             Err("Invalid size slice for Dim1")
         }
@@ -293,7 +301,9 @@ impl Dimension for Dim6 {
 
     fn try_from_slice(slice: &[usize]) -> Result<Self, &'static str> {
         if slice.len() == Self::NDIM as usize {
-            Ok(Dim6 { shape: [slice[0], slice[1], slice[2], slice[3], slice[4], slice[5]] })
+            Ok(Dim6 {
+                shape: [slice[0], slice[1], slice[2], slice[3], slice[4], slice[5]],
+            })
         } else {
             Err("Invalid size slice for Dim1")
         }
@@ -340,7 +350,11 @@ impl Dimension for Dim7 {
 
     fn try_from_slice(slice: &[usize]) -> Result<Self, &'static str> {
         if slice.len() == Self::NDIM as usize {
-            Ok(Dim7 { shape: [slice[0], slice[1], slice[2], slice[3], slice[4], slice[5], slice[6]] })
+            Ok(Dim7 {
+                shape: [
+                    slice[0], slice[1], slice[2], slice[3], slice[4], slice[5], slice[6],
+                ],
+            })
         } else {
             Err("Invalid size slice for Dim1")
         }

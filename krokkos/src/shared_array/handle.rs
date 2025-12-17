@@ -6,7 +6,8 @@ use crate::rust_view::{Dimension, LayoutType, MemorySpace};
 
 use super::SharedArray;
 use super::ffi::{
-    DataType, Layout, MemSpace, SharedArray_f32, SharedArray_f64, SharedArray_i32, kokkos_finalize, kokkos_initialize,
+    DataType, Layout, MemSpace, SharedArray_f32, SharedArray_f64, SharedArray_i32, kokkos_finalize,
+    kokkos_initialize,
 };
 
 pub fn kokkos_initialize_ops() {
@@ -188,14 +189,12 @@ where
     }
 }
 
-
-
-// impl<S,D,M,L> From<Array<S::T, IxDyn>> for SharedArray<S, D, M, L> 
+// impl<S,D,M,L> From<Array<S::T, IxDyn>> for SharedArray<S, D, M, L>
 // where
 //     S: SharedArrayT,
 //     D: Dimension,
 //     M: MemorySpace,
-//     L: LayoutType, 
+//     L: LayoutType,
 // {
 //     fn from(value: Array<S::T, IxDyn>) -> Self {
 //         let shapes: D = D::try_from_slice(value.shape()).unwrap();
@@ -213,6 +212,6 @@ where
     fn from(value: SharedArray<S, D, M, L>) -> Self {
         // TODO : Handle le cas o`u le shared_array est sur gpu, dans ce cas faut deep_copy cqu'il a dans gpu_ptr into cpu_vec puis faire Array::from_shape_vec`
         let shapes = value.1.slice().into();
-        Array::<S::T,IxDyn>::from_shape_vec(IxDyn(shapes), value.0.get_cpu_vec()).unwrap()
+        Array::<S::T, IxDyn>::from_shape_vec(IxDyn(shapes), value.0.get_cpu_vec()).unwrap()
     }
 }

@@ -1,6 +1,9 @@
 use super::ffi;
 use crate::rust_view::dim::{Dim1, Dim2};
-use crate::rust_view::{DTType, DeviceSpace, Dimension, HostSpace, LayoutRight, LayoutType, MemorySpace, RustView, RustViewMut, data_type};
+use crate::rust_view::{
+    DTType, DeviceSpace, Dimension, HostSpace, LayoutRight, LayoutType, MemorySpace, RustView,
+    RustViewMut, data_type,
+};
 
 pub fn kokkos_initialize_ops() {
     ffi::kokkos_initialize();
@@ -12,9 +15,33 @@ pub fn kokkos_finalize_ops() {
 
 pub fn deep_copy<T: DTType<T>, D: Dimension, M1: MemorySpace, M2: MemorySpace, L: LayoutType>(
     dest: &mut RustViewMut<'_, T, D, M1, L>,
-    src: &RustView<'_, T, D, M2, L>
+    src: &RustView<'_, T, D, M2, L>,
 ) {
     ffi::deep_copy(&mut dest.0, &src.0);
+}
+
+pub fn subview<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType>(
+    src: &RustView<'a, T, D, M, L>,
+    ranges: &[&[usize; 2]],
+) -> RustView<'a, T, D, M, L> {
+    match D::NDIM {
+        1 => if ranges.len() == 1 {
+                RustView::<'a, T, D, M, L>::from_opaque_view(ffi::subview_1(src.get(), ranges[0]))
+            }else {
+                panic!("Bad ranges for dimensions of the view")
+            },
+        2 => if ranges.len() == 2 {
+                RustView::<'a, T, D, M, L>::from_opaque_view(ffi::subview_2(src.get(), ranges[0], ranges[1]))
+            }else {
+                panic!("Bad ranges for dimensions of the view")
+            },
+        3 => if ranges.len() == 3 {
+                RustView::<'a, T, D, M, L>::from_opaque_view(ffi::subview_3(src.get(), ranges[0], ranges[1], ranges[2]))
+            }else {
+                panic!("Bad ranges for dimensions of the view")
+            },
+        _ => panic!("Dimension not supported yet")
+    }
 }
 
 pub fn y_ax(
@@ -85,7 +112,7 @@ pub mod tests {
         let view = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[6], &data);
         let view2 = view.create_mirror();
 
-        assert_eq!(view2[&[0]], 0.0); 
+        assert_eq!(view2[&[0]], 0.0);
         assert_eq!(view2.0.size, view.0.size);
     }
 
@@ -96,7 +123,7 @@ pub mod tests {
         let view2 = view.create_mirror_view();
 
         #[cfg(feature = "omp")] // Si on est sur host, alors DeviceSpace = HostSpace et donc create_mirror_view renvoie une View qui pointe vers la meme zone memoire que view.
-        assert_eq!(view[&[0]], view2[&[0]]); 
+        assert_eq!(view[&[0]], view2[&[0]]);
 
         #[cfg(feature = "cuda")] // Sinon, ca crée une nouvelle View, remplie de zéros.
         assert_eq!(view2[&[0]], 0.0);
@@ -110,13 +137,14 @@ pub mod tests {
         let view = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[6], &data);
         let view2 = view.create_mirror_view_and_copy();
 
-        assert_eq!(view[&[0]], view2[&[0]]); 
+        assert_eq!(view[&[0]], view2[&[0]]);
         assert_eq!(view2.0.size, view.0.size);
     }
 
     pub fn deep_copy_test() {
         let mut data1 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
-        let view1 = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[6], &mut data1);
+        let view1 =
+            RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[6], &mut data1);
 
         let mut view2 = RustViewMut::<'_, f64, Dim1, HostSpace, LayoutRight>::zeros(&[6]);
 
@@ -152,7 +180,8 @@ pub mod tests {
         let x = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[6], &mut data3);
 
         let mut res = [0.0];
-        let mut r = RustViewMut::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[1], &mut res);
+        let mut r =
+            RustViewMut::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[1], &mut res);
 
         dot(&mut r, &x, &y);
 

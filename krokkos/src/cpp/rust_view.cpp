@@ -107,6 +107,39 @@ namespace rust_view {
         }
     }
 
+    OpaqueView subview_1(const OpaqueView& src, rust::slice<const size_t> i1) {
+        return OpaqueView {
+            std::move(src.view->subview_1(i1)),
+            src.size,
+            src.rank,
+            src.shape,
+            src.mem_space,
+            src.layout,
+        };
+    }
+
+    OpaqueView subview_2(const OpaqueView& src, rust::slice<const size_t> i1, rust::slice<const size_t> i2) {
+        return OpaqueView {
+            std::move(src.view->subview_2(i1, i2)),
+            src.size,
+            src.rank,
+            src.shape,
+            src.mem_space,
+            src.layout,
+        };
+    }
+
+    OpaqueView subview_3(const OpaqueView& src, rust::slice<const size_t> i1, rust::slice<const size_t> i2, rust::slice<const size_t> i3){
+        return OpaqueView {
+            std::move(src.view->subview_3(i1, i2, i3)),
+            src.size,
+            src.rank,
+            src.shape,
+            src.mem_space,
+            src.layout,
+        };
+    }
+
     void dot(OpaqueView& r, const OpaqueView& x, const OpaqueView& y) {
         if (y.rank != 1 || x.rank != 1) {
             std::cout << "Ranks : y : " << y.rank << " x: " << x.rank <<" \n";
