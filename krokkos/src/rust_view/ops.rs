@@ -89,7 +89,7 @@ pub fn matrix_product_op<'a, L1: LayoutType, L2: LayoutType>(
 
 #[cfg(test)]
 pub mod tests {
-    use crate::rust_view::LayoutLeft;
+    use crate::rust_view::{Dim3, LayoutLeft};
 
     use super::*;
 
@@ -154,6 +154,46 @@ pub mod tests {
         println!("Value of view2[1] after deep_copy : {}", view2[&[1]]);
         println!("Value of view2[2] after deep_copy : {}", view2[&[2]]);
         assert_eq!(view1[&[0]], view2[&[0]]);
+    }
+
+    pub fn subview1_test() {
+        let mut data1 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+        let view1 = RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[6], &mut data1);
+
+        let subview = subview(&view1, &[&[1,2]]);
+
+        println!("Length of subview : {}", subview.0.size);
+        println!("Shapes of subview: {:?}", subview.0.shape);
+        println!("Value of view1[1] after deep_copy : {} and value of subview[0] : {}", view1[&[1]], subview[&[0]]);
+        // println!("Value of view1[2] after deep_copy : {} and value of subview[1] : {}", view1[&[2]], subview[&[1]]);
+        assert_eq!(view1[&[1]], subview[&[0]]);
+    }
+
+    pub fn subview2_test() {
+        let mut data2 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0];
+        let view2 = RustView::<'_, f64, Dim2, DeviceSpace, LayoutRight>::from_shape(&[6, 3], &mut data2);
+
+        let subview = subview(&view2, &[&[1,2], &[0,3]]);
+
+        println!("Length of subview : {}", subview.0.size);
+        println!("Shapes of subview: {:?}", subview.0.shape);
+        println!("Value of view2[1][0] after deep_copy : {} and value of subview[0][0] : {}", view2[&[1, 0]], subview[&[0, 0]]);
+        println!("Value of view2[1][1] after deep_copy : {} and value of subview[0][1] : {}", view2[&[1, 1]], subview[&[0, 1]]);
+        assert_eq!(view2[&[1,0]], subview[&[0,0]]);
+    }
+
+    pub fn subview3_test() {
+        let mut data2 = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0];
+        let view3 = RustView::<'_, f64, Dim3, DeviceSpace, LayoutRight>::from_shape(&[3, 3, 2], &mut data2);
+
+        let subview = subview(&view3, &[&[1,3], &[0,3], &[1,2]]);
+
+        println!("Length of subview : {}", subview.0.size);
+        println!("Shapes of subview: {:?}", subview.0.shape);
+        println!("Value of view3[1][0][1] after deep_copy : {} and value of subview[0][0][0] : {}", view3[&[1, 0, 1]], subview[&[0, 0, 0]]);
+        println!("Value of view3[1][1][1] after deep_copy : {} and value of subview[0][1][0] : {}", view3[&[1, 1, 1]], subview[&[0, 1, 0]]);
+        println!("Value of view3[2][1][1] after deep_copy : {} and value of subview[1][1][0] : {}", view3[&[2, 1, 1]], subview[&[1, 1, 0]]);
+        assert_eq!(view3[&[1,0,1]], subview[&[0,0,0]]);
     }
 
     pub fn y_ax_test() {

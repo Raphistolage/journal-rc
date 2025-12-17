@@ -69,7 +69,6 @@ impl<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType> RustView<'a,
     }
 
     pub fn create_mirror(&self) -> RustView<'_, T, D, M::MirrorSpace, L> {
-        // TODO : Imposer M2 = !M.
         if M::default().to_space() == MemSpace::HostSpace.into() {
             RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(ffi::create_mirror(&self.0))
         } else {
@@ -78,7 +77,6 @@ impl<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType> RustView<'a,
     }
 
     pub fn create_mirror_view(&self) -> RustView<'_, T, D, M::MirrorSpace, L> {
-        // TODO : Imposer M2 = !M.
         if M::default().to_space() == MemSpace::HostSpace.into() {
             RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(ffi::create_mirror_view(
                 &self.0,
@@ -91,7 +89,6 @@ impl<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType> RustView<'a,
     }
 
     pub fn create_mirror_view_and_copy(&self) -> RustView<'_, T, D, M::MirrorSpace, L> {
-        // TODO : Imposer M2 = !M.
         if M::default().to_space() == MemSpace::HostSpace.into() {
             RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(
                 ffi::create_mirror_view_and_copy(&self.0),
