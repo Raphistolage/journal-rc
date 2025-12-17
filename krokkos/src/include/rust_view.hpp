@@ -126,6 +126,23 @@ namespace rust_view {
             auto src_view = *static_cast<const decltype(mirror_device_view)*>(src.get_view()); // on dit donc que le type de la vue dans src c'est le type de la mirror_view
             Kokkos::deep_copy(view, src_view);
         }
+
+        std::shared_ptr<IView> subview_1(rust::slice<const size_t> i1) {
+            if constexpr(ViewType::rank == 1) {
+                if (i1.size() == 1)
+                {
+                    auto subview1 = Kokkos::subview(view, i1[0]);
+                    return std::make_shared<ViewHolder<decltype(subview1)>>(subview1);
+                } else if (i1.size() == 2) {
+                    auto subview1 = Kokkos::subview(view, std::make_pair(i1[0],i1[1]));
+                    return std::make_shared<ViewHolder<decltype(subview1)>>(subview1);
+                } else {
+                    throw std::runtime_error("Bad ranges for subview");
+                }
+            } else {
+                throw std::runtime_error("Bad ranges for subview");
+            }
+        }
     };
 
     void deep_copy(OpaqueView& dest, const OpaqueView& src);
