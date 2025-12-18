@@ -14,6 +14,7 @@ pub fn deep_copy<T: DTType<T>, D: Dimension, M1: MemorySpace, M2: MemorySpace, L
     dest: &mut RustViewMut<'_, T, D, M1, L>,
     src: &RustView<'_, T, D, M2, L>
 ) {
+    //TODO : Verifier que tous les fields sont similaires (sauf mem_space)
     ffi::deep_copy(&mut dest.0, &src.0);
 }
 
