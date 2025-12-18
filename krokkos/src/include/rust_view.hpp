@@ -60,7 +60,7 @@ namespace rust_view {
                     throw std::runtime_error("Bad indexing");
                 }
             } else {
-
+                
                 auto host_view = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(),view);
                 if (i.size() != host_view.rank()) {
                     throw std::runtime_error("Bad indexing");
