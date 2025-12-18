@@ -1,7 +1,7 @@
-use crate::rust_view::{Dim1, Dim2, Dimension, LayoutType, MemorySpace};
-use crate::shared_array::{SharedArray, SharedArray_f64};
 use super::ffi;
 use super::types::*;
+use crate::rust_view::{Dim1, Dim2, Dimension, LayoutType, MemorySpace};
+use crate::shared_array::{SharedArray, SharedArray_f64};
 
 // pub fn opaque_view_to_shared(opaque_view: &OpaqueView) -> SharedArray {
 //     unsafe { ffi::view_to_shared_c(opaque_view) }
@@ -27,7 +27,10 @@ use super::types::*;
 //     create_view_f64(dimensions, mem_space.into(), layout.into(), slice)
 // }
 
-pub fn deep_copy<D, M, L>(arr1: &mut SharedArray<SharedArray_f64, D, M, L>, arr2: &SharedArray<SharedArray_f64, D, M, L>) -> Result<(), Errors>
+pub fn deep_copy<D, M, L>(
+    arr1: &mut SharedArray<SharedArray_f64, D, M, L>,
+    arr2: &SharedArray<SharedArray_f64, D, M, L>,
+) -> Result<(), Errors>
 where
     D: Dimension,
     M: MemorySpace,
@@ -45,7 +48,10 @@ where
     }
 }
 
-pub fn dot<D, M, L>(arr1: &SharedArray<SharedArray_f64, D, M, L>, arr2: &SharedArray<SharedArray_f64, D, M, L>) -> f64
+pub fn dot<D, M, L>(
+    arr1: &SharedArray<SharedArray_f64, D, M, L>,
+    arr2: &SharedArray<SharedArray_f64, D, M, L>,
+) -> f64
 where
     D: Dimension,
     M: MemorySpace,
@@ -57,8 +63,11 @@ where
     unsafe { ffi::dot(&shared_arr1, &shared_arr2) }
 }
 
-pub fn matrix_vector_product<M, L>(res: &mut SharedArray<SharedArray_f64, Dim1, M, L>, arr1: &SharedArray<SharedArray_f64, Dim2, M, L>, arr2: &SharedArray<SharedArray_f64, Dim1, M, L>)
-where
+pub fn matrix_vector_product<M, L>(
+    res: &mut SharedArray<SharedArray_f64, Dim1, M, L>,
+    arr1: &SharedArray<SharedArray_f64, Dim2, M, L>,
+    arr2: &SharedArray<SharedArray_f64, Dim1, M, L>,
+) where
     M: MemorySpace,
     L: LayoutType,
 {
@@ -69,14 +78,17 @@ where
     unsafe { ffi::matrix_vector_product(&mut res_arr, &shared_arr1, &shared_arr2) }
 }
 
-pub fn matrix_product<M, L>(res: &mut SharedArray<SharedArray_f64, Dim2, M, L>, arr1: &SharedArray<SharedArray_f64, Dim2, M, L>, arr2: &SharedArray<SharedArray_f64, Dim2, M, L>)
-where
+pub fn matrix_product<M, L>(
+    res: &mut SharedArray<SharedArray_f64, Dim2, M, L>,
+    arr1: &SharedArray<SharedArray_f64, Dim2, M, L>,
+    arr2: &SharedArray<SharedArray_f64, Dim2, M, L>,
+) where
     M: MemorySpace,
     L: LayoutType,
 {
     let mut res_arr = &mut res.0;
-    let shared_arr1 = & arr1.0;
-    let shared_arr2 = & arr2.0;
+    let shared_arr1 = &arr1.0;
+    let shared_arr2 = &arr2.0;
 
     unsafe { ffi::matrix_product(&mut res_arr, &shared_arr1, &shared_arr2) }
 }
@@ -113,8 +125,13 @@ pub mod tests {
 
         assert_eq!(arr1, arr3);
 
-        let mut shared_arr1: SharedArray::<SharedArray_f64,Dim2,HostSpace,LayoutRight> = arr1.try_into().unwrap();
-        let shared_arr2 = SharedArray::<SharedArray_f64,Dim2,HostSpace,LayoutRight>::from_shape_vec(&[2,6], s);
+        let mut shared_arr1: SharedArray<SharedArray_f64, Dim2, HostSpace, LayoutRight> =
+            arr1.try_into().unwrap();
+        let shared_arr2 =
+            SharedArray::<SharedArray_f64, Dim2, HostSpace, LayoutRight>::from_shape_vec(
+                &[2, 6],
+                s,
+            );
 
         let _ = deep_copy(&mut shared_arr1, &shared_arr2);
 
@@ -128,16 +145,19 @@ pub mod tests {
     pub fn matrix_vector_prod_test() {
         let v = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
         let s = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let arr1 = SharedArray::<SharedArray_f64,Dim2,HostSpace,LayoutRight>::from_shape_vec(&[2,6], v);
-        let arr2 = SharedArray::<SharedArray_f64,Dim1,HostSpace,LayoutRight>::from_shape_vec(&[6], s);
-        let mut result_shared_arr = SharedArray::<SharedArray_f64,Dim1,HostSpace,LayoutRight>::zeros(&[2]);
+        let arr1 = SharedArray::<SharedArray_f64, Dim2, HostSpace, LayoutRight>::from_shape_vec(
+            &[2, 6],
+            v,
+        );
+        let arr2 =
+            SharedArray::<SharedArray_f64, Dim1, HostSpace, LayoutRight>::from_shape_vec(&[6], s);
+        let mut result_shared_arr =
+            SharedArray::<SharedArray_f64, Dim1, HostSpace, LayoutRight>::zeros(&[2]);
 
         matrix_vector_product(&mut result_shared_arr, &arr1, &arr2);
 
         let expected_slice = vec![55.0, 145.0];
-        let expected = Array::from_shape_vec(2, expected_slice)
-            .unwrap()
-            .into_dyn();
+        let expected = Array::from_shape_vec(2, expected_slice).unwrap().into_dyn();
         let result_arr: Array<f64, IxDyn> = result_shared_arr.into();
         assert_eq!(result_arr, expected);
     }
@@ -145,8 +165,10 @@ pub mod tests {
     pub fn vector_product_test() {
         let v = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
         let s = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let arr1 = SharedArray::<SharedArray_f64,Dim1,HostSpace,LayoutRight>::from_shape_vec(&[6], v);
-        let arr2 = SharedArray::<SharedArray_f64,Dim1,HostSpace,LayoutRight>::from_shape_vec(&[6], s);
+        let arr1 =
+            SharedArray::<SharedArray_f64, Dim1, HostSpace, LayoutRight>::from_shape_vec(&[6], v);
+        let arr2 =
+            SharedArray::<SharedArray_f64, Dim1, HostSpace, LayoutRight>::from_shape_vec(&[6], s);
 
         let result = dot(&arr1, &arr2);
 
@@ -156,10 +178,16 @@ pub mod tests {
     pub fn matrix_product_test() {
         let v = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
         let s = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
-        let arr1 = SharedArray::<SharedArray_f64,Dim2,HostSpace,LayoutRight>::from_shape_vec(&[3,2], v);
-        let arr2 = SharedArray::<SharedArray_f64,Dim2,HostSpace,LayoutRight>::from_shape_vec(&[2,2], s);
-        let mut result_shared_arr = SharedArray::<SharedArray_f64,Dim2,HostSpace,LayoutRight>::zeros(&[3,2]);
-
+        let arr1 = SharedArray::<SharedArray_f64, Dim2, HostSpace, LayoutRight>::from_shape_vec(
+            &[3, 2],
+            v,
+        );
+        let arr2 = SharedArray::<SharedArray_f64, Dim2, HostSpace, LayoutRight>::from_shape_vec(
+            &[2, 2],
+            s,
+        );
+        let mut result_shared_arr =
+            SharedArray::<SharedArray_f64, Dim2, HostSpace, LayoutRight>::zeros(&[3, 2]);
 
         let expected_slice = vec![2.0, 3.0, 6.0, 11.0, 10.0, 19.0];
         let expected = Array::from_shape_vec((3, 2), expected_slice)

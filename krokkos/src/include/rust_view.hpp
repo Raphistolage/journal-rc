@@ -126,6 +126,47 @@ namespace rust_view {
             auto src_view = *static_cast<const decltype(mirror_device_view)*>(src.get_view()); // on dit donc que le type de la vue dans src c'est le type de la mirror_view
             Kokkos::deep_copy(view, src_view);
         }
+
+        std::shared_ptr<IView> subview_1(rust::slice<const size_t> i1) {
+            if constexpr(ViewType::rank == 1) {
+                if (i1.size() == 2)
+                {
+                    auto subview1 = Kokkos::subview(view, std::make_pair(i1[0],i1[1])); // So the idea is basicly that with std::make_pair you can cover any scenario (a range, an int (make_pair(k,k+1)), or full coverage (make_pair(0, extent()))).
+                    return std::make_shared<ViewHolder<decltype(subview1)>>(subview1);
+                } else {
+                    throw std::runtime_error("Bad ranges for subview");
+                }
+            } else {
+                throw std::runtime_error("Bad ranges for subview");
+            }
+        }
+
+        std::shared_ptr<IView> subview_2(rust::slice<const size_t> i1, rust::slice<const size_t> i2) {
+            if constexpr(ViewType::rank == 2) {
+                if (i1.size() == 2 && i2.size() == 2) {
+                    auto subView2 = Kokkos::subview(view, std::make_pair(i1[0],i1[1]), std::make_pair(i2[0], i2[1]));
+                    return std::make_shared<ViewHolder<decltype(subView2)>>(subView2);
+                } else {
+                    throw std::runtime_error("Bad ranges for subview");
+                }
+            } else {
+                throw std::runtime_error("Bad ranges for subview");
+            }
+        }
+
+        std::shared_ptr<IView> subview_3(rust::slice<const size_t> i1, rust::slice<const size_t> i2, rust::slice<const size_t> i3) {
+            if constexpr(ViewType::rank == 3) {
+                if (i1.size() == 2 && i2.size() == 2 && i3.size() == 2) {
+                    auto subView3 = Kokkos::subview(view, std::make_pair(i1[0],i1[1]), std::make_pair(i2[0], i2[1]), std::make_pair(i3[0], i3[1]));
+                    return std::make_shared<ViewHolder<decltype(subView3)>>(subView3);
+                } else {
+                    throw std::runtime_error("Bad ranges for subview");
+                }
+            } else {
+                throw std::runtime_error("Bad ranges for subview");
+            }
+        }
+        
     };
 
     void deep_copy(OpaqueView& dest, const OpaqueView& src);
@@ -133,6 +174,10 @@ namespace rust_view {
     OpaqueView create_mirror(const OpaqueView& src);
     OpaqueView create_mirror_view(const OpaqueView& src);
     OpaqueView create_mirror_view_and_copy(const OpaqueView& src);
+
+    OpaqueView subview_1(const OpaqueView& src, rust::slice<const size_t> i1);
+    OpaqueView subview_2(const OpaqueView& src, rust::slice<const size_t> i1, rust::slice<const size_t> i2);
+    OpaqueView subview_3(const OpaqueView& src, rust::slice<const size_t> i1, rust::slice<const size_t> i2, rust::slice<const size_t> i3);
 
     void dot(OpaqueView& r, const OpaqueView& x, const OpaqueView& y);
     void matrix_product(const OpaqueView& A, const OpaqueView& B, OpaqueView& C);

@@ -2,17 +2,17 @@ mod data_type;
 mod dim;
 pub mod ffi;
 mod functions_ffi;
-mod shared_ffi_types;
 mod layout;
 mod memory_space;
 mod ops;
+mod shared_ffi_types;
 
 pub use data_type::*;
 pub use dim::*;
-pub use shared_ffi_types::OpaqueView;
 pub use layout::*;
 pub use memory_space::*;
 pub use ops::*;
+pub use shared_ffi_types::OpaqueView;
 
 use std::ops::Index;
 
@@ -68,7 +68,7 @@ impl<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType> RustView<'a,
         )
     }
 
-    pub fn create_mirror(&self) -> RustView<'_, T, D, M::MirrorSpace, L> { // TODO : Imposer M2 = !M.
+    pub fn create_mirror(&self) -> RustView<'_, T, D, M::MirrorSpace, L> {
         if M::default().to_space() == MemSpace::HostSpace.into() {
             RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(ffi::create_mirror(&self.0))
         } else {
@@ -76,19 +76,27 @@ impl<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType> RustView<'a,
         }
     }
 
-    pub fn create_mirror_view(&self) -> RustView<'_, T, D, M::MirrorSpace, L> { // TODO : Imposer M2 = !M.
+    pub fn create_mirror_view(&self) -> RustView<'_, T, D, M::MirrorSpace, L> {
         if M::default().to_space() == MemSpace::HostSpace.into() {
-            RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(ffi::create_mirror_view(&self.0))
+            RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(ffi::create_mirror_view(
+                &self.0,
+            ))
         } else {
-            RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(ffi::create_mirror_view(&self.0))
+            RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(ffi::create_mirror_view(
+                &self.0,
+            ))
         }
     }
 
-    pub fn create_mirror_view_and_copy(&self) -> RustView<'_, T, D, M::MirrorSpace, L> { // TODO : Imposer M2 = !M.
+    pub fn create_mirror_view_and_copy(&self) -> RustView<'_, T, D, M::MirrorSpace, L> {
         if M::default().to_space() == MemSpace::HostSpace.into() {
-            RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(ffi::create_mirror_view_and_copy(&self.0))
+            RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(
+                ffi::create_mirror_view_and_copy(&self.0),
+            )
         } else {
-            RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(ffi::create_mirror_view_and_copy(&self.0))
+            RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(
+                ffi::create_mirror_view_and_copy(&self.0),
+            )
         }
     }
 
@@ -126,7 +134,6 @@ impl<'a, D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]>
         ffi::get_i32(self.get(), index)
     }
 }
-
 
 pub struct RustViewMut<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType>(
     OpaqueView,

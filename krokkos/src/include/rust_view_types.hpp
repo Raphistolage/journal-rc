@@ -15,6 +15,10 @@ namespace rust_view_types{
         virtual void deep_copy(const IView& src) = 0;
         virtual void deep_copy_from_host_to_device(const IView& src) = 0;
         virtual void deep_copy_from_device_to_host(const IView& src) = 0;
+
+        virtual std::shared_ptr<IView> subview_1(rust::slice<const size_t> i1) = 0;
+        virtual std::shared_ptr<IView> subview_2(rust::slice<const size_t> i1, rust::slice<const size_t> i2) = 0;
+        virtual std::shared_ptr<IView> subview_3(rust::slice<const size_t> i1, rust::slice<const size_t> i2, rust::slice<const size_t> i3) = 0;        
     };
 }
 

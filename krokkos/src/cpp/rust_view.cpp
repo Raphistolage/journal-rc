@@ -107,6 +107,66 @@ namespace rust_view {
         }
     }
 
+    OpaqueView subview_1(const OpaqueView& src, rust::slice<const size_t> i1) {
+        uint32_t size = 1;
+        rust::Vec<size_t> new_shapes = {};
+        size_t shape = i1[1]-i1[0];
+        size *= shape;
+        new_shapes.push_back(shape);
+        
+        return OpaqueView {
+            std::move(src.view->subview_1(i1)),
+            size,
+            src.rank,
+            new_shapes,
+            src.mem_space,
+            src.layout,
+        };
+    }
+
+    OpaqueView subview_2(const OpaqueView& src, rust::slice<const size_t> i1, rust::slice<const size_t> i2) {
+        uint32_t size = 1;
+        rust::Vec<size_t> new_shapes = {};
+        size_t shape1 = i1[1]-i1[0];
+        size *= shape1;
+        size_t shape2 = i2[1]-i2[0];
+        size *= shape2;
+        new_shapes.push_back(shape1);
+        new_shapes.push_back(shape2);
+
+        return OpaqueView {
+            std::move(src.view->subview_2(i1, i2)),
+            size,
+            src.rank,
+            new_shapes,
+            src.mem_space,
+            src.layout,
+        };
+    }
+
+    OpaqueView subview_3(const OpaqueView& src, rust::slice<const size_t> i1, rust::slice<const size_t> i2, rust::slice<const size_t> i3){
+        uint32_t size = 1;
+        rust::Vec<size_t> new_shapes = {};
+        size_t shape1 = i1[1]-i1[0];
+        size *= shape1;
+        size_t shape2 = i2[1]-i2[0];
+        size *= shape2;
+        size_t shape3 = i3[1]-i3[0];
+        size *= shape3;
+        new_shapes.push_back(shape1);
+        new_shapes.push_back(shape2);
+        new_shapes.push_back(shape3);
+
+        return OpaqueView {
+            std::move(src.view->subview_3(i1, i2, i3)),
+            size,
+            src.rank,
+            new_shapes,
+            src.mem_space,
+            src.layout,
+        };
+    }
+
     void dot(OpaqueView& r, const OpaqueView& x, const OpaqueView& y) {
         if (y.rank != 1 || x.rank != 1) {
             std::cout << "Ranks : y : " << y.rank << " x: " << x.rank <<" \n";

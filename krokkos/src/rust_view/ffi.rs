@@ -1,6 +1,5 @@
 #[cxx::bridge(namespace = "rust_view")]
 mod rust_view_ffi {
-
     unsafe extern "C++" {
         include!("rust_view.hpp");
 
@@ -21,6 +20,10 @@ mod rust_view_ffi {
         fn create_mirror(src: &OpaqueView) -> OpaqueView;
         fn create_mirror_view(src: &OpaqueView) -> OpaqueView;
         fn create_mirror_view_and_copy(src: &OpaqueView) -> OpaqueView;
+
+        fn subview_1(src: &OpaqueView, i1: &[usize]) -> OpaqueView;
+        fn subview_2(src: &OpaqueView, i1: &[usize], i2: &[usize]) -> OpaqueView;
+        fn subview_3(src: &OpaqueView, i1: &[usize], i2: &[usize], i3: &[usize]) -> OpaqueView;
 
         fn matrix_product(a: &OpaqueView, b: &OpaqueView, c: &mut OpaqueView);
         fn dot(r: &mut OpaqueView, x: &OpaqueView, y: &OpaqueView);
