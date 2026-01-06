@@ -26,24 +26,24 @@ impl DTType<f64> for f64 {
     }
 }
 
-impl DTType<f32> for f32 {
-    fn create_opaque_view(
-        dimensions: Vec<usize>,
-        mem_space: MemSpace,
-        layout: Layout,
-        data: &[f32],
-    ) -> OpaqueView {
-        ffi::create_view_f32(dimensions, mem_space.into(), layout.into(), data)
-    }
-}
+// impl DTType<f32> for f32 {
+//     fn create_opaque_view(
+//         dimensions: Vec<usize>,
+//         mem_space: MemSpace,
+//         layout: Layout,
+//         data: &[f32],
+//     ) -> OpaqueView {
+//         ffi::create_view_f32(dimensions, mem_space.into(), layout.into(), data)
+//     }
+// }
 
-impl DTType<i32> for i32 {
-    fn create_opaque_view(
-        dimensions: Vec<usize>,
-        mem_space: MemSpace,
-        layout: Layout,
-        data: &[i32],
-    ) -> OpaqueView {
-        ffi::create_view_i32(dimensions, mem_space.into(), layout.into(), data)
-    }
-}
+// impl DTType<i32> for i32 {
+//     fn create_opaque_view(
+//         dimensions: Vec<usize>,
+//         mem_space: MemSpace,
+//         layout: Layout,
+//         data: &[i32],
+//     ) -> OpaqueView {
+//         ffi::create_view_i32(dimensions, mem_space.into(), layout.into(), data)
+//     }
+// }

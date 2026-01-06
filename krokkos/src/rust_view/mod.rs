@@ -115,25 +115,25 @@ impl<'a, D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]>
     }
 }
 
-impl<'a, D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]>
-    for RustView<'a, f32, D, M, L>
-{
-    type Output = f32;
+// impl<'a, D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]>
+//     for RustView<'a, f32, D, M, L>
+// {
+//     type Output = f32;
 
-    fn index(&self, index: &[usize]) -> &Self::Output {
-        ffi::get_f32(self.get(), index)
-    }
-}
+//     fn index(&self, index: &[usize]) -> &Self::Output {
+//         ffi::get_f32(self.get(), index)
+//     }
+// }
 
-impl<'a, D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]>
-    for RustView<'a, i32, D, M, L>
-{
-    type Output = i32;
+// impl<'a, D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]>
+//     for RustView<'a, i32, D, M, L>
+// {
+//     type Output = i32;
 
-    fn index(&self, index: &[usize]) -> &Self::Output {
-        ffi::get_i32(self.get(), index)
-    }
-}
+//     fn index(&self, index: &[usize]) -> &Self::Output {
+//         ffi::get_i32(self.get(), index)
+//     }
+// }
 
 pub struct RustViewMut<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType>(
     OpaqueView,
@@ -205,22 +205,22 @@ impl<'a, D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]>
     }
 }
 
-impl<'a, D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]>
-    for RustViewMut<'a, f32, D, M, L>
-{
-    type Output = f32;
+// impl<'a, D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]>
+//     for RustViewMut<'a, f32, D, M, L>
+// {
+//     type Output = f32;
 
-    fn index(&self, index: &[usize]) -> &Self::Output {
-        ffi::get_f32(self.get(), index)
-    }
-}
+//     fn index(&self, index: &[usize]) -> &Self::Output {
+//         ffi::get_f32(self.get(), index)
+//     }
+// }
 
-impl<'a, D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]>
-    for RustViewMut<'a, i32, D, M, L>
-{
-    type Output = i32;
+// impl<'a, D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]>
+//     for RustViewMut<'a, i32, D, M, L>
+// {
+//     type Output = i32;
 
-    fn index(&self, index: &[usize]) -> &Self::Output {
-        ffi::get_i32(self.get(), index)
-    }
-}
+//     fn index(&self, index: &[usize]) -> &Self::Output {
+//         ffi::get_i32(self.get(), index)
+//     }
+// }
