@@ -1,6 +1,6 @@
 use templated_macro::templated;
 
-#[templated(f64, f32, i32)]
+#[templated(f64)]
 mod rust_view_functions {
 
     #[namespace = "rust_view_types"]

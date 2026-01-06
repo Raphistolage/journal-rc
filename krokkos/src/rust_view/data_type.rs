@@ -4,6 +4,8 @@ use crate::{Layout, MemSpace};
 
 use super::{OpaqueView, ffi};
 
+//TODO : Full implem (voir burn pour une implem similaire)
+
 pub trait DTType<T>: Debug + Default + Clone + Copy {
     fn create_opaque_view(
         dimensions: Vec<usize>,

@@ -1,6 +1,6 @@
 use templated_macro::templated;
 
-#[templated(f64, f32, i32)]
+#[templated(f64)]
 mod shared_array_functions {
 
     #[namespace = "shared_ffi_types"]
