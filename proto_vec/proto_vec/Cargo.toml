@@ -1,0 +1,12 @@
+[package]
+name = "proto_vec"
+version = "0.1.0"
+edition = "2024"
+
+
+[dependencies]
+cxx = "1.0" 
+krokkos_macro = { path = "../KrokkosMacroGen/krokkos_macro" }
+
+[build-dependencies]
+krokkos_gen = { path = "../KrokkosMacroGen/krokkos_gen" }
