@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 krokkos = {path = "../krokkos/." }
+cxx = "1.0"
 
 [build-dependencies]
-krokkos-build = {path = "../krokkos-build/." }
+krokkos-build = {path = "../krokkos/build/." } 
