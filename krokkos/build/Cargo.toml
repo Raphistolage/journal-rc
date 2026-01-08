@@ -1,0 +1,19 @@
+[package]
+name = "krokkos-build"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+quote = "1"
+syn = { version = "2", features = ["full", "extra-traits", "printing"] }
+krokkos-parser = { path = "../parser/." }
+cc = "1.0"
+proc-macro2 = "1.0.103"
+cxx-build = "1.0"
+cmake = "0.1.31"
+
+[features]
+default = ["omp"]
+omp = []
+cuda = []
+
