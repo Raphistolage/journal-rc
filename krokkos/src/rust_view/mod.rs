@@ -14,39 +14,39 @@ pub use memory_space::*;
 pub use ops::*;
 pub use shared_ffi_types::OpaqueView;
 
-use std::ops::Index;
+use std::{marker::PhantomData, ops::Index};
 
 use crate::rust_view::ffi::MemSpace;
-pub struct RustView<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType>(
-    OpaqueView,
-    std::marker::PhantomData<D>,
-    std::marker::PhantomData<M>,
-    std::marker::PhantomData<L>,
-    std::marker::PhantomData<&'a T>,
-);
+pub struct RustView<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType>{
+    opaque_view: OpaqueView,
+    dim: std::marker::PhantomData<D>,
+    mem_space: std::marker::PhantomData<M>,
+    layout: std::marker::PhantomData<L>,
+    data_type: std::marker::PhantomData<&'a T>,
+}
 
 impl<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType> RustView<'a, T, D, M, L> {
     pub fn from_shape<U: Into<D>>(shapes: U, v: &'a [T]) -> Self {
         let mem_space = M::default();
         let layout = L::default();
         let shapes = shapes.into();
-        Self(
-            T::create_opaque_view(shapes.into(), mem_space.to_space(), layout.to_layout(), v),
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-        )
+        Self{
+            opaque_view: T::create_opaque_view(shapes.into(), mem_space.to_space(), layout.to_layout(), v),
+            dim: PhantomData,
+            mem_space: PhantomData,
+            layout: PhantomData,
+            data_type: PhantomData,
+        }
     }
 
     pub fn from_opaque_view(opaque_view: OpaqueView) -> Self {
-        Self(
+        Self{
             opaque_view,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-        )
+            dim: PhantomData,
+            mem_space: PhantomData,
+            layout: PhantomData,
+            data_type: PhantomData,
+        }
     }
 
     pub fn zeros<U: Into<D>>(shapes: U) -> Self {
@@ -54,36 +54,36 @@ impl<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType> RustView<'a,
         let layout = L::default();
         let shapes = shapes.into();
         let mut v = vec![T::default(); shapes.size()];
-        Self(
-            T::create_opaque_view(
+        Self{
+            opaque_view: T::create_opaque_view(
                 shapes.into(),
                 mem_space.to_space(),
                 layout.to_layout(),
                 v.as_mut_slice(),
             ),
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-        )
+            dim: PhantomData,
+            mem_space: PhantomData,
+            layout: PhantomData,
+            data_type: PhantomData,
+        }
     }
 
     pub fn create_mirror(&self) -> RustView<'_, T, D, M::MirrorSpace, L> {
         if M::default().to_space() == MemSpace::HostSpace.into() {
-            RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(ffi::create_mirror(&self.0))
+            RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(ffi::create_mirror(self.get()))
         } else {
-            RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(ffi::create_mirror(&self.0))
+            RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(ffi::create_mirror(self.get()))
         }
     }
 
     pub fn create_mirror_view(&self) -> RustView<'_, T, D, M::MirrorSpace, L> {
         if M::default().to_space() == MemSpace::HostSpace.into() {
             RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(ffi::create_mirror_view(
-                &self.0,
+                self.get(),
             ))
         } else {
             RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(ffi::create_mirror_view(
-                &self.0,
+                self.get(),
             ))
         }
     }
@@ -91,17 +91,17 @@ impl<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType> RustView<'a,
     pub fn create_mirror_view_and_copy(&self) -> RustView<'_, T, D, M::MirrorSpace, L> {
         if M::default().to_space() == MemSpace::HostSpace.into() {
             RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(
-                ffi::create_mirror_view_and_copy(&self.0),
+                ffi::create_mirror_view_and_copy(self.get()),
             )
         } else {
             RustView::<'_, T, D, M::MirrorSpace, L>::from_opaque_view(
-                ffi::create_mirror_view_and_copy(&self.0),
+                ffi::create_mirror_view_and_copy(self.get()),
             )
         }
     }
 
     pub fn get(&self) -> &OpaqueView {
-        &self.0
+        &self.opaque_view
     }
 }
 
@@ -135,36 +135,36 @@ impl<'a, D: Dimension, M: MemorySpace, L: LayoutType> Index<&[usize]>
     }
 }
 
-pub struct RustViewMut<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType>(
-    OpaqueView,
-    std::marker::PhantomData<D>,
-    std::marker::PhantomData<M>,
-    std::marker::PhantomData<L>,
-    std::marker::PhantomData<&'a mut T>,
-);
+pub struct RustViewMut<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType>{
+    opaque_view: OpaqueView,
+    dim: std::marker::PhantomData<D>,
+    mem_space: std::marker::PhantomData<M>,
+    layout: std::marker::PhantomData<L>,
+    data_type: std::marker::PhantomData<&'a mut T>,
+}
 
 impl<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType> RustViewMut<'a, T, D, M, L> {
     pub fn from_shape<U: Into<D>>(shapes: U, v: &'a mut [T]) -> Self {
         let mem_space = M::default();
         let layout = L::default();
         let shapes = shapes.into();
-        Self(
-            T::create_opaque_view(shapes.into(), mem_space.to_space(), layout.to_layout(), v),
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-        )
+        Self{
+            opaque_view: T::create_opaque_view(shapes.into(), mem_space.to_space(), layout.to_layout(), v),
+            dim: PhantomData,
+            mem_space: PhantomData,
+            layout: PhantomData,
+            data_type: PhantomData,
+        }
     }
 
     pub fn from_opaque_view(opaque_view: OpaqueView) -> Self {
-        Self(
+        Self{
             opaque_view,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-        )
+            dim: PhantomData,
+            mem_space: PhantomData,
+            layout: PhantomData,
+            data_type: PhantomData,
+        }
     }
 
     pub fn zeros<U: Into<D>>(shapes: U) -> Self {
@@ -172,26 +172,26 @@ impl<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType> RustViewMut<
         let layout = L::default();
         let shapes = shapes.into();
         let mut v = vec![T::default(); shapes.size()];
-        Self(
-            T::create_opaque_view(
+        Self{
+            opaque_view: T::create_opaque_view(
                 shapes.into(),
                 mem_space.to_space(),
                 layout.to_layout(),
                 v.as_mut_slice(),
             ),
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-            std::marker::PhantomData,
-        )
+            dim: PhantomData,
+            mem_space: PhantomData,
+            layout: PhantomData,
+            data_type: PhantomData,
+        }
     }
 
     pub fn get(&self) -> &OpaqueView {
-        &self.0
+        &self.opaque_view
     }
 
     pub fn get_mut(&mut self) -> &mut OpaqueView {
-        &mut self.0
+        &mut self.opaque_view
     }
 }
 

@@ -18,7 +18,7 @@ pub fn deep_copy<T: DTType<T>, D: Dimension, M1: MemorySpace, M2: MemorySpace, L
     src: &RustView<'_, T, D, M2, L>,
 ) {
     //TODO : Verifier que tous les fields sont similaires (sauf mem_space)
-    ffi::deep_copy(&mut dest.0, &src.0);
+    ffi::deep_copy(dest.get_mut(), src.get());
 }
 
 pub fn subview<'a, T: DTType<T>, D: Dimension, M: MemorySpace, L: LayoutType>(
@@ -114,7 +114,7 @@ pub mod tests {
         let view2 = view.create_mirror();
 
         assert_eq!(view2[&[0]], 0.0);
-        assert_eq!(view2.0.size, view.0.size);
+        assert_eq!(view2.get().size, view.get().size);
     }
 
     pub fn create_mirror_view_test() {
@@ -129,7 +129,7 @@ pub mod tests {
         #[cfg(feature = "cuda")] // Sinon, ca crée une nouvelle View, remplie de zéros.
         assert_eq!(view2[&[0]], 0.0);
 
-        assert_eq!(view2.0.size, view.0.size);
+        assert_eq!(view2.get().size, view.get().size);
     }
 
     pub fn create_mirror_view_and_copy_test() {
@@ -139,7 +139,7 @@ pub mod tests {
         let view2 = view.create_mirror_view_and_copy();
 
         assert_eq!(view[&[0]], view2[&[0]]);
-        assert_eq!(view2.0.size, view.0.size);
+        assert_eq!(view2.get().size, view.get().size);
     }
 
     pub fn deep_copy_test() {
@@ -163,8 +163,8 @@ pub mod tests {
 
         let subview = subview(&view1, &[&[1,2]]);
 
-        println!("Length of subview : {}", subview.0.size);
-        println!("Shapes of subview: {:?}", subview.0.shape);
+        println!("Length of subview : {}", subview.get().size);
+        println!("Shapes of subview: {:?}", subview.get().shape);
         println!("Value of view1[1] : {} and value of subview[0] : {}", view1[&[1]], subview[&[0]]);
         // println!("Value of view1[2] : {} and value of subview[1] : {}", view1[&[2]], subview[&[1]]);
         assert_eq!(view1[&[1]], subview[&[0]]);
@@ -176,8 +176,8 @@ pub mod tests {
 
         let subview = subview(&view2, &[&[1,2], &[0,3]]);
 
-        println!("Length of subview : {}", subview.0.size);
-        println!("Shapes of subview: {:?}", subview.0.shape);
+        println!("Length of subview : {}", subview.get().size);
+        println!("Shapes of subview: {:?}", subview.get().shape);
         println!("Value of view2[1][0] : {} and value of subview[0][0] : {}", view2[&[1, 0]], subview[&[0, 0]]);
         println!("Value of view2[1][1] : {} and value of subview[0][1] : {}", view2[&[1, 1]], subview[&[0, 1]]);
         assert_eq!(view2[&[1,0]], subview[&[0,0]]);
@@ -191,8 +191,8 @@ pub mod tests {
 
         let subview = subview(&view3, &[&[1,3], &[0,3], &[0,2]]);
 
-        println!("Length of subview : {}", subview.0.size);
-        println!("Shapes of subview: {:?}", subview.0.shape);
+        println!("Length of subview : {}", subview.get().size);
+        println!("Shapes of subview: {:?}", subview.get().shape);
         println!("Value of view3[1][1][0] : {} and value of subview[0][0][0] : {}", view3[&[1, 0, 0]], subview[&[0, 0, 0]]);
         println!("Value of view3[1][2][0] : {} and value of subview[0][1][0] : {}", view3[&[1, 1, 0]], subview[&[0, 1, 0]]);
         println!("Value of view3[2][2][0] : {} and value of subview[1][1][0] : {}", view3[&[2, 1, 0]], subview[&[1, 1, 0]]);
