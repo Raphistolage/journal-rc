@@ -22,10 +22,10 @@ endif()
 
 # rustViewFfiTypes
 
-add_library(rustViewFfiTypes SHARED ${OUT_DIR}/cxxbridge/sources/${PKG_NAME}/src/rust_view/shared_ffi_types.rs.cc)
+add_library(rustViewFfiTypes SHARED ${OUT_DIR}/cxxbridge/sources/krokkos/src/rust_view/shared_ffi_types.rs.cc)
 
 target_include_directories(rustViewFfiTypes PUBLIC 
-${OUT_DIR}/cxxbridge/include/${PKG_NAME}/src/rust_view/ 
+${OUT_DIR}/cxxbridge/include/krokkos/src/rust_view/ 
 ${OUT_DIR}/cxxbridge/include/rust
 ../src/include
 )
@@ -33,7 +33,7 @@ ${OUT_DIR}/cxxbridge/include/rust
 set_target_properties(rustViewFfiTypes PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # RustView
-add_library(rustView SHARED ../src/cpp/rust_view.cpp ${OUT_DIR}/cxxbridge/krokkos/src/rust_view/ffi.rs.cc)
+add_library(rustView SHARED ../src/cpp/rust_view.cpp ${OUT_DIR}/cxxbridge/sources/krokkos/src/rust_view/ffi.rs.cc)
 
 target_link_libraries(rustView PUBLIC Kokkos::kokkos rustViewFfiTypes)
 
@@ -47,13 +47,13 @@ set_target_properties(rustView PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # RustView_Functions ffi
 add_library(rustViewFunctionsFfi SHARED 
-    ${OUT_DIR}/cxxbridge/krokkos/${OUT_DIR}/krokkosbridge/rust_view_functions_ffi.rs.cc
+    ${OUT_DIR}/cxxbridge/sources/krokkos/${OUT_DIR}/../../../../krokkosbridge/rust_view_functions_ffi.rs.cc
     ../src/cpp/functions.cpp
 )
 
 target_link_libraries(rustViewFunctionsFfi PUBLIC Kokkos::kokkos rustView )
 
-target_include_directories(rustViewFunctionsFfi PUBLIC ${OUT_DIR}/cxxbridge/krokkos/${OUT_DIR}/krokkosbridge/)
+target_include_directories(rustViewFunctionsFfi PUBLIC ${OUT_DIR}/cxxbridge/include/krokkos/${OUT_DIR}/../../../../krokkosbridge/)
 
 set_target_properties(rustViewFunctionsFfi PROPERTIES POSITION_INDEPENDENT_CODE ON)
 

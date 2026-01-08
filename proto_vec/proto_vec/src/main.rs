@@ -1,7 +1,7 @@
 mod ffi;
 
 fn main() {
-    println!("Successfully compiled with bridge!");
+    println!("Hello");
 }
 
 #[allow(dead_code)]
