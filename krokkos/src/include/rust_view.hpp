@@ -15,6 +15,8 @@ namespace rust_view {
     using rust_view_types::IView;
     using rust_view_types::OpaqueView;
 
+    // using Kokkos::LayoutRight;
+
     void kokkos_initialize();
     void kokkos_finalize();
 

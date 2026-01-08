@@ -218,8 +218,3 @@ namespace rust_view_functions {
         }
     }
 }
-
-// extern "C" {
-//     SharedArray view_to_shared_c(const OpaqueView* opaqueView);
-//     SharedArrayMut view_to_shared_mut_c(const OpaqueView* opaqueView);
-// }

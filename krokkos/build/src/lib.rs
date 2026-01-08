@@ -7,7 +7,7 @@ pub fn bridge(rust_source_file: Option<impl AsRef<Path>>, cpp_source_file: Optio
 
     let mut dst_config = Config::new(format!("{}/Release", KROKKOS_CRATE_ROOT));
 
-    let mut shared_dir = format!("{}/../../../../", std::env::var("OUT_DIR").expect("OUT_DIR not defined"));
+    let shared_dir = format!("{}/../../../../", std::env::var("OUT_DIR").expect("OUT_DIR not defined"));
 
     if !std::fs::exists(format!("{}krokkosbridge", shared_dir)).unwrap() {
         std::fs::create_dir(format!("{}/../../../../krokkosbridge", std::env::var("OUT_DIR").expect("OUT_DIR not defined"))).unwrap();

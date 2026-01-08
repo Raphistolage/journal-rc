@@ -19,7 +19,6 @@ else()
   endif()
 endif()
 
-
 # rustViewFfiTypes
 
 add_library(rustViewFfiTypes SHARED ${OUT_DIR}/cxxbridge/sources/krokkos/src/rust_view/shared_ffi_types.rs.cc)

@@ -3,6 +3,8 @@ mod rust_view_ffi {
     unsafe extern "C++" {
         include!("rust_view.hpp");
 
+        // type LayoutRight;
+
         #[namespace = "rust_view_types"]
         type MemSpace = crate::rust_view::shared_ffi_types::MemSpace;
 
