@@ -1,15 +1,10 @@
 mod ffi;
 
 fn main() {
-    println!("Hello");
-}
+    let v = ffi::ProtoVector::<f64>::from_slice(&[1.0, 2.0, 3.0]);
+    let a = v.at(2);
+    println!("Value is : {:?}", a);
 
-#[allow(dead_code)]
-fn test_bridge_compilation(v: &ffi::IVec) {
-    let _ = ffi::get_f64(v, 0);
-    let _ = ffi::get_i32(v, 0);
-    let _ = ffi::get_u32(v, 0);
-
-    // Produces an error : 
-    let _ = ffi::get_u16(v, 0);
+    ffi::printcpp_1(1);
+    ffi::printcpp_2(4, 8);
 }

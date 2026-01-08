@@ -1,5 +1,3 @@
-use krokkos_gen::bridge;
-
 fn main() {
-    bridge("src/ffi.rs");
+    krokkos_gen::bridge("src/ffi.rs");
 }
