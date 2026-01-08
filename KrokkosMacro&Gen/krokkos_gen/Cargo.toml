@@ -1,0 +1,14 @@
+[package]
+name = "krokkos_gen"
+version = "0.1.0"
+edition = "2024"
+description = "A generator that allows to generate the Views for Krokkos, as well as their implementation, both on Rust and C++ side."
+
+[lib]
+
+[dependencies]
+cc = "1.2.51"
+proc-macro2 = "1.0.105"
+quote = "1"
+syn = { version = "2", features = ["full","extra-traits"] }
+cxx-build = "1.0"
