@@ -210,7 +210,7 @@ pub fn bridge(rust_source_file: impl AsRef<Path>, which_ffi: i32) -> cc::Build {
                     to_write_full.push_str("}\n}\n");
                     to_write_full.push_str(&export_string);
 
-                    let output_file = Path::new(&out_dir).join(format!("{}_ffi.rs",module.ident.to_string()));
+                    let output_file = Path::new(&out_dir).join(format!("../../../../krokkosbridge/{}_ffi.rs",module.ident.to_string()));
                     
                     std::fs::write(&output_file, to_write_full).unwrap();
                     output_files.push(output_file);

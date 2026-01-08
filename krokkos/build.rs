@@ -5,8 +5,8 @@ fn main() {
     let _ = cxx_build::bridge("src/rust_view/ffi.rs");
     let _ = cxx_build::bridge("src/shared_array/ffi.rs");
 
-    let _ = templated_parser::bridge("src/rust_view/functions_ffi.rs", 2);
-    let _ = templated_parser::bridge("src/shared_array/functions_ffi.rs", 1);
+    let _ = krokkos_parser::bridge("src/rust_view/functions_ffi.rs", 2);
+    let _ = krokkos_parser::bridge("src/shared_array/functions_ffi.rs", 1);
 
     let mut dst_config = Config::new("Release");
     let modifieid_dst_config = dst_config
