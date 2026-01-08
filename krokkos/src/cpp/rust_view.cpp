@@ -2,7 +2,6 @@
 #include <iostream>
 
 #include "rust_view.hpp"
-// #include "ffi.rs.h"
 
 namespace rust_view {
 

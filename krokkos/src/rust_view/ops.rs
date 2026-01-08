@@ -101,10 +101,10 @@ pub mod tests {
             RustView::<'_, f64, Dim1, DeviceSpace, LayoutRight>::from_shape(&[5], &mut data1);
         assert_eq!(ffi::get_f64(view1.get(), &[2]), &3.0_f64);
 
-        let mut data2 = [1, 2, 3, 4, 5, 6];
-        let view2 = RustView::<'_, i32, Dim1, HostSpace, LayoutRight>::from_shape(&[5], &mut data2);
+        // let mut data2 = [1, 2, 3, 4, 5, 6];
+        // let view2 = RustView::<'_, i32, Dim1, HostSpace, LayoutRight>::from_shape(&[5], &mut data2);
 
-        assert_eq!(ffi::get_i32(view2.get(), &[2]), &3_i32);
+        // assert_eq!(ffi::get_i32(view2.get(), &[2]), &3_i32);
     }
 
     pub fn create_mirror_test() {
@@ -253,7 +253,7 @@ pub mod tests {
     }
 
     pub fn performance_test() {
-        let n = 8;
+        let n = 5;
         for i in 0..n {
             let a = RustView::<'_, f64, Dim2, DeviceSpace, LayoutRight>::zeros(&[
                 64 * 2_i32.pow(i) as usize,

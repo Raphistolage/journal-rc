@@ -1,8 +1,6 @@
 fn main() {
-    let _ = cxx_build::bridge("src/shared_array/shared_ffi_types.rs");
     let _ = cxx_build::bridge("src/rust_view/shared_ffi_types.rs");
     let _ = cxx_build::bridge("src/rust_view/ffi.rs");
-    let _ = cxx_build::bridge("src/shared_array/ffi.rs");
 
     let _ = krokkos_parser::bridge("src/rust_view/functions_ffi.rs", 2);
     let _ = krokkos_parser::bridge("src/shared_array/functions_ffi.rs", 1);
