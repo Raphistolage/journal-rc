@@ -1,4 +1,4 @@
-use templated_macro::templated;
+use krokkos_macro::templated;
 
 #[templated(f64, f32, i32)]
 mod shared_array_functions {
