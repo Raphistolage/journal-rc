@@ -1,4 +1,6 @@
-#include "rust_view_types.hpp"
+#include <iostream>
+#include "shared_ffi_types.rs.h"
+#include <Kokkos_Core.hpp>
 
 using rust_view_types::OpaqueView;
 

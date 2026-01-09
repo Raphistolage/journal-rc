@@ -2,7 +2,7 @@ mod ffi;
 
 use krokkos::rust_view::{Dim1, Dim2, DeviceSpace, LayoutRight, RustView};
 use krokkos::{kokkos_finalize_ops, kokkos_initialize_ops};
-use ffi::y_ax;
+use ffi::y_ax_f64;
 
 fn main() {
     kokkos_initialize_ops();
@@ -18,7 +18,7 @@ fn main() {
 
         println!("Initializations done");
 
-        let result = y_ax(&y, &a, &x);
+        let result = y_ax_f64(y.get(), a.get(), x.get());
 
         println!("HEllo world!");
         println!("Result of using y_ax of rust_view : {}", result);
