@@ -7,8 +7,6 @@ fn main() {
     if !std::fs::exists(format!("{}/../../../../krokkosbridge", out_dir)).unwrap() {
         println!("cargo:warning=Creating krokkosbridge folder");
         std::fs::create_dir(format!("{}/../../../../krokkosbridge", out_dir)).unwrap();
-    } else {
-        println!("cargo:warning=Not Creating krokkosbridge folder");
     }
 
     let _ = cxx_build::bridge("src/rust_view/shared_ffi_types.rs");
