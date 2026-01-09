@@ -1,3 +1,3 @@
 use krokkos_macro::make_vecs;
 
-make_vecs!([f64, i32, u32], [1, 2]);
+make_vecs!([f64, f32, u8], [1]);

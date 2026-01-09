@@ -67,11 +67,11 @@ impl syn::parse::Parse for ViewDataType {
 }
 
 trait ToCppTypeStr {
-    fn cpp_type(&self) -> &'static str;
+    fn cpp_type(&self) -> &str;
 }
 
 impl ToCppTypeStr for ViewDataType {
-    fn cpp_type(&self) -> &'static str {
+    fn cpp_type(&self) -> &str {
         match self {
             ViewDataType::F64 => "double",
             ViewDataType::F32 => "float",
@@ -164,10 +164,8 @@ namespace proto_vec_bridge {
                     let ty: Type = syn::parse_str(&rust_type_str).unwrap();
 
                     let fn_at_ident = format_ident!("at_{}", rust_type_str);
-                    let fn_at_str = fn_at_ident.to_string();
 
                     let fn_create_ident = format_ident!("create_vec_{}", rust_type_str);
-                    let fn_create_str = fn_create_ident.to_string();
 
                     let struct_ident = format_ident!("OpaqueVector_{}", rust_type_str);
                     let vec_holder_ident = format_ident!("VecHolder_{}", rust_type_str);
@@ -267,7 +265,7 @@ void printcpp(Is... args) {
                             #(#func_decls)*
                         }
                     }
-                    pub use proto_vec_bridge_ffi::*;
+                    use proto_vec_bridge_ffi::*;
                     use std::fmt::Debug;
                     use cxx::SharedPtr;
                     use cxx::memory::SharedPtrTarget;
@@ -282,7 +280,7 @@ void printcpp(Is... args) {
                     }
 
                     #(#dttype_decls)*
-                    
+
                     pub struct ProtoVector <T: DTType<T>>{
                         vec_holder: SharedPtr<T::V>,
                     }
@@ -314,11 +312,12 @@ void printcpp(Is... args) {
                     .expect("Writing went wrong!");
                 fs::write(out_path.join("proto_vec.cpp"), "#include \"proto_vec.hpp\"")
                     .expect("Writing went wrong!");
-                cxx_build::bridge(rust_source_file)
+                cxx_build::bridge(rust_source_file.clone())
                     .file(out_path.join("proto_vec.cpp"))
                     .include(&out_path)
                     .include(out_path.join("../cxxbridge/rust"))
                     .compile("proto_veco");
+                println!("cargo:rerun-if-changed={}", rust_source_file.display());
             }
         }
     }

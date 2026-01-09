@@ -7,6 +7,6 @@ fn main() {
     let a = v.at(2);
     println!("Value is : {:?}", a);
 
-    ffi::printcpp_1(1);
-    ffi::printcpp_2(4, 8);
+    // ffi::printcpp_1(1);
+    // ffi::printcpp_2(4, 8);
 }
