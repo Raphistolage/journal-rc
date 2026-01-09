@@ -66,32 +66,33 @@ impl syn::parse::Parse for ViewDataType {
     }
 }
 
+trait ToCppTypeStr {
+    fn cpp_type(&self) -> &'static str;
+}
+
+impl ToCppTypeStr for ViewDataType {
+    fn cpp_type(&self) -> &'static str {
+        match self {
+            ViewDataType::F64 => "double",
+            ViewDataType::F32 => "float",
+            ViewDataType::I64 => "std::int64_t",
+            ViewDataType::I32 => "std::int32_t",
+            ViewDataType::I16 => "std::int16_t",
+            ViewDataType::I8  => "std::int8_t",
+            ViewDataType::U64 => "std::uint64_t",
+            ViewDataType::U32 => "std::uint32_t",
+            ViewDataType::U16 => "std::uint16_t",
+            ViewDataType::U8  => "std::uint8_t",
+        }
+    }
+}
+
 fn parse_into_vec_datatypes(input: ParseStream) -> syn::Result<Vec<ViewDataType>> {
     let content;
     bracketed!(content in input);
     let punct_data_types = Punctuated::<ViewDataType, Token![,]>::parse_terminated(&content)?;
     Ok(punct_data_types.into_iter().collect())
 }
-
-// #[derive(Debug)]
-// enum Layout {
-//     LayoutRight,
-//     LayoutLeft,
-// }
-
-// impl syn::parse::Parse for Layout {
-//     fn parse(input: ParseStream) -> syn::Result<Self> {
-//         let ident: Ident = input.parse()?;
-//         match ident.to_string().as_str() {
-//             "LayoutRight" => Ok(Layout::LayoutRight),
-//             "LayoutLeft" => Ok(Layout::LayoutLeft),
-//             _ => Err(syn::Error::new_spanned(
-//                 ident,
-//                 "expected `LayoutRight` or `LayoutLeft`",
-//             )),
-//         }
-//     }
-// }
 
 fn parse_into_vec_dimensions(input: ParseStream) -> syn::Result<Vec<u8>> {
     let content;
@@ -105,7 +106,7 @@ fn parse_into_vec_dimensions(input: ParseStream) -> syn::Result<Vec<u8>> {
             return Err(syn::Error::new_spanned(
                 punct_dimensions,
                 "Number of dimensions must be between 1 and 8",
-            ))
+            ));
         }
         dims.push(val);
     }
@@ -124,7 +125,10 @@ impl syn::parse::Parse for MakeVecInput {
         input.parse::<syn::Token![,]>()?;
         let dimensions = parse_into_vec_dimensions(&input)?;
 
-        Ok(Self { data_types, dimensions })
+        Ok(Self {
+            data_types,
+            dimensions,
+        })
     }
 }
 
@@ -132,11 +136,6 @@ pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
     let content = fs::read_to_string(rust_source_file).expect("unable to read file");
     let ast = syn::parse_file(&content).expect("unable to parse file");
     let out_dir = std::env::var("OUT_DIR").expect("OUT_DIR not set");
-
-    if !std::fs::exists(format!("{}/../../../../krokkosbridge", out_dir)).unwrap() {
-        println!("cargo:warning=Creating krokkosbridge folder");
-        std::fs::create_dir(format!("{}/../../../../krokkosbridge", out_dir)).unwrap();
-    }
 
     for item in ast.items {
         if let Item::Macro(i_macro) = item {
@@ -147,50 +146,99 @@ pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
 
                 let mut func_decls = vec![];
                 let mut dttype_decls = vec![];
+                let mut struct_decls = vec![];
+                let mut ivec_types_decls = vec![];
+
+                let mut to_write_cpp = "
+#pragma once
+#include <vector>
+#include <memory>
+#include <iostream>
+#include \"cxx.h\"
+
+namespace proto_vec_bridge {
+".to_string();
 
                 for i_type in input.data_types.iter() {
-                    let ty_str = i_type.to_string();
-                    let ty: Type = syn::parse_str(&ty_str).unwrap();
-                    let fn_name_get = format_ident!("get_{}", ty_str).to_string();
-                    let fn_name_get_ty: Type = syn::parse_str(&fn_name_get).unwrap();
-                    let fn_name_create = format_ident!("create_{}", ty_str).to_string();
-                    let fn_name_create_ty: Type = syn::parse_str(&fn_name_create).unwrap();
-                    // let fn_name_push = format_ident!("push_{}", ty_str).to_string();
+                    let rust_type_str = i_type.to_string();
+                    let ty: Type = syn::parse_str(&rust_type_str).unwrap();
+
+                    let fn_at_ident = format_ident!("at_{}", rust_type_str);
+                    let fn_at_str = fn_at_ident.to_string();
+
+                    let fn_create_ident = format_ident!("create_vec_{}", rust_type_str);
+                    let fn_create_str = fn_create_ident.to_string();
+
+                    let struct_ident = format_ident!("OpaqueVector_{}", rust_type_str);
+                    let vec_holder_ident = format_ident!("VecHolder_{}", rust_type_str);
+
                     func_decls.push(quote! {
                         #[allow(dead_code)]
-                        #[rust_name = #fn_name_get]
-                        fn get(v: &IVec, i: i32) -> #ty;
+                        fn #fn_at_ident(v: SharedPtr<#vec_holder_ident>, i: i32) -> #ty;
                         #[allow(dead_code)]
-                        #[rust_name = #fn_name_create]
-                        fn create_vec(s: &[#ty]) -> SharedPtr<IVec>;
-                        // #[rust_name = #fn_name_push]
-                        // fn push(v: &IVec, k: #ty);
+                        fn #fn_create_ident(s: &[#ty]) -> SharedPtr<#vec_holder_ident>;
                     });
 
                     dttype_decls.push(quote! {
                         impl DTType<#ty> for #ty {
+                            type V = #vec_holder_ident;
                             fn from_slice(
                                 s: &[#ty],
-                            ) -> OpaqueVector {
-                                OpaqueVector{
-                                    vec: proto_vec_bridge_ffi::#fn_name_create_ty(s),
-                                }
-
+                            ) -> SharedPtr<Self::V> {
+                                proto_vec_bridge_ffi::#fn_create_ident(s)
                             }
 
-                            fn at(v: &OpaqueVector, i: i32) -> #ty {
-                                proto_vec_bridge_ffi::#fn_name_get_ty(&v.vec, i)
+                            fn at(v: SharedPtr<Self::V>, i: i32) -> #ty {
+                                proto_vec_bridge_ffi::#fn_at_ident(v, i)
                             }
                         }
                     });
 
+                    struct_decls.push(quote! {
+                        #[allow(dead_code)]
+                        pub struct #struct_ident {
+                            vec: SharedPtr<#vec_holder_ident>,
+                        }
+                    });
+
+                    ivec_types_decls.push(quote! {
+                        type #vec_holder_ident;
+                    });
+
+                    let cpp_type = i_type.cpp_type();
+                    to_write_cpp.push_str(&format!("
+struct VecHolder_{} {{
+    std::vector<{}> vec;
+
+    VecHolder_{}(std::vector<{}>& vec) : vec(vec) {{}}
+
+    std::vector<{}> get_vec() const {{
+        return vec;
+    }}
+}};
+
+{} at_{}(std::shared_ptr<VecHolder_{}> vec_holder, int i) {{
+    auto v = vec_holder->get_vec();
+    return v.at(i);
+}}
+
+std::shared_ptr<VecHolder_{}> create_vec_{}(rust::Slice<const {}> s) {{
+    std::vector<{}> v(s.begin(), s.end());
+    auto vec = std::make_shared<VecHolder_{}>(v);
+    return vec;
+}}
+                    ", 
+                        rust_type_str, cpp_type, rust_type_str, cpp_type, cpp_type, 
+                        cpp_type, rust_type_str, rust_type_str,
+                        rust_type_str, rust_type_str, cpp_type, cpp_type, rust_type_str
+                    ));
                 }
 
                 for d in input.dimensions.into_iter() {
                     let fn_name_print = format_ident!("printcpp_{}", d).to_string();
 
                     let idents: Vec<Ident> = (1..=d).map(|i| format_ident!("i{}", i)).collect();
-                    
+
                     func_decls.push(quote! {
                         #[allow(dead_code)]
                         #[rust_name = #fn_name_print]
@@ -198,100 +246,69 @@ pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
                     });
                 }
 
+                to_write_cpp.push_str("
+template <typename... Is>
+void printcpp(Is... args) {
+    ((std::cout << std::forward<Is>(args) << \'\\n\'), ...);
+}
+
+                ");
+
                 let tokens = quote! {
                     #[cxx::bridge(namespace = "proto_vec_bridge")]
                     mod proto_vec_bridge_ffi {
-                        pub struct OpaqueVector {
-                            vec: SharedPtr<IVec>,
-                        }
+                        
+                        #(#struct_decls)*
 
                         unsafe extern "C++" {
                             include!("proto_vec.hpp");
-                            type IVec;
+                            #(#ivec_types_decls)*
 
                             #(#func_decls)*
                         }
                     }
                     pub use proto_vec_bridge_ffi::*;
                     use std::fmt::Debug;
+                    use cxx::SharedPtr;
+                    use cxx::memory::SharedPtrTarget;
 
                     pub trait DTType<T>: Debug + Default + Clone + Copy {
+                        type V: SharedPtrTarget;
                         fn from_slice(
                             s: &[T],
-                        ) -> OpaqueVector;
+                        ) -> SharedPtr<Self::V>;
 
-                        fn at(v: &OpaqueVector, i: i32) -> T;
+                        fn at(v: SharedPtr<Self::V>, i: i32) -> T;
                     }
 
                     #(#dttype_decls)*
-
+                    
                     pub struct ProtoVector <T: DTType<T>>{
-                        opaque_vector: OpaqueVector,
-                        data_type: std::marker::PhantomData<T>,
+                        vec_holder: SharedPtr<T::V>,
                     }
 
-                    impl<T: DTType<T>> ProtoVector <T> {
+                    impl <T: DTType<T>> ProtoVector <T> {
                         pub fn from_slice(s: &[T]) -> Self {
-                            Self {
-                                opaque_vector: T::from_slice(s),
-                                data_type: std::marker::PhantomData,
+                            Self{
+                                vec_holder: T::from_slice(s),
                             }
                         }
 
                         pub fn at(&self, i: i32) -> T {
-                            T::at(&self.opaque_vector, i)
+                            T::at(self.vec_holder.clone(), i)
                         }
                     }
                 };
                 let to_write_rust = tokens.to_string();
+                if !std::fs::exists(format!("{}/../../../../krokkosbridge", out_dir)).unwrap() {
+                    println!("cargo:warning=Creating krokkosbridge folder");
+                    std::fs::create_dir(format!("{}/../../../../krokkosbridge", out_dir)).unwrap();
+                }
                 let rust_source_file =
                     std::path::Path::new(&out_dir).join("../../../../krokkosbridge/proto_vec.rs");
                 fs::write(rust_source_file.clone(), to_write_rust).expect("Writing went wrong!");
 
-                let to_write_cpp = "
-#pragma once
-#include <vector>
-#include <memory>
-#include \"cxx.h\"
-#include <iostream>
-
-namespace proto_vec_bridge {
-    struct IVec {
-        virtual ~IVec() = default;
-        virtual const void* get_vec() const = 0;
-    };
-
-    template <typename T>
-    struct VecHolder : IVec {
-        std::vector<T> vec;
-
-        VecHolder(std::vector<T>& vec) : vec(vec) {}
-
-        const void* get_vec() const override {
-            return &vec;
-        }
-    };
-
-
-    template <typename T>
-    T get(const IVec& ivec, int i) {
-        auto v = static_cast<const std::vector<T>*>(ivec.get_vec());
-        return v->at(i);
-    }
-
-    template <typename T>
-    std::shared_ptr<IVec> create_vec(rust::Slice<const T> s) {
-        std::vector<T> v(s.begin(), s.end());
-        auto vec = std::make_shared<VecHolder<T>>(v);
-        return vec;
-    }
-
-    template <typename... Is>
-    void printcpp(Is... args) {
-        ((std::cout << std::forward<Is>(args) << \'\\n\'), ...);
-    }
-}
-                ";
+                to_write_cpp.push('}');
                 let out_path = std::path::Path::new(&out_dir).join("../../../../krokkosbridge/");
                 fs::write(out_path.join("proto_vec.hpp"), to_write_cpp)
                     .expect("Writing went wrong!");

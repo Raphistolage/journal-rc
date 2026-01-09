@@ -8,3 +8,4 @@ test_rust_view
 cmake_rust/build
 Cargo.lock
 build/
+shared_array/
