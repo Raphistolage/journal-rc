@@ -1,0 +1,12 @@
+[package]
+name = "krokkos_macro"
+version = "0.1.0"
+edition = "2024"
+description = "A procedural macro that allows to generate the Views for Krokkos, as well as their implementation, both on Rust and C++ side."
+
+[lib]
+proc-macro = true
+
+[dependencies]
+quote = "1"
+syn = { version = "2", features = ["full","extra-traits"] }
