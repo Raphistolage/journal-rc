@@ -1,0 +1,20 @@
+[package]
+name = "krokkos_build"
+version = "0.1.0"
+edition = "2024"
+description = "A build script to be called, specifying the path to the rust_source_file, and optionaly the cpp_source_file, on which the generator will be applied"
+
+[dependencies]
+quote = "1"
+syn = { version = "2", features = ["full", "extra-traits", "printing"] }
+krokkos_gen = { path = "../gen/." }
+cc = "1.0"
+proc-macro2 = "1.0.103"
+cxx-build = "1.0"
+cmake = "0.1.31"
+
+[features]
+default = ["omp"]
+omp = []
+cuda = []
+
