@@ -232,8 +232,9 @@ pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
 
                 let mut func_decls = vec![];
                 let mut dttype_decls = vec![];
-                let mut struct_decls = vec![];
-                let mut ivec_types_decls = vec![];
+                let mut enums_decls = vec![];
+                let mut iview_types_decls = vec![];
+                let mut views_impls = vec![];
 
                 let mut to_write_cpp = "
 #pragma once
@@ -242,55 +243,78 @@ pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
 #include <iostream>
 #include \"cxx.h\"
 
-namespace proto_vec_bridge {
-".to_string();
+namespace krokkos_bridge {
+"
+                .to_string();
 
-                for i_type in input.data_types.iter() {
+                for i_type in data_types.iter() {
+                    for dim in dimensions.iter() {
+                        for layout in layouts.iter() {
                     let rust_type_str = i_type.to_string();
                     let ty: Type = syn::parse_str(&rust_type_str).unwrap();
 
-                    let fn_at_ident = format_ident!("at_{}", rust_type_str);
+                            let dim_str = dim.to_string();
+                            let dim_ty: Type = syn::parse_str(&dim_str).unwrap();
 
-                    let fn_create_ident = format_ident!("create_vec_{}", rust_type_str);
+                            let layout_str = layout.to_string();
+                            let layout_ty: Type = syn::parse_str(&layout_str).unwrap();
 
-                    let struct_ident = format_ident!("OpaqueVector_{}", rust_type_str);
-                    let vec_holder_ident = format_ident!("VecHolder_{}", rust_type_str);
+                            let fn_create_ident = format_ident!("create_view_{}_{}_{}", rust_type_str, dim_str, layout_str);
+                            let fn_at_ident = format_ident!("at_{}_{}_{}", rust_type_str, dim_str, layout_str);
+
+                            let view_holder_ident = format_ident!("ViewHolder_{}_{}_{}", rust_type_str, dim_str, layout_str);
 
                     func_decls.push(quote! {
                         #[allow(dead_code)]
-                        fn #fn_at_ident(v: SharedPtr<#vec_holder_ident>, i: i32) -> #ty;
-                        #[allow(dead_code)]
-                        fn #fn_create_ident(s: &[#ty]) -> SharedPtr<#vec_holder_ident>;
+                                fn #fn_create_ident(s: &[#ty]) -> SharedPtr<#view_holder_ident>;
                     });
 
                     dttype_decls.push(quote! {
                         impl DTType<#ty> for #ty {
-                            type V = #vec_holder_ident;
-                            fn from_slice(
+                                    type V = #view_holder_ident;
+                                    fn from_shape(
                                 s: &[#ty],
                             ) -> SharedPtr<Self::V> {
-                                proto_vec_bridge_ffi::#fn_create_ident(s)
+                                        krokkos_bridge_bridge_ffi::#fn_create_ident(s)
                             }
 
-                            fn at(v: SharedPtr<Self::V>, i: i32) -> #ty {
-                                proto_vec_bridge_ffi::#fn_at_ident(v, i)
+                                    pub fn from_shape<U: Into<D>>(shapes: U, v: &'a [T]) -> Self {
+                                        let mem_space = M::default();
+                                        let layout = L::default();
+                                        let shapes = shapes.into();
+                                        Self{
+                                            opaque_view: T::create_opaque_view(shapes.into(), mem_space.to_space(), layout.to_layout(), v),
+                                            dim: PhantomData,
+                                            mem_space: PhantomData,
+                                            layout: PhantomData,
+                                            data_type: PhantomData,
+                                        }
                             }
                         }
                     });
 
-                    struct_decls.push(quote! {
-                        #[allow(dead_code)]
-                        pub struct #struct_ident {
-                            vec: SharedPtr<#vec_holder_ident>,
-                        }
-                    });
+                            iview_types_decls.push(quote! {
+                                type #view_holder_ident;
+                            });
 
-                    ivec_types_decls.push(quote! {
-                        type #vec_holder_ident;
+                            enums_decls.push(quote! {
+                                #view_holder_ident(#view_holder_ident)
+                            });
+
+                            views_impls.push(quote! {
+                                impl View<#ty, #dim_ty, #layout_ty> {
+                                    pub fn from_shape<U: Into<#dim_ty>>(shape: &U, data: &[#ty]) -> Self {
+                                        Self{
+                                            view_hold: ViewHolder::#view_holder_ident(#fn_create_ident(shape, data)),
+                                            _marker: PhantomData,
+                                        }
+                                    }
+                                }
                     });
 
                     let cpp_type = i_type.cpp_type();
-                    to_write_cpp.push_str(&format!("
+                            to_write_cpp.push_str(&format!( 
+"
 struct VecHolder_{} {{
     std::vector<{}> vec;
 
@@ -312,46 +336,61 @@ std::shared_ptr<VecHolder_{}> create_vec_{}(rust::Slice<const {}> s) {{
     return vec;
 }}
                     ", 
-                        rust_type_str, cpp_type, rust_type_str, cpp_type, cpp_type, 
-                        cpp_type, rust_type_str, rust_type_str,
-                        rust_type_str, rust_type_str, cpp_type, cpp_type, rust_type_str
+                                rust_type_str,
+                                cpp_type,
+                                rust_type_str,
+                                cpp_type,
+                                cpp_type,
+                                cpp_type,
+                                rust_type_str,
+                                rust_type_str,
+                                rust_type_str,
+                                rust_type_str,
+                                cpp_type,
+                                cpp_type,
+                                rust_type_str
                     ));
                 }
-
-                for d in input.dimensions.into_iter() {
-                    let fn_name_print = format_ident!("printcpp_{}", d).to_string();
-
-                    let idents: Vec<Ident> = (1..=d).map(|i| format_ident!("i{}", i)).collect();
-
-                    func_decls.push(quote! {
-                        #[allow(dead_code)]
-                        #[rust_name = #fn_name_print]
-                        fn printcpp(#(#idents : i32),*);
-                    });
+                    }
                 }
 
-                to_write_cpp.push_str("
-template <typename... Is>
-void printcpp(Is... args) {
-    ((std::cout << std::forward<Is>(args) << \'\\n\'), ...);
-}
+                // for d in dimensions.into_iter() {
+                //     let fn_name_print = format_ident!("printcpp_{}", d).to_string();
 
-                ");
+                //     let idents: Vec<Ident> = (1..=d).map(|i| format_ident!("i{}", i)).collect();
+
+                //     func_decls.push(quote! {
+                //         #[allow(dead_code)]
+                //         #[rust_name = #fn_name_print]
+                //         fn printcpp(#(#idents : i32),*);
+                //     });
+                // }
+
+                //                 to_write_cpp.push_str(
+                //                     "
+                // template <typename... Is>
+                // void printcpp(Is... args) {
+                //     ((std::cout << std::forward<Is>(args) << \'\\n\'), ...);
+                // }
+
+                //                 ",
+                //                 );
 
                 let tokens = quote! {
-                    #[cxx::bridge(namespace = "proto_vec_bridge")]
-                    mod proto_vec_bridge_ffi {
                         
-                        #(#struct_decls)*
+                    #[cxx::bridge(namespace = "krokkos_bridge_ffi")]
+                    mod krokkos_bridge_bridge_ffi {
 
                         unsafe extern "C++" {
-                            include!("proto_vec.hpp");
-                            #(#ivec_types_decls)*
+                            include!("rust_view.hpp");
+                            include!("krokkos_bridge.hpp");
+                            #(#iview_types_decls)*
 
                             #(#func_decls)*
                         }
                     }
-                    use proto_vec_bridge_ffi::*;
+
+                    use krokkos_bridge_ffi::*;
                     use std::fmt::Debug;
                     use cxx::SharedPtr;
                     use cxx::memory::SharedPtrTarget;
