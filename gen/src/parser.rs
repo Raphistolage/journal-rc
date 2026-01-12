@@ -1,7 +1,7 @@
 use syn::{LitInt, Path, Token, bracketed, parse::ParseStream, punctuated::Punctuated};
 
 #[derive(Debug)]
-enum ViewDataType {
+pub enum ViewDataType {
     F64,
     F32,
     I64,
@@ -61,7 +61,7 @@ impl syn::parse::Parse for ViewDataType {
     }
 }
 
-trait ToCppTypeStr {
+pub trait ToCppTypeStr {
     fn cpp_type(&self) -> &str;
 }
 
@@ -83,7 +83,7 @@ impl ToCppTypeStr for ViewDataType {
 }
 
 #[derive(Debug)]
-enum Dimension {
+pub enum Dimension {
     Dim1,
     Dim2,
     Dim3,
@@ -128,7 +128,7 @@ impl ToString for Dimension {
 }
 
 #[derive(Debug)]
-enum Layout {
+pub enum Layout {
     LayoutRight,
     LayoutLeft,
 }
@@ -164,14 +164,14 @@ impl ToString for Layout {
     }
 }
 
-fn parse_into_vec_datatypes(input: ParseStream) -> syn::Result<Vec<ViewDataType>> {
+pub fn parse_into_vec_datatypes(input: ParseStream) -> syn::Result<Vec<ViewDataType>> {
     let content;
     bracketed!(content in input);
     let punct_data_types = Punctuated::<ViewDataType, Token![,]>::parse_terminated(&content)?;
     Ok(punct_data_types.into_iter().collect())
 }
 
-fn parse_into_vec_dimensions(input: ParseStream) -> syn::Result<Vec<Dimension>> {
+pub fn parse_into_vec_dimensions(input: ParseStream) -> syn::Result<Vec<Dimension>> {
     let content;
     bracketed!(content in input);
     let punct_dimensions = Punctuated::<Dimension, Token![,]>::parse_terminated(&content)?;
@@ -179,7 +179,7 @@ fn parse_into_vec_dimensions(input: ParseStream) -> syn::Result<Vec<Dimension>> 
     Ok(punct_dimensions.into_iter().collect())
 }
 
-fn parse_into_vec_layouts(input: ParseStream) -> syn::Result<Vec<Layout>> {
+pub fn parse_into_vec_layouts(input: ParseStream) -> syn::Result<Vec<Layout>> {
     let content;
     bracketed!(content in input);
     let punct_layouts = Punctuated::<Layout, Token![,]>::parse_terminated(&content)?;
@@ -187,10 +187,10 @@ fn parse_into_vec_layouts(input: ParseStream) -> syn::Result<Vec<Layout>> {
 }
 
 #[derive(Debug, Default)]
-struct MakeVecInput {
-    data_types: Vec<ViewDataType>,
-    dimensions: Vec<Dimension>,
-    layouts: Vec<Layout>,
+pub struct MakeVecInput {
+    pub data_types: Vec<ViewDataType>,
+    pub dimensions: Vec<Dimension>,
+    pub layouts: Vec<Layout>,
 }
 
 impl syn::parse::Parse for MakeVecInput {
