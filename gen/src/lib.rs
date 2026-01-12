@@ -303,20 +303,20 @@ void printcpp(Is... args) {
                     std::fs::create_dir(format!("{}/../../../../krokkosbridge", out_dir)).unwrap();
                 }
                 let rust_source_file =
-                    std::path::Path::new(&out_dir).join("../../../../krokkosbridge/proto_vec.rs");
+                    std::path::Path::new(&out_dir).join("../../../../krokkosbridge/krokkos_bridge.rs");
                 fs::write(rust_source_file.clone(), to_write_rust).expect("Writing went wrong!");
 
                 to_write_cpp.push('}');
                 let out_path = std::path::Path::new(&out_dir).join("../../../../krokkosbridge/");
-                fs::write(out_path.join("proto_vec.hpp"), to_write_cpp)
+                fs::write(out_path.join("krokkos_bridge.hpp"), to_write_cpp)
                     .expect("Writing went wrong!");
-                fs::write(out_path.join("proto_vec.cpp"), "#include \"proto_vec.hpp\"")
+                fs::write(out_path.join("krokkos_bridge.cpp"), "#include \"krokkos_bridge.hpp\"")
                     .expect("Writing went wrong!");
                 cxx_build::bridge(rust_source_file.clone())
-                    .file(out_path.join("proto_vec.cpp"))
+                    .file(out_path.join("krokkos_bridge.cpp"))
                     .include(&out_path)
                     .include(out_path.join("../cxxbridge/rust"))
-                    .compile("proto_veco");
+                    .compile("krokkos_bridge");
                 println!("cargo:rerun-if-changed={}", rust_source_file.display());
             }
         }
