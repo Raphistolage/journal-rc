@@ -12,3 +12,4 @@ proc-macro2 = "1.0.105"
 quote = "1"
 syn = { version = "2", features = ["full","extra-traits"] }
 cxx-build = "1.0"
+cxx = "1.0"

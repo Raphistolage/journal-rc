@@ -1,0 +1,12 @@
+[package]
+name = "test_macros"
+version = "0.1.0"
+edition = "2024"
+
+
+[dependencies]
+cxx = "1.0" 
+krokkos_macro = { path = "../macro" }
+
+[build-dependencies]
+krokkos_gen = { path = "../gen" }
