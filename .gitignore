@@ -1,2 +1,11 @@
 target/
 Cargo.lock
+_deps
+.cmake
+cmake_packages
+CMakeFiles
+build.ninja
+cmake_install.cmake
+CMakeCache.txt
+git-state.txt
+settings.json
