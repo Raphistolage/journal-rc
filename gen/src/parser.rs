@@ -1,6 +1,12 @@
-use syn::{LitInt, Path, Token, bracketed, parse::ParseStream, punctuated::Punctuated};
+use syn::{
+    LitInt, Path, Token, bracketed, parenthesized, parse::ParseStream, punctuated::Punctuated,
+};
 
-#[derive(Debug)]
+use std::fs;
+
+use quote::{format_ident, quote};
+
+#[derive(Debug, PartialEq)]
 pub enum ViewDataType {
     F64,
     F32,
@@ -62,27 +68,27 @@ impl syn::parse::Parse for ViewDataType {
 }
 
 pub trait ToCppTypeStr {
-    fn cpp_type(&self) -> &str;
+    fn cpp_type(&self) -> String;
 }
 
 impl ToCppTypeStr for ViewDataType {
-    fn cpp_type(&self) -> &str {
+    fn cpp_type(&self) -> String {
         match self {
-            ViewDataType::F64 => "double",
-            ViewDataType::F32 => "float",
-            ViewDataType::I64 => "std::int64_t",
-            ViewDataType::I32 => "std::int32_t",
-            ViewDataType::I16 => "std::int16_t",
-            ViewDataType::I8 => "std::int8_t",
-            ViewDataType::U64 => "std::uint64_t",
-            ViewDataType::U32 => "std::uint32_t",
-            ViewDataType::U16 => "std::uint16_t",
-            ViewDataType::U8 => "std::uint8_t",
+            ViewDataType::F64 => "double".to_string(),
+            ViewDataType::F32 => "float".to_string(),
+            ViewDataType::I64 => "std::int64_t".to_string(),
+            ViewDataType::I32 => "std::int32_t".to_string(),
+            ViewDataType::I16 => "std::int16_t".to_string(),
+            ViewDataType::I8 => "std::int8_t".to_string(),
+            ViewDataType::U64 => "std::uint64_t".to_string(),
+            ViewDataType::U32 => "std::uint32_t".to_string(),
+            ViewDataType::U16 => "std::uint16_t".to_string(),
+            ViewDataType::U8 => "std::uint8_t".to_string(),
         }
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Dimension {
     Dim1,
     Dim2,
@@ -107,7 +113,7 @@ impl syn::parse::Parse for Dimension {
             7 => Ok(Dimension::Dim7),
             _ => Err(syn::Error::new_spanned(
                 lit,
-                "Number of dimensions must be between 1 and 8",
+                "Number of dimension must be between 1 and 8",
             )),
         }
     }
@@ -127,7 +133,21 @@ impl ToString for Dimension {
     }
 }
 
-#[derive(Debug)]
+impl Into<usize> for &Dimension {
+    fn into(self) -> usize {
+        match self {
+            Dimension::Dim1 => 1,
+            Dimension::Dim2 => 2,
+            Dimension::Dim3 => 3,
+            Dimension::Dim4 => 4,
+            Dimension::Dim5 => 5,
+            Dimension::Dim6 => 6,
+            Dimension::Dim7 => 7,
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
 pub enum Layout {
     LayoutRight,
     LayoutLeft,
@@ -167,44 +187,46 @@ impl ToString for Layout {
 pub fn parse_into_vec_datatypes(input: ParseStream) -> syn::Result<Vec<ViewDataType>> {
     let content;
     bracketed!(content in input);
-    let punct_data_types = Punctuated::<ViewDataType, Token![,]>::parse_terminated(&content)?;
-    Ok(punct_data_types.into_iter().collect())
+    let punct_data_type = Punctuated::<ViewDataType, Token![,]>::parse_terminated(&content)?;
+    Ok(punct_data_type.into_iter().collect())
 }
 
-pub fn parse_into_vec_dimensions(input: ParseStream) -> syn::Result<Vec<Dimension>> {
+pub fn parse_into_vec_dimension(input: ParseStream) -> syn::Result<Vec<Dimension>> {
     let content;
     bracketed!(content in input);
-    let punct_dimensions = Punctuated::<Dimension, Token![,]>::parse_terminated(&content)?;
+    let punct_dimension = Punctuated::<Dimension, Token![,]>::parse_terminated(&content)?;
 
-    Ok(punct_dimensions.into_iter().collect())
+    Ok(punct_dimension.into_iter().collect())
 }
 
-pub fn parse_into_vec_layouts(input: ParseStream) -> syn::Result<Vec<Layout>> {
+pub fn parse_into_vec_layout(input: ParseStream) -> syn::Result<Vec<Layout>> {
     let content;
     bracketed!(content in input);
-    let punct_layouts = Punctuated::<Layout, Token![,]>::parse_terminated(&content)?;
-    Ok(punct_layouts.into_iter().collect())
+    let punct_layout = Punctuated::<Layout, Token![,]>::parse_terminated(&content)?;
+    Ok(punct_layout.into_iter().collect())
 }
 
-#[derive(Debug, Default)]
-pub struct MakeVecInput {
-    pub data_types: Vec<ViewDataType>,
-    pub dimensions: Vec<Dimension>,
-    pub layouts: Vec<Layout>,
+#[derive(Debug)]
+pub struct ViewConfig {
+    pub data_type: ViewDataType,
+    pub dimension: Dimension,
+    pub layout: Layout,
 }
 
-impl syn::parse::Parse for MakeVecInput {
+impl syn::parse::Parse for ViewConfig {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
-        let data_types = parse_into_vec_datatypes(&input)?;
-        input.parse::<Token![,]>()?;
-        let dimensions = parse_into_vec_dimensions(&input)?;
-        input.parse::<Token![,]>()?;
-        let layouts = parse_into_vec_layouts(&input)?;
+        let content;
+        parenthesized!(content in input);
+        let data_type: ViewDataType = content.parse()?;
+        content.parse::<Token![,]>()?;
+        let dimension: Dimension = content.parse()?;
+        content.parse::<Token![,]>()?;
+        let layout: Layout = content.parse()?;
 
         Ok(Self {
-            data_types,
-            dimensions,
-            layouts,
+            data_type,
+            dimension,
+            layout,
         })
     }
 }
