@@ -1,3 +1,3 @@
 fn main() {
-    krokkos_gen::bridge("src/ffi.rs");
+    krokkos_build::build("src/ffi.rs");
 }
