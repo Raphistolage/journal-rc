@@ -1,10 +1,4 @@
-use syn::{
-    LitInt, Path, Token, bracketed, parenthesized, parse::ParseStream, punctuated::Punctuated,
-};
-
-use std::fs;
-
-use quote::{format_ident, quote};
+use syn::{LitInt, Path, Token, parenthesized, parse::ParseStream};
 
 #[derive(Debug, PartialEq)]
 pub enum ViewDataType {
@@ -133,17 +127,31 @@ impl ToString for Dimension {
     }
 }
 
-impl Into<usize> for &Dimension {
-    fn into(self) -> usize {
+impl Into<u8> for &Dimension {
+    fn into(self) -> u8 {
         match self {
             Dimension::Dim1 => 1,
+
             Dimension::Dim2 => 2,
+
             Dimension::Dim3 => 3,
+
             Dimension::Dim4 => 4,
+
             Dimension::Dim5 => 5,
+
             Dimension::Dim6 => 6,
+
             Dimension::Dim7 => 7,
         }
+    }
+}
+
+impl Into<usize> for &Dimension {
+    fn into(self) -> usize {
+        let b8: u8 = self.into();
+
+        b8 as usize
     }
 }
 
@@ -178,32 +186,10 @@ impl syn::parse::Parse for Layout {
 impl ToString for Layout {
     fn to_string(&self) -> String {
         match self {
-            Layout::LayoutLeft => "LF".to_string(),
-            Layout::LayoutRight => "LR".to_string(),
+            Layout::LayoutLeft => "LayoutLeft".to_string(),
+            Layout::LayoutRight => "LayoutRight".to_string(),
         }
     }
-}
-
-pub fn parse_into_vec_datatypes(input: ParseStream) -> syn::Result<Vec<ViewDataType>> {
-    let content;
-    bracketed!(content in input);
-    let punct_data_type = Punctuated::<ViewDataType, Token![,]>::parse_terminated(&content)?;
-    Ok(punct_data_type.into_iter().collect())
-}
-
-pub fn parse_into_vec_dimension(input: ParseStream) -> syn::Result<Vec<Dimension>> {
-    let content;
-    bracketed!(content in input);
-    let punct_dimension = Punctuated::<Dimension, Token![,]>::parse_terminated(&content)?;
-
-    Ok(punct_dimension.into_iter().collect())
-}
-
-pub fn parse_into_vec_layout(input: ParseStream) -> syn::Result<Vec<Layout>> {
-    let content;
-    bracketed!(content in input);
-    let punct_layout = Punctuated::<Layout, Token![,]>::parse_terminated(&content)?;
-    Ok(punct_layout.into_iter().collect())
 }
 
 #[derive(Debug)]

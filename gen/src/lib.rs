@@ -3,7 +3,7 @@ use parser::*;
 
 use quote::{format_ident, quote};
 use std::fs;
-use syn::{Expr, Ident, Item, Token, Type, parse_quote, punctuated::Punctuated};
+use syn::{Item, Token, Type, punctuated::Punctuated};
 
 pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
     let rust_source_path = rust_source_file.as_ref();
@@ -62,7 +62,9 @@ inline void kokkos_finalize() {{
 
                     let dim_str = dimension.to_string();
                     let dim_ty: Type = syn::parse_str(&dim_str).unwrap();
-                    let dim_val: usize = (&dimension).into();
+                    let dim_val_usize: usize = (&dimension).into();
+                    let dim_val_u8: u8 = (&dimension).into();
+                    let kokkos_dim_stars: String = '*'.to_string().repeat(dim_val_usize);
 
                     let layout_str = layout.to_string();
                     let layout_ty: Type = syn::parse_str(&layout_str).unwrap();
@@ -78,15 +80,15 @@ inline void kokkos_finalize() {{
                         dims_impls.push(quote! {
                             #[derive(Debug, Clone, Default)]
                             pub struct #dim_ty {
-                                shape: [usize; #dim_val],
+                                shape: [usize; #dim_val_usize],
                             }
 
                             impl #dim_ty {
-                                pub fn new(shape: &[usize; #dim_val]) -> Self {
+                                pub fn new(shape: &[usize; #dim_val_usize]) -> Self {
                                     #dim_ty {shape: *shape}
                                 }
 
-                                pub fn shapes(&self) -> &[usize; #dim_val] {
+                                pub fn shapes(&self) -> &[usize; #dim_val_usize] {
                                     &self.shape
                                 }
                             }
@@ -97,17 +99,17 @@ inline void kokkos_finalize() {{
                                 }
                             }
 
-                            impl From<&[usize; #dim_val]> for #dim_ty {
-                                fn from(value: &[usize; #dim_val]) -> Self {
+                            impl From<&[usize; #dim_val_usize]> for #dim_ty {
+                                fn from(value: &[usize; #dim_val_usize]) -> Self {
                                     #dim_ty {shape: *value}
                                 }
                             }
 
                             impl Dimension for #dim_ty {
-                                const NDIM: u8 = #dim_val;
+                                const NDIM: u8 = #dim_val_u8;
 
                                 fn ndim(&self) -> u8 {
-                                    #dim_val
+                                    #dim_val_u8
                                 }
 
                                 fn slice(&self) -> &[usize] {
@@ -124,7 +126,7 @@ inline void kokkos_finalize() {{
                             #[derive(Default, Debug)]
                             pub struct #layout_ty();
 
-                            impl Layout for #layout_ty {
+                            impl LayoutType for #layout_ty {
                                 fn to_layout(&self) -> Layout {
                                     Layout::#layout_ty
                                 }
@@ -134,37 +136,81 @@ inline void kokkos_finalize() {{
                         implemented_layout.push(layout);
                     }
 
-                    let fn_create_ident =
-                        format_ident!("create_view_{}_{}_{}", rust_type_str, dim_str, layout_str);
-                    let fn_at_ident =
-                        format_ident!("at_{}_{}_{}", rust_type_str, dim_str, layout_str);
+                    let extension = format!("{}_{}_{}", rust_type_str, dim_str, layout_str);
 
-                    let view_holder_ident =
-                        format_ident!("ViewHolder_{}_{}_{}", rust_type_str, dim_str, layout_str);
+                    let fn_create_ident = format_ident!("create_view_{}", extension);
+
+                    let view_holder_extension_ident =
+                        format_ident!("{}{}{}", rust_type_str.to_uppercase(), dim_str, layout_str);
+                    let view_holder_ident = format_ident!("ViewHolder_{}", extension);
 
                     func_decls.push(quote! {
                         #[allow(dead_code)]
-                        fn #fn_create_ident(s: &[#ty]) -> SharedPtr<#view_holder_ident>;
+                        fn #fn_create_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> SharedPtr<#view_holder_ident>;
                     });
 
                     iview_types_decls.push(quote! {
+                        #[allow(dead_code)]
                         type #view_holder_ident;
                     });
 
                     enums_decls.push(quote! {
-                        #view_holder_ident(#view_holder_ident)
+                        #view_holder_extension_ident(SharedPtr<#view_holder_ident>)
                     });
 
                     views_impls.push(quote! {
+                        #[allow(dead_code)]
                         impl View<#ty, #dim_ty, #layout_ty> {
-                            pub fn from_shape<U: Into<#dim_ty>>(shape: &U, data: &[#ty]) -> Self {
+                            pub fn from_shape<U: Into<#dim_ty>>(shape: U, data: &[#ty]) -> Self {
+                                let dims: #dim_ty = shape.into();
                                 Self{
-                                    view_holder: ViewHolder::#view_holder_ident(#fn_create_ident(shape, data)),
+                                    view_holder: ViewHolder::#view_holder_extension_ident(#fn_create_ident(dims.into(), data)),
                                     _marker: PhantomData,
                                 }
                             }
                         }
                     });
+
+                    let kokkos_view_ty_str = format!(
+                        "Kokkos::View<{}{}, Kokkos::{}, Kokkos::DefaultExecutionSpace::memory_space>",
+                        cpp_type, kokkos_dim_stars, layout_str,
+                    );
+                    let mut create_view_dims_args = (0..dim_val_usize)
+                        .map(|i| format!("dimensions[{}],", i))
+                        .collect::<String>();
+                    create_view_dims_args.pop();
+
+                    to_write_cpp.push_str(&format!(
+                        "
+struct ViewHolder_{} {{
+    {} view; 
+
+    ViewHolder_{}({}& view) : view(view) {{}}
+
+    {} get_view() const {{
+        return view;
+    }}
+}};
+
+std::shared_ptr<ViewHolder_{}> create_view_{}(rust::Vec<size_t> dimensions, rust::Slice<const {}> s) {{
+    {} view(\"krokkos_view_{}\", {});
+    auto view_holder = std::make_shared<ViewHolder_{}>(view);
+    return view_holder;
+}}
+",
+                        extension,
+                        kokkos_view_ty_str,
+                        extension,
+                        kokkos_view_ty_str,
+                        kokkos_view_ty_str,
+                        extension,
+                        extension,
+                        cpp_type,
+                        kokkos_view_ty_str,
+                        extension,
+                        create_view_dims_args,
+                        extension,
+                    ));
                 }
 
                 let tokens = quote! {
@@ -186,12 +232,13 @@ inline void kokkos_finalize() {{
                     pub use krokkos_bridge::*;
                     use std::fmt::Debug;
                     use cxx::SharedPtr;
-                    use cxx::memory::SharedPtrTarget;
+                    use std::marker::PhantomData;
 
                     pub trait DTType: Debug + Default + Clone + Copy {}
 
                     #(#dttype_impls)*
 
+                    #[allow(dead_code)]
                     pub trait Dimension: Debug + Into<Vec<usize>> + Clone + Default {
                         const NDIM: u8;
 
@@ -210,17 +257,28 @@ inline void kokkos_finalize() {{
 
                     #(#dims_impls)*
 
-                    pub trait Layout: Default + Debug {
+                    #[allow(dead_code)]
+                    #[derive(Debug, Clone, Copy, PartialEq)]
+                    #[repr(u8)]
+                    pub enum Layout {
+                        LayoutLeft = 0,
+                        LayoutRight = 1,
+                    }
+
+                    #[allow(dead_code)]
+                    pub trait LayoutType: Default + Debug {
                         fn to_layout(&self) -> Layout;
                     }
 
                     #(#layout_impls)*
 
+                    #[allow(dead_code)]
                     pub enum ViewHolder {
                         #(#enums_decls),*
                     }
 
-                    pub struct View<T: DTType<T>, D: Dimension, L: Layout>{
+                    #[allow(dead_code)]
+                    pub struct View<T: DTType, D: Dimension, L: LayoutType>{
                         view_holder: ViewHolder,
                         _marker: PhantomData<(T,D,L)>
                     }
