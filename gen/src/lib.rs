@@ -1,11 +1,13 @@
 use std::fs;
 
-use syn::{Ident, LitInt, Token, bracketed, parse::ParseStream, punctuated::Punctuated};
+use syn::{
+    Ident, LitInt, Token, bracketed, parenthesized, parse::ParseStream, punctuated::Punctuated,
+};
 
 use quote::{format_ident, quote};
 use syn::{Item, Path, Type};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 enum ViewDataType {
     F64,
     F32,
@@ -67,27 +69,27 @@ impl syn::parse::Parse for ViewDataType {
 }
 
 trait ToCppTypeStr {
-    fn cpp_type(&self) -> &str;
+    fn cpp_type(&self) -> String;
 }
 
 impl ToCppTypeStr for ViewDataType {
-    fn cpp_type(&self) -> &str {
+    fn cpp_type(&self) -> String {
         match self {
-            ViewDataType::F64 => "double",
-            ViewDataType::F32 => "float",
-            ViewDataType::I64 => "std::int64_t",
-            ViewDataType::I32 => "std::int32_t",
-            ViewDataType::I16 => "std::int16_t",
-            ViewDataType::I8 => "std::int8_t",
-            ViewDataType::U64 => "std::uint64_t",
-            ViewDataType::U32 => "std::uint32_t",
-            ViewDataType::U16 => "std::uint16_t",
-            ViewDataType::U8 => "std::uint8_t",
+            ViewDataType::F64 => "double".to_string(),
+            ViewDataType::F32 => "float".to_string(),
+            ViewDataType::I64 => "std::int64_t".to_string(),
+            ViewDataType::I32 => "std::int32_t".to_string(),
+            ViewDataType::I16 => "std::int16_t".to_string(),
+            ViewDataType::I8 => "std::int8_t".to_string(),
+            ViewDataType::U64 => "std::uint64_t".to_string(),
+            ViewDataType::U32 => "std::uint32_t".to_string(),
+            ViewDataType::U16 => "std::uint16_t".to_string(),
+            ViewDataType::U8 => "std::uint8_t".to_string(),
         }
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 enum Dimension {
     Dim1,
     Dim2,
@@ -111,9 +113,9 @@ impl syn::parse::Parse for Dimension {
             6 => Ok(Dimension::Dim6),
             7 => Ok(Dimension::Dim7),
             _ => Err(syn::Error::new_spanned(
-            lit,
-            "Number of dimensions must be between 1 and 8",
-        )),
+                lit,
+                "Number of dimension must be between 1 and 8",
+            )),
         }
     }
 }
@@ -132,7 +134,21 @@ impl ToString for Dimension {
     }
 }
 
-#[derive(Debug)]
+impl Into<usize> for &Dimension {
+    fn into(self) -> usize {
+        match self {
+            Dimension::Dim1 => 1,
+            Dimension::Dim2 => 2,
+            Dimension::Dim3 => 3,
+            Dimension::Dim4 => 4,
+            Dimension::Dim5 => 5,
+            Dimension::Dim6 => 6,
+            Dimension::Dim7 => 7,
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
 enum Layout {
     LayoutRight,
     LayoutLeft,
@@ -172,44 +188,46 @@ impl ToString for Layout {
 fn parse_into_vec_datatypes(input: ParseStream) -> syn::Result<Vec<ViewDataType>> {
     let content;
     bracketed!(content in input);
-    let punct_data_types = Punctuated::<ViewDataType, Token![,]>::parse_terminated(&content)?;
-    Ok(punct_data_types.into_iter().collect())
+    let punct_data_type = Punctuated::<ViewDataType, Token![,]>::parse_terminated(&content)?;
+    Ok(punct_data_type.into_iter().collect())
 }
 
-fn parse_into_vec_dimensions(input: ParseStream) -> syn::Result<Vec<Dimension>> {
+fn parse_into_vec_dimension(input: ParseStream) -> syn::Result<Vec<Dimension>> {
     let content;
     bracketed!(content in input);
-    let punct_dimensions = Punctuated::<Dimension, Token![,]>::parse_terminated(&content)?;
+    let punct_dimension = Punctuated::<Dimension, Token![,]>::parse_terminated(&content)?;
 
-    Ok(punct_dimensions.into_iter().collect())
+    Ok(punct_dimension.into_iter().collect())
 }
 
-fn parse_into_vec_layouts(input: ParseStream) -> syn::Result<Vec<Layout>> {
+fn parse_into_vec_layout(input: ParseStream) -> syn::Result<Vec<Layout>> {
     let content;
     bracketed!(content in input);
-    let punct_layouts = Punctuated::<Layout, Token![,]>::parse_terminated(&content)?;
-    Ok(punct_layouts.into_iter().collect())
+    let punct_layout = Punctuated::<Layout, Token![,]>::parse_terminated(&content)?;
+    Ok(punct_layout.into_iter().collect())
 }
 
-#[derive(Debug, Default)]
-struct MakeVecInput {
-    data_types: Vec<ViewDataType>,
-    dimensions: Vec<Dimension>,
-    layouts: Vec<Layout>,
+#[derive(Debug)]
+struct ViewConfig {
+    data_type: ViewDataType,
+    dimension: Dimension,
+    layout: Layout,
 }
 
-impl syn::parse::Parse for MakeVecInput {
+impl syn::parse::Parse for ViewConfig {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
-        let data_types = parse_into_vec_datatypes(&input)?;
-        input.parse::<Token![,]>()?;
-        let dimensions = parse_into_vec_dimensions(&input)?;
-        input.parse::<Token![,]>()?;
-        let layouts = parse_into_vec_layouts(&input)?;
+        let content;
+        parenthesized!(content in input);
+        let data_type: ViewDataType = content.parse()?;
+        content.parse::<Token![,]>()?;
+        let dimension: Dimension = content.parse()?;
+        content.parse::<Token![,]>()?;
+        let layout: Layout = content.parse()?;
 
         Ok(Self {
-            data_types,
-            dimensions,
-            layouts,
+            data_type,
+            dimension,
+            layout,
         })
     }
 }
@@ -224,14 +242,18 @@ pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
             let mac = i_macro.mac;
 
             if mac.path.is_ident("krokkos_initialize") {
-                let input: MakeVecInput = mac.parse_body().unwrap();
+                let configs = mac
+                    .parse_body_with(Punctuated::<ViewConfig, Token![,]>::parse_terminated)
+                    .unwrap();
 
-                let data_types = input.data_types;
-                let dimensions = input.dimensions;
-                let layouts = input.layouts;
+                let mut implemented_dttype: Vec<ViewDataType> = vec![];
+                let mut implemented_dims: Vec<Dimension> = vec![];
+                let mut implemented_layout: Vec<Layout> = vec![];
 
                 let mut func_decls = vec![];
-                let mut dttype_decls = vec![];
+                let mut dttype_impls = vec![];
+                let mut dims_impls = vec![];
+                let mut layout_impls = vec![];
                 let mut enums_decls = vec![];
                 let mut iview_types_decls = vec![];
                 let mut views_impls = vec![];
@@ -247,74 +269,130 @@ namespace krokkos_bridge {
 "
                 .to_string();
 
-                for i_type in data_types.iter() {
-                    for dim in dimensions.iter() {
-                        for layout in layouts.iter() {
-                    let rust_type_str = i_type.to_string();
+                for config in configs.into_iter() {
+                    let data_type = config.data_type;
+                    let dimension = config.dimension;
+                    let layout = config.layout;
+
+
+                    let cpp_type = data_type.cpp_type();
+                    let rust_type_str = data_type.to_string();
                     let ty: Type = syn::parse_str(&rust_type_str).unwrap();
 
-                            let dim_str = dim.to_string();
-                            let dim_ty: Type = syn::parse_str(&dim_str).unwrap();
+                    let dim_str = dimension.to_string();
+                    let dim_ty: Type = syn::parse_str(&dim_str).unwrap();
+                    let dim_val: usize = (&dimension).into();
 
-                            let layout_str = layout.to_string();
-                            let layout_ty: Type = syn::parse_str(&layout_str).unwrap();
+                    let layout_str = layout.to_string();
+                    let layout_ty: Type = syn::parse_str(&layout_str).unwrap();
 
-                            let fn_create_ident = format_ident!("create_view_{}_{}_{}", rust_type_str, dim_str, layout_str);
-                            let fn_at_ident = format_ident!("at_{}_{}_{}", rust_type_str, dim_str, layout_str);
+                    if !implemented_dttype.contains(&data_type) {
+                        dttype_impls.push(quote! {
+                            impl DTType for #ty {}
+                        });
+                        implemented_dttype.push(data_type);
+                    }
 
-                            let view_holder_ident = format_ident!("ViewHolder_{}_{}_{}", rust_type_str, dim_str, layout_str);
+                    if !implemented_dims.contains(&dimension) {
+                        dims_impls.push(quote! {
+                            #[derive(Debug, Clone, Default)]
+                            pub struct #dim_ty {
+                                shape: [usize; #dim_val],
+                            }
+
+                            impl #dim_ty {
+                                pub fn new(shape: &[usize; #dim_val]) -> Self {
+                                    #dim_ty {shape: *shape}
+                                }
+
+                                pub fn shapes(&self) -> &[usize; #dim_val] {
+                                    &self.shape
+                                }
+                            }
+
+                            impl From<#dim_ty> for Vec<usize> {
+                                fn from(value: #dim_ty) -> Self {
+                                    value.shapes().into()
+                                }
+                            }
+
+                            impl From<&[usize; #dim_val]> for #dim_ty {
+                                fn from(value: &[usize; #dim_val]) -> Self {
+                                    #dim_ty {shape: *value}
+                                }
+                            }
+
+                            impl Dimension for #dim_ty {
+                                const NDIM: u8 = #dim_val;
+
+                                fn ndim(&self) -> u8 {
+                                    #dim_val
+                                }
+
+                                fn slice(&self) -> &[usize] {
+                                    self.shapes()
+                                }
+
+                                // fn try_from_slice(slice:&[usize]) -> Result<Self, &'static str> {
+                                //     if slice.len() == Self::NDIM as usize {
+                                //         Ok(#dim_ty {shape: })  // TODO : Imple pour nombre variable de shapes.
+                                //     }
+                                // }
+                            }
+                        });
+
+                        implemented_dims.push(dimension);
+                    }
+
+                    if !implemented_layout.contains(&layout) {
+                        layout_impls.push(quote! {
+                            #[derive(Default, Debug)]
+                            pub struct #layout_ty();
+
+                            impl Layout for #layout_ty {
+                                fn to_layout(&self) -> Layout {
+                                    Layout::#layout_ty
+                                }
+                            }
+                        });
+
+                        implemented_layout.push(layout);
+                    }
+
+                    let fn_create_ident =
+                        format_ident!("create_view_{}_{}_{}", rust_type_str, dim_str, layout_str);
+                    let fn_at_ident =
+                        format_ident!("at_{}_{}_{}", rust_type_str, dim_str, layout_str);
+
+                    let view_holder_ident =
+                        format_ident!("ViewHolder_{}_{}_{}", rust_type_str, dim_str, layout_str);
 
                     func_decls.push(quote! {
                         #[allow(dead_code)]
-                                fn #fn_create_ident(s: &[#ty]) -> SharedPtr<#view_holder_ident>;
+                        fn #fn_create_ident(s: &[#ty]) -> SharedPtr<#view_holder_ident>;
                     });
 
-                    dttype_decls.push(quote! {
-                        impl DTType<#ty> for #ty {
-                                    type V = #view_holder_ident;
-                                    fn from_shape(
-                                s: &[#ty],
-                            ) -> SharedPtr<Self::V> {
-                                        krokkos_bridge_bridge_ffi::#fn_create_ident(s)
-                            }
+                    iview_types_decls.push(quote! {
+                        type #view_holder_ident;
+                    });
 
-                                    pub fn from_shape<U: Into<D>>(shapes: U, v: &'a [T]) -> Self {
-                                        let mem_space = M::default();
-                                        let layout = L::default();
-                                        let shapes = shapes.into();
-                                        Self{
-                                            opaque_view: T::create_opaque_view(shapes.into(), mem_space.to_space(), layout.to_layout(), v),
-                                            dim: PhantomData,
-                                            mem_space: PhantomData,
-                                            layout: PhantomData,
-                                            data_type: PhantomData,
-                                        }
+                    enums_decls.push(quote! {
+                        #view_holder_ident(#view_holder_ident)
+                    });
+
+                    views_impls.push(quote! {
+                        impl View<#ty, #dim_ty, #layout_ty> {
+                            pub fn from_shape<U: Into<#dim_ty>>(shape: &U, data: &[#ty]) -> Self {
+                                Self{
+                                    view_holder: ViewHolder::#view_holder_ident(#fn_create_ident(shape, data)),
+                                    _marker: PhantomData,
+                                }
                             }
                         }
                     });
 
-                            iview_types_decls.push(quote! {
-                                type #view_holder_ident;
-                            });
-
-                            enums_decls.push(quote! {
-                                #view_holder_ident(#view_holder_ident)
-                            });
-
-                            views_impls.push(quote! {
-                                impl View<#ty, #dim_ty, #layout_ty> {
-                                    pub fn from_shape<U: Into<#dim_ty>>(shape: &U, data: &[#ty]) -> Self {
-                                        Self{
-                                            view_hold: ViewHolder::#view_holder_ident(#fn_create_ident(shape, data)),
-                                            _marker: PhantomData,
-                                        }
-                                    }
-                                }
-                    });
-
-                    let cpp_type = i_type.cpp_type();
-                            to_write_cpp.push_str(&format!( 
-"
+                    to_write_cpp.push_str(&format!(
+                        "
 struct VecHolder_{} {{
     std::vector<{}> vec;
 
@@ -335,51 +413,49 @@ std::shared_ptr<VecHolder_{}> create_vec_{}(rust::Slice<const {}> s) {{
     auto vec = std::make_shared<VecHolder_{}>(v);
     return vec;
 }}
-                    ", 
-                                rust_type_str,
-                                cpp_type,
-                                rust_type_str,
-                                cpp_type,
-                                cpp_type,
-                                cpp_type,
-                                rust_type_str,
-                                rust_type_str,
-                                rust_type_str,
-                                rust_type_str,
-                                cpp_type,
-                                cpp_type,
-                                rust_type_str
+",
+                        rust_type_str,
+                        cpp_type,
+                        rust_type_str,
+                        cpp_type,
+                        cpp_type,
+                        cpp_type,
+                        rust_type_str,
+                        rust_type_str,
+                        rust_type_str,
+                        rust_type_str,
+                        cpp_type,
+                        cpp_type,
+                        rust_type_str
                     ));
+
+                    // for d in dimension.into_iter() {
+                    //     let fn_name_print = format_ident!("printcpp_{}", d).to_string();
+
+                    //     let idents: Vec<Ident> = (1..=d).map(|i| format_ident!("i{}", i)).collect();
+
+                    //     func_decls.push(quote! {
+                    //         #[allow(dead_code)]
+                    //         #[rust_name = #fn_name_print]
+                    //         fn printcpp(#(#idents : i32),*);
+                    //     });
+                    // }
+
+                    //                 to_write_cpp.push_str(
+                    //                     "
+                    // template <typename... Is>
+                    // void printcpp(Is... args) {
+                    //     ((std::cout << std::forward<Is>(args) << \'\\n\'), ...);
+                    // }
+
+                    //                 ",
+                    //                 );
                 }
-                    }
-                }
-
-                // for d in dimensions.into_iter() {
-                //     let fn_name_print = format_ident!("printcpp_{}", d).to_string();
-
-                //     let idents: Vec<Ident> = (1..=d).map(|i| format_ident!("i{}", i)).collect();
-
-                //     func_decls.push(quote! {
-                //         #[allow(dead_code)]
-                //         #[rust_name = #fn_name_print]
-                //         fn printcpp(#(#idents : i32),*);
-                //     });
-                // }
-
-                //                 to_write_cpp.push_str(
-                //                     "
-                // template <typename... Is>
-                // void printcpp(Is... args) {
-                //     ((std::cout << std::forward<Is>(args) << \'\\n\'), ...);
-                // }
-
-                //                 ",
-                //                 );
 
                 let tokens = quote! {
-                        
+
                     #[cxx::bridge(namespace = "krokkos_bridge_ffi")]
-                    mod krokkos_bridge_bridge_ffi {
+                    mod krokkos_bridge_ffi {
 
                         unsafe extern "C++" {
                             include!("rust_view.hpp");
@@ -395,48 +471,67 @@ std::shared_ptr<VecHolder_{}> create_vec_{}(rust::Slice<const {}> s) {{
                     use cxx::SharedPtr;
                     use cxx::memory::SharedPtrTarget;
 
-                    pub trait DTType<T>: Debug + Default + Clone + Copy {
-                        type V: SharedPtrTarget;
-                        fn from_slice(
-                            s: &[T],
-                        ) -> SharedPtr<Self::V>;
+                    pub trait DTType: Debug + Default + Clone + Copy {}
 
-                        fn at(v: SharedPtr<Self::V>, i: i32) -> T;
-                    }
+                    #(#dttype_impls)*
 
-                    #(#dttype_decls)*
+                    pub trait Dimension: Debug + Into<Vec<usize>> + Clone + Default {
+                        const NDIM: u8;
 
-                    pub struct ProtoVector <T: DTType<T>>{
-                        vec_holder: SharedPtr<T::V>,
-                    }
-
-                    impl <T: DTType<T>> ProtoVector <T> {
-                        pub fn from_slice(s: &[T]) -> Self {
-                            Self{
-                                vec_holder: T::from_slice(s),
-                            }
+                        fn ndim(&self) -> u8;
+                        
+                        fn size(&self) -> usize {
+                            self.slice().iter().product()
                         }
 
-                        pub fn at(&self, i: i32) -> T {
-                            T::at(self.vec_holder.clone(), i)
+                        fn slice(&self) -> &[usize];
+
+                        fn to_vec(&self) -> Vec<usize> {
+                            self.slice().to_vec()
                         }
+
+                        // fn try_from_slice(slice: &[usize]) -> Result<Self, &'static str>;
                     }
+
+                    #(#dims_impls)*
+
+                    pub trait Layout: Default + Debug {
+                        fn to_layout(&self) -> Layout;
+                    }
+
+                    #(#layout_impls)*
+
+                    pub enum ViewHolder {
+                        #(#enums_decls),*
+                    }
+
+                    pub struct View<T: DTType<T>, D: Dimension, L: Layout>{
+                        view_holder: ViewHolder,
+                        _marker: PhantomData<(T,D,L)>
+                    }
+
+                    #(#views_impls)*
+
                 };
+
                 let to_write_rust = tokens.to_string();
                 if !std::fs::exists(format!("{}/../../../../krokkosbridge", out_dir)).unwrap() {
                     println!("cargo:warning=Creating krokkosbridge folder");
                     std::fs::create_dir(format!("{}/../../../../krokkosbridge", out_dir)).unwrap();
                 }
-                let rust_source_file =
-                    std::path::Path::new(&out_dir).join("../../../../krokkosbridge/krokkos_bridge.rs");
+                let rust_source_file = std::path::Path::new(&out_dir)
+                    .join("../../../../krokkosbridge/krokkos_bridge.rs");
                 fs::write(rust_source_file.clone(), to_write_rust).expect("Writing went wrong!");
 
                 to_write_cpp.push('}');
                 let out_path = std::path::Path::new(&out_dir).join("../../../../krokkosbridge/");
                 fs::write(out_path.join("krokkos_bridge.hpp"), to_write_cpp)
                     .expect("Writing went wrong!");
-                fs::write(out_path.join("krokkos_bridge.cpp"), "#include \"krokkos_bridge.hpp\"")
-                    .expect("Writing went wrong!");
+                fs::write(
+                    out_path.join("krokkos_bridge.cpp"),
+                    "#include \"krokkos_bridge.hpp\"",
+                )
+                .expect("Writing went wrong!");
                 cxx_build::bridge(rust_source_file.clone())
                     .file(out_path.join("krokkos_bridge.cpp"))
                     .include(&out_path)
