@@ -55,6 +55,8 @@ inline void kokkos_finalize() {{
                     let data_type = config.data_type;
                     let dimension = config.dimension;
                     let layout = config.layout;
+                    let host_mem_space = MemSpace::HostSpace;
+                    let device_mem_space = MemSpace::DeviceSpace;
 
                     let cpp_type = data_type.cpp_type();
                     let rust_type_str = data_type.to_string();
@@ -68,6 +70,11 @@ inline void kokkos_finalize() {{
 
                     let layout_str = layout.to_string();
                     let layout_ty: Type = syn::parse_str(&layout_str).unwrap();
+
+                    let host_mem_space_str = host_mem_space.to_string();
+                    let host_mem_space_ty: Type = syn::parse_str(&host_mem_space_str).unwrap();
+                    let device_mem_space_str = device_mem_space.to_string();
+                    let device_mem_space_ty: Type = syn::parse_str(&device_mem_space_str).unwrap();
 
                     if !implemented_dttype.contains(&data_type) {
                         dttype_impls.push(quote! {
@@ -136,43 +143,84 @@ inline void kokkos_finalize() {{
                         implemented_layout.push(layout);
                     }
 
-                    let extension = format!("{}_{}_{}", rust_type_str, dim_str, layout_str);
+                    let raw_extension = format!("{}_{}_{}", rust_type_str, dim_str, layout_str);
+                    let host_extension = format!("{}_{}", raw_extension, host_mem_space_str);
+                    let device_extension = format!("{}_{}", raw_extension, device_mem_space_str);
 
-                    let fn_create_ident = format_ident!("create_view_{}", extension);
+                    let fn_create_host_ident = format_ident!("create_view_{}", host_extension);
+                    let fn_create_device_ident = format_ident!("create_view_{}", device_extension);
 
-                    let view_holder_extension_ident =
-                        format_ident!("{}{}{}", rust_type_str.to_uppercase(), dim_str, layout_str);
-                    let view_holder_ident = format_ident!("ViewHolder_{}", extension);
+                    let host_view_holder_extension_ident = format_ident!(
+                        "{}{}{}{}",
+                        rust_type_str.to_uppercase(),
+                        dim_str,
+                        layout_str,
+                        host_mem_space_str
+                    );
+                    let host_view_holder_ident = format_ident!("ViewHolder_{}", host_extension);
+
+                    let device_view_holder_extension_ident = format_ident!(
+                        "{}{}{}{}",
+                        rust_type_str.to_uppercase(),
+                        dim_str,
+                        layout_str,
+                        device_mem_space_str
+                    );
+                    let device_view_holder_ident = format_ident!("ViewHolder_{}", device_extension);
 
                     func_decls.push(quote! {
                         #[allow(dead_code)]
-                        fn #fn_create_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> SharedPtr<#view_holder_ident>;
+                        unsafe fn #fn_create_host_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> *mut #host_view_holder_ident;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_create_device_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> *mut #device_view_holder_ident;
+
                     });
 
                     iview_types_decls.push(quote! {
                         #[allow(dead_code)]
-                        type #view_holder_ident;
+                        type #host_view_holder_ident;
+                        #[allow(dead_code)]
+                        type #device_view_holder_ident;
                     });
 
                     enums_decls.push(quote! {
-                        #view_holder_extension_ident(SharedPtr<#view_holder_ident>)
+                        #host_view_holder_extension_ident(*mut #host_view_holder_ident),
+                        #device_view_holder_extension_ident(*mut #device_view_holder_ident)
                     });
 
                     views_impls.push(quote! {
-                        #[allow(dead_code)]
-                        impl View<#ty, #dim_ty, #layout_ty> {
+                        impl View<#ty, #dim_ty, #layout_ty, #host_mem_space_ty> {
                             pub fn from_shape<U: Into<#dim_ty>>(shape: U, data: &[#ty]) -> Self {
                                 let dims: #dim_ty = shape.into();
                                 Self{
-                                    view_holder: ViewHolder::#view_holder_extension_ident(#fn_create_ident(dims.into(), data)),
+                                    view_holder: ViewHolder::#host_view_holder_extension_ident(unsafe{#fn_create_host_ident(dims.into(), data)}),
                                     _marker: PhantomData,
                                 }
                             }
                         }
+
+                        impl View<#ty, #dim_ty, #layout_ty, #device_mem_space_ty> {
+                            pub fn from_shape<U: Into<#dim_ty>>(shape: U, data: &[#ty]) -> Self {
+                                let dims: #dim_ty = shape.into();
+                                Self{
+                                    view_holder: ViewHolder::#device_view_holder_extension_ident(unsafe{#fn_create_device_ident(dims.into(), data)}),
+                                    _marker: PhantomData,
+                                }
+                            }
+                        }
+
                     });
 
-                    let kokkos_view_ty_str = format!(
+                    let kokkos_host_view_ty_str = format!(
+                        "Kokkos::View<{}{}, Kokkos::{}, Kokkos::HostSpace>",
+                        cpp_type, kokkos_dim_stars, layout_str,
+                    );
+                    let kokkos_device_view_ty_str = format!(
                         "Kokkos::View<{}{}, Kokkos::{}, Kokkos::DefaultExecutionSpace::memory_space>",
+                        cpp_type, kokkos_dim_stars, layout_str,
+                    );
+                    let kokkos_view_unmanaged_ty_str = format!(
+                        "Kokkos::View<const {}{}, Kokkos::{}, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>",
                         cpp_type, kokkos_dim_stars, layout_str,
                     );
                     let mut create_view_dims_args = (0..dim_val_usize)
@@ -182,35 +230,43 @@ inline void kokkos_finalize() {{
 
                     to_write_cpp.push_str(&format!(
                         "
-struct ViewHolder_{} {{
-    {} view; 
 
-    ViewHolder_{}({}& view) : view(view) {{}}
+struct ViewHolder_{host_extension} {{
+    {kokkos_host_view_ty_str} view; 
 
-    {} get_view() const {{
+    ViewHolder_{host_extension}({kokkos_host_view_ty_str} view) : view(view) {{}}
+
+    {kokkos_host_view_ty_str} get_view() const {{
         return view;
     }}
 }};
 
-std::shared_ptr<ViewHolder_{}> create_view_{}(rust::Vec<size_t> dimensions, rust::Slice<const {}> s) {{
-    {} view(\"krokkos_view_{}\", {});
-    auto view_holder = std::make_shared<ViewHolder_{}>(view);
-    return view_holder;
+ViewHolder_{host_extension}* create_view_{host_extension}(rust::Vec<size_t> dimensions, rust::Slice<const {cpp_type}> s) {{
+    {kokkos_host_view_ty_str} host_view(\"krokkos_view_{host_extension}\", {create_view_dims_args});
+    {kokkos_view_unmanaged_ty_str} rust_view(s.data(), {create_view_dims_args});
+    Kokkos::deep_copy(host_view, rust_view);
+    return new ViewHolder_{host_extension}(host_view);
 }}
-",
-                        extension,
-                        kokkos_view_ty_str,
-                        extension,
-                        kokkos_view_ty_str,
-                        kokkos_view_ty_str,
-                        extension,
-                        extension,
-                        cpp_type,
-                        kokkos_view_ty_str,
-                        extension,
-                        create_view_dims_args,
-                        extension,
-                    ));
+
+
+struct ViewHolder_{device_extension} {{
+    {kokkos_device_view_ty_str} view; 
+
+    ViewHolder_{device_extension}({kokkos_device_view_ty_str} view) : view(view) {{}}
+
+    {kokkos_device_view_ty_str} get_view() const {{
+        return view;
+    }}
+
+}};
+
+ViewHolder_{device_extension}* create_view_{device_extension}(rust::Vec<size_t> dimensions, rust::Slice<const {cpp_type}> s) {{
+    {kokkos_device_view_ty_str} host_view(\"krokkos_view_{device_extension}\", {create_view_dims_args});
+    {kokkos_view_unmanaged_ty_str} rust_view(s.data(), {create_view_dims_args});
+    Kokkos::deep_copy(host_view, rust_view);
+    return new ViewHolder_{device_extension}(host_view);
+}}
+"));
                 }
 
                 let tokens = quote! {
@@ -231,7 +287,6 @@ std::shared_ptr<ViewHolder_{}> create_view_{}(rust::Vec<size_t> dimensions, rust
 
                     pub use krokkos_bridge::*;
                     use std::fmt::Debug;
-                    use cxx::SharedPtr;
                     use std::marker::PhantomData;
 
                     pub trait DTType: Debug + Default + Clone + Copy {}
@@ -273,14 +328,31 @@ std::shared_ptr<ViewHolder_{}> create_view_{}(rust::Vec<size_t> dimensions, rust
                     #(#layout_impls)*
 
                     #[allow(dead_code)]
+                    pub trait MemorySpace: Default + Debug {
+                        type MirrorSpace: MemorySpace;
+                    }
+
+                    #[derive(Default, Debug)]
+                    pub struct HostSpace();
+                    #[derive(Default, Debug)]
+                    pub struct DeviceSpace();
+
+                    impl MemorySpace for HostSpace {
+                        type MirrorSpace = DeviceSpace;
+                    }
+                    impl MemorySpace for DeviceSpace {
+                        type MirrorSpace = HostSpace;
+                    }
+
+                    #[allow(dead_code)]
                     pub enum ViewHolder {
                         #(#enums_decls),*
                     }
 
                     #[allow(dead_code)]
-                    pub struct View<T: DTType, D: Dimension, L: LayoutType>{
-                        view_holder: ViewHolder,
-                        _marker: PhantomData<(T,D,L)>
+                    pub struct View<T: DTType, D: Dimension, L: LayoutType, M: MemorySpace>{
+                        pub view_holder: ViewHolder,
+                        _marker: PhantomData<(T,D,L,M)>
                     }
 
                     #(#views_impls)*

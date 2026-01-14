@@ -192,6 +192,21 @@ impl ToString for Layout {
     }
 }
 
+#[derive(Debug, PartialEq)]
+pub enum MemSpace {
+    HostSpace,
+    DeviceSpace,
+}
+
+impl ToString for MemSpace {
+    fn to_string(&self) -> String {
+        match self {
+            MemSpace::HostSpace => "HostSpace".to_string(),
+            MemSpace::DeviceSpace => "DeviceSpace".to_string(),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct ViewConfig {
     pub data_type: ViewDataType,
