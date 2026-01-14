@@ -190,6 +190,30 @@ impl ToString for Layout {
     }
 }
 
+#[derive(Debug, PartialEq)]
+enum MemSpace {
+    HostSpace,
+    DeviceSpace,
+}
+
+impl ToString for MemSpace {
+    fn to_string(&self) -> String {
+        match self {
+            MemSpace::HostSpace => "HostSpace".to_string(),
+            MemSpace::DeviceSpace => "DeviceSpace".to_string(),
+        }
+    }
+}
+
+impl MemSpace {
+    fn mirror_space(&self) -> Self {
+        match self {
+            MemSpace::HostSpace => MemSpace::DeviceSpace,
+            MemSpace::DeviceSpace => MemSpace::HostSpace,
+        }
+    }
+}
+
 #[derive(Debug)]
 struct ViewConfig {
     data_type: ViewDataType,
@@ -241,6 +265,7 @@ pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
                 let mut iview_types_decls = vec![];
                 let mut views_impls = vec![];
                 let mut deep_copy_matches_impls = vec![];
+                let mut create_mirror_matches_impls = vec![];
 
                 let mut to_write_cpp = "
 #pragma once
@@ -268,6 +293,8 @@ void kokkos_finalize() {{
                     let data_type = config.data_type;
                     let dimension = config.dimension;
                     let layout = config.layout;
+                    let host_mem_space = MemSpace::HostSpace;
+                    let device_mem_space = MemSpace::DeviceSpace;
 
                     let cpp_type = data_type.cpp_type();
                     let rust_type_str = data_type.to_string();
@@ -281,6 +308,11 @@ void kokkos_finalize() {{
 
                     let layout_str = layout.to_string();
                     let layout_ty: Type = syn::parse_str(&layout_str).unwrap();
+
+                    let host_mem_space_str = host_mem_space.to_string();
+                    let host_mem_space_ty: Type = syn::parse_str(&host_mem_space_str).unwrap();
+                    let device_mem_space_str = device_mem_space.to_string();
+                    let device_mem_space_ty: Type = syn::parse_str(&device_mem_space_str).unwrap();
 
                     if !implemented_dttype.contains(&data_type) {
                         dttype_impls.push(quote! {
@@ -329,11 +361,6 @@ void kokkos_finalize() {{
                                     self.shapes()
                                 }
 
-                                // fn try_from_slice(slice:&[usize]) -> Result<Self, &'static str> {
-                                //     if slice.len() == Self::NDIM as usize {
-                                //         Ok(#dim_ty {shape: })  // TODO : Imple pour nombre variable de shapes.
-                                //     }
-                                // }
                             }
                         });
 
@@ -355,36 +382,65 @@ void kokkos_finalize() {{
                         implemented_layout.push(layout);
                     }
 
-                    let extension = format!("{}_{}_{}", rust_type_str, dim_str, layout_str);
+                    let raw_extension = format!("{}_{}_{}", rust_type_str, dim_str, layout_str);
+                    let host_extension = format!("{}_{}", raw_extension, host_mem_space_str);
+                    let device_extension = format!("{}_{}", raw_extension, device_mem_space_str);
 
-                    let fn_create_ident = format_ident!("create_view_{}", extension);
-                    let fn_get_at_ident = format_ident!("get_at_{}", extension);
-                    let fn_deep_copy_ident = format_ident!("deep_copy_{}", extension);
+                    let fn_create_ident = format_ident!("create_view_{}", host_extension);
+                    let fn_create_device_ident = format_ident!("create_view_{}", device_extension);
+                    let mirror_fn_create_ident = format_ident!("create_view_{}", device_extension);
+                    let fn_get_at_ident = format_ident!("get_at_{}", host_extension);
+                    let mirror_fn_get_at_ident = format_ident!("get_at_{}", device_extension);
+                    let fn_deep_copy_hth_ident = format_ident!("deep_copy_hth_{}", raw_extension);
+                    let fn_deep_copy_htd_ident = format_ident!("deep_copy_htd_{}", raw_extension);
+                    let fn_deep_copy_dth_ident = format_ident!("deep_copy_dth_{}", raw_extension);
+                    let fn_deep_copy_dtd_ident = format_ident!("deep_copy_dtd_{}", raw_extension);
+                    let fn_create_mirror_htd_ident = format_ident!("create_mirror_htd_{}", raw_extension);
+                    let fn_create_mirror_dth_ident = format_ident!("create_mirror_dth_{}", raw_extension);
 
                     let fn_get_at_args = (0..dim_val_usize)
                         .map(|i| format_ident!("i{i}"))
                         .collect::<Vec<Ident>>();
 
-                    let view_holder_extension_ident =
-                        format_ident!("{}{}{}", rust_type_str.to_uppercase(), dim_str, layout_str);
-                    let view_holder_ident = format_ident!("ViewHolder_{}", extension);
+                    let host_view_holder_extension_ident =
+                        format_ident!("{}{}{}{}", rust_type_str.to_uppercase(), dim_str, layout_str, host_mem_space_str);
+                    let host_view_holder_ident = format_ident!("ViewHolder_{}", host_extension);
+
+                    let device_view_holder_extension_ident =
+                        format_ident!("{}{}{}{}", rust_type_str.to_uppercase(), dim_str, layout_str, device_mem_space_str);
+                    let device_view_holder_ident = format_ident!("ViewHolder_{}", device_extension);
 
                     func_decls.push(quote! {
                         #[allow(dead_code)]
-                        unsafe fn #fn_create_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> *mut #view_holder_ident;
+                        unsafe fn #fn_create_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> *mut #host_view_holder_ident;
                         #[allow(dead_code)]
-                        unsafe fn #fn_get_at_ident<'a>(view: *const #view_holder_ident, #(#fn_get_at_args: usize),*) -> &'a #ty;
+                        unsafe fn #fn_create_device_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> *mut #device_view_holder_ident;
                         #[allow(dead_code)]
-                        unsafe fn #fn_deep_copy_ident(dest: *mut #view_holder_ident, src: *const #view_holder_ident);
+                        unsafe fn #fn_get_at_ident<'a>(view: *const #host_view_holder_ident, #(#fn_get_at_args: usize),*) -> &'a #ty;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_deep_copy_hth_ident(dest: *mut #host_view_holder_ident, src: *const #host_view_holder_ident);
+                        #[allow(dead_code)]
+                        unsafe fn #fn_deep_copy_htd_ident(dest: *mut #device_view_holder_ident, src: *const #host_view_holder_ident);
+                        #[allow(dead_code)]
+                        unsafe fn #fn_deep_copy_dth_ident(dest: *mut #host_view_holder_ident, src: *const #device_view_holder_ident);
+                        #[allow(dead_code)]
+                        unsafe fn #fn_deep_copy_dtd_ident(dest: *mut #device_view_holder_ident, src: *const #device_view_holder_ident);
+                        #[allow(dead_code)]
+                        unsafe fn #fn_create_mirror_htd_ident(src: *const #host_view_holder_ident) -> *mut #device_view_holder_ident;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_create_mirror_dth_ident(src: *const #device_view_holder_ident) -> *mut #host_view_holder_ident;
                     });
 
                     iview_types_decls.push(quote! {
                         #[allow(dead_code)]
-                        type #view_holder_ident;
+                        type #host_view_holder_ident;
+                        #[allow(dead_code)]
+                        type #device_view_holder_ident;
                     });
 
                     enums_decls.push(quote! {
-                        #view_holder_extension_ident(*mut #view_holder_ident)
+                        #host_view_holder_extension_ident(*mut #host_view_holder_ident),
+                        #device_view_holder_extension_ident(*mut #device_view_holder_ident)
                     });
 
                     let usize_ty: Type = syn::parse_str("usize").unwrap();
@@ -393,22 +449,32 @@ void kokkos_finalize() {{
                         .collect::<Vec<Type>>();
 
                     views_impls.push(quote! {
-                        impl View<#ty, #dim_ty, #layout_ty> {
+                        impl View<#ty, #dim_ty, #layout_ty, #host_mem_space_ty> {
                             pub fn from_shape<U: Into<#dim_ty>>(shape: U, data: &[#ty]) -> Self {
                                 let dims: #dim_ty = shape.into();
                                 Self{
-                                    view_holder: ViewHolder::#view_holder_extension_ident(unsafe{#fn_create_ident(dims.into(), data)}),
+                                    view_holder: ViewHolder::#host_view_holder_extension_ident(unsafe{#fn_create_ident(dims.into(), data)}),
                                     _marker: PhantomData,
                                 }
                             }
                         }
 
-                        impl Index<(#(#index_args),*)> for View<#ty, #dim_ty, #layout_ty> {
+                        impl View<#ty, #dim_ty, #layout_ty, #device_mem_space_ty> {
+                            pub fn from_shape<U: Into<#dim_ty>>(shape: U, data: &[#ty]) -> Self {
+                                let dims: #dim_ty = shape.into();
+                                Self{
+                                    view_holder: ViewHolder::#device_view_holder_extension_ident(unsafe{#mirror_fn_create_ident(dims.into(), data)}),
+                                    _marker: PhantomData,
+                                }
+                            }
+                        }
+
+                        impl Index<(#(#index_args),*)> for View<#ty, #dim_ty, #layout_ty, #host_mem_space_ty> {
                             type Output = #ty;
 
                             fn index(&self, (#(#fn_get_at_args),*): (#(#index_args),*)) -> &Self::Output {
                                 match self.view_holder {
-                                    ViewHolder::#view_holder_extension_ident(v) => unsafe {
+                                    ViewHolder::#host_view_holder_extension_ident(v) => unsafe {
                                         #fn_get_at_ident(v as *const _, #(#fn_get_at_args),*)
                                     },
                                     _ => unreachable!(),
@@ -418,18 +484,50 @@ void kokkos_finalize() {{
                     });
 
                     deep_copy_matches_impls.push(quote! {
-                        ViewHolder::#view_holder_extension_ident(v1) => {
+                        ViewHolder::#host_view_holder_extension_ident(v1) => {
                             match src.view_holder {
-                                ViewHolder::#view_holder_extension_ident(v2) => unsafe {
-                                    #fn_deep_copy_ident(v1 as *mut _, v2 as *const _);
+                                ViewHolder::#host_view_holder_extension_ident(v2) => unsafe {
+                                    #fn_deep_copy_hth_ident(v1 as *mut _, v2 as *const _);
+                                },
+                                ViewHolder::#device_view_holder_extension_ident(v2) => unsafe {
+                                    #fn_deep_copy_dth_ident(v1 as *mut _, v2 as *const _);
+                                },
+                                _ => unreachable!()
+                            }
+                        },
+                        ViewHolder::#device_view_holder_extension_ident(v1) => {
+                            match src.view_holder {
+                                ViewHolder::#device_view_holder_extension_ident(v2) => unsafe {
+                                    #fn_deep_copy_dtd_ident(v1 as *mut _, v2 as *const _);
+                                },
+                                ViewHolder::#host_view_holder_extension_ident(v2) => unsafe {
+                                    #fn_deep_copy_htd_ident(v1 as *mut _, v2 as *const _);
                                 },
                                 _ => unreachable!()
                             }
                         }
+
                     });
 
-                    let kokkos_view_ty_str = format!(
+                    create_mirror_matches_impls.push(quote! {
+                        ViewHolder::#host_view_holder_extension_ident(v) => {
+                            unsafe {
+                                ViewHolder::#device_view_holder_extension_ident(#fn_create_mirror_htd_ident(v as *const _))
+                            }
+                        },
+                        ViewHolder::#device_view_holder_extension_ident(v) => {
+                            unsafe {
+                                ViewHolder::#host_view_holder_extension_ident(#fn_create_mirror_dth_ident(v as *const _))
+                            }
+                        }
+                    });
+
+                    let kokkos_host_view_ty_str = format!(
                         "Kokkos::View<{}{}, Kokkos::{}, Kokkos::HostSpace>",
+                        cpp_type, kokkos_dim_stars, layout_str,
+                    );
+                    let kokkos_device_view_ty_str = format!(
+                        "Kokkos::View<{}{}, Kokkos::{}, Kokkos::DefaultExecutionSpace::memory_space>",
                         cpp_type, kokkos_dim_stars, layout_str,
                     );
                     let kokkos_view_unmanaged_ty_str = format!(
@@ -452,12 +550,12 @@ void kokkos_finalize() {{
 
                     to_write_cpp.push_str(&format!(
                         "
-struct ViewHolder_{extension} {{
-    {kokkos_view_ty_str} view; 
+struct ViewHolder_{host_extension} {{
+    {kokkos_host_view_ty_str} view; 
 
-    ViewHolder_{extension}({kokkos_view_ty_str}& view) : view(view) {{}}
+    ViewHolder_{host_extension}({kokkos_host_view_ty_str} view) : view(view) {{}}
 
-    {kokkos_view_ty_str} get_view() const {{
+    {kokkos_host_view_ty_str} get_view() const {{
         return view;
     }}
 
@@ -467,19 +565,67 @@ struct ViewHolder_{extension} {{
 
 }};
 
-ViewHolder_{extension}* create_view_{extension}(rust::Vec<size_t> dimensions, rust::Slice<const {cpp_type}> s) {{
-    {kokkos_view_ty_str} host_view(\"krokkos_view_{extension}\", {create_view_dims_args});
+ViewHolder_{host_extension}* create_view_{host_extension}(rust::Vec<size_t> dimensions, rust::Slice<const {cpp_type}> s) {{
+    {kokkos_host_view_ty_str} host_view(\"krokkos_view_{host_extension}\", {create_view_dims_args});
     {kokkos_view_unmanaged_ty_str} rust_view(s.data(), {create_view_dims_args});
     Kokkos::deep_copy(host_view, rust_view);
-    return new ViewHolder_{extension}(host_view);
+    return new ViewHolder_{host_extension}(host_view);
 }}
 
-const {cpp_type}& get_at_{extension}(const ViewHolder_{extension}* view, {at_view_index_args}) {{
+const {cpp_type}& get_at_{host_extension}(const ViewHolder_{host_extension}* view, {at_view_index_args}) {{
     return view->at({at_view_index});
 }}
 
-void deep_copy_{extension}(ViewHolder_{extension}* dest, const ViewHolder_{extension}* src) {{
+struct ViewHolder_{device_extension} {{
+    {kokkos_device_view_ty_str} view; 
+
+    ViewHolder_{device_extension}({kokkos_device_view_ty_str} view) : view(view) {{}}
+
+    {kokkos_device_view_ty_str} get_view() const {{
+        return view;
+    }}
+
+    const {cpp_type}& at ({at_view_index_args}) const {{
+        return view({at_view_index});
+    }}
+
+}};
+
+ViewHolder_{device_extension}* create_view_{device_extension}(rust::Vec<size_t> dimensions, rust::Slice<const {cpp_type}> s) {{
+    {kokkos_device_view_ty_str} host_view(\"krokkos_view_{device_extension}\", {create_view_dims_args});
+    {kokkos_view_unmanaged_ty_str} rust_view(s.data(), {create_view_dims_args});
+    Kokkos::deep_copy(host_view, rust_view);
+    return new ViewHolder_{device_extension}(host_view);
+}}
+
+const {cpp_type}& get_at_{device_extension}(const ViewHolder_{device_extension}* view, {at_view_index_args}) {{
+    return view->at({at_view_index});
+}}
+
+void deep_copy_hth_{raw_extension}(ViewHolder_{host_extension}* dest, const ViewHolder_{host_extension}* src) {{
     Kokkos::deep_copy(dest->get_view(), src->get_view());
+}}
+
+void deep_copy_dth_{raw_extension}(ViewHolder_{host_extension}* dest, const ViewHolder_{device_extension}* src) {{
+    Kokkos::deep_copy(dest->get_view(), src->get_view());
+}}
+
+void deep_copy_htd_{raw_extension}(ViewHolder_{device_extension}* dest, const ViewHolder_{host_extension}* src) {{
+    Kokkos::deep_copy(dest->get_view(), src->get_view());
+}}
+
+void deep_copy_dtd_{raw_extension}(ViewHolder_{device_extension}* dest, const ViewHolder_{device_extension}* src) {{
+    Kokkos::deep_copy(dest->get_view(), src->get_view());
+}}
+
+ViewHolder_{device_extension}* create_mirror_htd_{raw_extension}(const ViewHolder_{host_extension}* src) {{
+    auto mirror_view = Kokkos::create_mirror(src->get_view());
+    return new ViewHolder_{device_extension}(mirror_view);
+}}
+
+ViewHolder_{host_extension}* create_mirror_dth_{raw_extension}(const ViewHolder_{device_extension}* src) {{
+    auto mirror_view = Kokkos::create_mirror(src->get_view());
+    return new ViewHolder_{host_extension}(mirror_view);
 }}
 "));
                 }
@@ -527,8 +673,6 @@ void deep_copy_{extension}(ViewHolder_{extension}* dest, const ViewHolder_{exten
                         fn to_vec(&self) -> Vec<usize> {
                             self.slice().to_vec()
                         }
-
-                        // fn try_from_slice(slice: &[usize]) -> Result<Self, &'static str>;
                     }
 
                     #(#dims_impls)*
@@ -549,22 +693,49 @@ void deep_copy_{extension}(ViewHolder_{extension}* dest, const ViewHolder_{exten
                     #(#layout_impls)*
 
                     #[allow(dead_code)]
+                    pub trait MemorySpace: Default + Debug {
+                        type MirrorSpace: MemorySpace;
+                    }
+
+                    #[derive(Default, Debug)]
+                    pub struct HostSpace();
+                    #[derive(Default, Debug)]
+                    pub struct DeviceSpace();
+
+                    impl MemorySpace for HostSpace {
+                        type MirrorSpace = DeviceSpace;
+                    }
+                    impl MemorySpace for DeviceSpace {
+                        type MirrorSpace = HostSpace;
+                    }
+
+                    #[allow(dead_code)]
                     pub enum ViewHolder {
                         #(#enums_decls),*
                     }
 
                     #[allow(dead_code)]
-                    pub struct View<T: DTType, D: Dimension, L: LayoutType>{
+                    pub struct View<T: DTType, D: Dimension, L: LayoutType, M: MemorySpace>{
                         pub view_holder: ViewHolder,
-                        _marker: PhantomData<(T,D,L)>
+                        _marker: PhantomData<(T,D,L,M)>
                     }
 
                     #(#views_impls)*
 
-                    pub fn deep_copy<T: DTType, D: Dimension, L: LayoutType>(dest: &mut View<T,D,L>, src: &View<T,D,L>) {
+                    pub fn deep_copy<T: DTType, D: Dimension, L: LayoutType, M1: MemorySpace, M2: MemorySpace>(dest: &mut View<T,D,L, M1>, src: &View<T,D,L, M2>) {
                         match dest.view_holder {
                             #(#deep_copy_matches_impls),*
                         }
+                    }
+
+                    pub fn create_mirror<T: DTType, D: Dimension, L: LayoutType, M: MemorySpace>(src: &View<T,D,L,M>) ->  View<T,D,L,M::MirrorSpace> {
+                        View::<T,D,L,M::MirrorSpace>{
+                            view_holder: match src.view_holder {
+                                #(#create_mirror_matches_impls),*
+                            },
+                            _marker: PhantomData,
+                        }
+                        
                     }
 
                 };
