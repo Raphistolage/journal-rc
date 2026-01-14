@@ -38,6 +38,7 @@ pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
                 let mut views_impls = vec![];
                 let mut deep_copy_matches_impls = vec![];
                 let mut create_mirror_matches_impls = vec![];
+                let mut create_mirror_view_matches_impls = vec![];
 
                 let mut to_write_cpp = "
 #pragma once
@@ -162,14 +163,14 @@ inline void kokkos_finalize() {{
                     let fn_deep_copy_htd_ident = format_ident!("deep_copy_htd_{}", raw_extension);
                     let fn_deep_copy_dth_ident = format_ident!("deep_copy_dth_{}", raw_extension);
                     let fn_deep_copy_dtd_ident = format_ident!("deep_copy_dtd_{}", raw_extension);
-                    let fn_create_mirror_hth_ident =
-                        format_ident!("create_mirror_hth_{}", raw_extension);
-                    let fn_create_mirror_dth_ident =
-                        format_ident!("create_mirror_dth_{}", raw_extension);
-                    let fn_create_mirror_htd_ident =
-                        format_ident!("create_mirror_htd_{}", raw_extension);
-                    let fn_create_mirror_dtd_ident =
-                        format_ident!("create_mirror_dtd_{}", raw_extension);
+                    let fn_create_mirror_hth_ident = format_ident!("create_mirror_hth_{}", raw_extension);
+                    let fn_create_mirror_dth_ident = format_ident!("create_mirror_dth_{}", raw_extension);
+                    let fn_create_mirror_htd_ident = format_ident!("create_mirror_htd_{}", raw_extension);
+                    let fn_create_mirror_dtd_ident = format_ident!("create_mirror_dtd_{}", raw_extension);
+                    let fn_create_mirror_view_hth_ident = format_ident!("create_mirror_view_hth_{}", raw_extension);
+                    let fn_create_mirror_view_dth_ident = format_ident!("create_mirror_view_dth_{}", raw_extension);
+                    let fn_create_mirror_view_htd_ident = format_ident!("create_mirror_view_htd_{}", raw_extension);
+                    let fn_create_mirror_view_dtd_ident = format_ident!("create_mirror_view_dtd_{}", raw_extension);
 
                     let fn_get_at_args = (0..dim_val_usize)
                         .map(|i| format_ident!("i{i}"))
@@ -216,6 +217,14 @@ inline void kokkos_finalize() {{
                         unsafe fn #fn_create_mirror_htd_ident(src: *const #host_view_holder_ident) -> *mut #device_view_holder_ident;
                         #[allow(dead_code)]
                         unsafe fn #fn_create_mirror_dtd_ident(src: *const #device_view_holder_ident) -> *mut #device_view_holder_ident;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_create_mirror_view_hth_ident(src: *const #host_view_holder_ident) -> *mut #host_view_holder_ident;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_create_mirror_view_dth_ident(src: *const #device_view_holder_ident) -> *mut #host_view_holder_ident;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_create_mirror_view_htd_ident(src: *const #host_view_holder_ident) -> *mut #device_view_holder_ident;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_create_mirror_view_dtd_ident(src: *const #device_view_holder_ident) -> *mut #device_view_holder_ident;
                     });
 
                     view_holder_types_decls.push(quote! {
@@ -316,6 +325,29 @@ inline void kokkos_finalize() {{
                                 },
                                 MemSpace::DeviceSpace => unsafe {
                                     ViewHolder::#device_view_holder_extension_ident(#fn_create_mirror_dtd_ident(v as *const _))
+                                },
+                            }
+                        }
+                    });
+
+                    create_mirror_view_matches_impls.push(quote! {
+                        ViewHolder::#host_view_holder_extension_ident(v) => {
+                            match mem_space {
+                                MemSpace::HostSpace => unsafe {
+                                    ViewHolder::#host_view_holder_extension_ident(#fn_create_mirror_view_hth_ident(v as *const _))
+                                },
+                                MemSpace::DeviceSpace => unsafe {
+                                    ViewHolder::#device_view_holder_extension_ident(#fn_create_mirror_view_htd_ident(v as *const _))
+                                },
+                            }
+                        },
+                        ViewHolder::#device_view_holder_extension_ident(v) => {
+                            match mem_space {
+                                MemSpace::HostSpace => unsafe {
+                                    ViewHolder::#host_view_holder_extension_ident(#fn_create_mirror_view_dth_ident(v as *const _))
+                                },
+                                MemSpace::DeviceSpace => unsafe {
+                                    ViewHolder::#device_view_holder_extension_ident(#fn_create_mirror_view_dtd_ident(v as *const _))
                                 },
                             }
                         }
@@ -549,6 +581,18 @@ ViewHolder_{device_extension}* create_mirror_dtd_{raw_extension}(const ViewHolde
                         View::<T,D,L,M2>{
                             view_holder: match src.view_holder {
                                 #(#create_mirror_matches_impls),*
+                            },
+                            _marker: PhantomData,
+                        }
+
+                    }
+
+                    #[allow(unreachable_patterns, dead_code)]
+                    pub fn create_mirror_view<T: DTType, D: Dimension, L: LayoutType, M1: MemorySpace, M2: MemorySpace>(memory_space: M2, src: &View<T,D,L,M1>) ->  View<T,D,L,M2> {
+                        let mem_space = memory_space.to_mem_space();
+                        View::<T,D,L,M2>{
+                            view_holder: match src.view_holder {
+                                #(#create_mirror_view_matches_impls),*
                             },
                             _marker: PhantomData,
                         }
