@@ -1,6 +1,6 @@
 use std::fs;
 
-use syn::{LitInt, Token, parenthesized, parse::ParseStream, punctuated::Punctuated};
+use syn::{Ident, LitInt, Token, parenthesized, parse::ParseStream, punctuated::Punctuated};
 
 use quote::{format_ident, quote};
 use syn::{Item, Path, Type};
@@ -240,6 +240,7 @@ pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
                 let mut enums_decls = vec![];
                 let mut iview_types_decls = vec![];
                 let mut views_impls = vec![];
+                let mut deep_copy_matches_impls = vec![];
 
                 let mut to_write_cpp = "
 #pragma once
@@ -251,6 +252,15 @@ pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
 #include \"cxx.h\"
 
 namespace krokkos_bridge_ffi {
+
+void kokkos_initialize() {{
+    Kokkos::initialize();
+}}
+
+void kokkos_finalize() {{
+    Kokkos::finalize();
+}}
+
 "
                 .to_string();
 
@@ -345,13 +355,15 @@ namespace krokkos_bridge_ffi {
                         implemented_layout.push(layout);
                     }
 
-                    let extension =
-                        format!("{}_{}_{}", rust_type_str, dim_str, layout_str);
+                    let extension = format!("{}_{}_{}", rust_type_str, dim_str, layout_str);
 
-                    let fn_create_ident =
-                        format_ident!("create_view_{}", extension);
+                    let fn_create_ident = format_ident!("create_view_{}", extension);
                     let fn_get_at_ident = format_ident!("get_at_{}", extension);
                     let fn_deep_copy_ident = format_ident!("deep_copy_{}", extension);
+
+                    let fn_get_at_args = (0..dim_val_usize)
+                        .map(|i| format_ident!("i{i}"))
+                        .collect::<Vec<Ident>>();
 
                     let view_holder_extension_ident =
                         format_ident!("{}{}{}", rust_type_str.to_uppercase(), dim_str, layout_str);
@@ -359,7 +371,11 @@ namespace krokkos_bridge_ffi {
 
                     func_decls.push(quote! {
                         #[allow(dead_code)]
-                        fn #fn_create_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> SharedPtr<#view_holder_ident>;
+                        unsafe fn #fn_create_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> *mut #view_holder_ident;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_get_at_ident<'a>(view: *const #view_holder_ident, #(#fn_get_at_args: usize),*) -> &'a #ty;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_deep_copy_ident(dest: *mut #view_holder_ident, src: *const #view_holder_ident);
                     });
 
                     iview_types_decls.push(quote! {
@@ -368,24 +384,56 @@ namespace krokkos_bridge_ffi {
                     });
 
                     enums_decls.push(quote! {
-                        #view_holder_extension_ident(SharedPtr<#view_holder_ident>)
+                        #view_holder_extension_ident(*mut #view_holder_ident)
                     });
 
+                    let usize_ty: Type = syn::parse_str("usize").unwrap();
+                    let index_args = (0..dim_val_usize)
+                        .map(|_| usize_ty.clone())
+                        .collect::<Vec<Type>>();
+
                     views_impls.push(quote! {
-                        #[allow(dead_code)]
                         impl View<#ty, #dim_ty, #layout_ty> {
                             pub fn from_shape<U: Into<#dim_ty>>(shape: U, data: &[#ty]) -> Self {
                                 let dims: #dim_ty = shape.into();
                                 Self{
-                                    view_holder: ViewHolder::#view_holder_extension_ident(#fn_create_ident(dims.into(), data)),
+                                    view_holder: ViewHolder::#view_holder_extension_ident(unsafe{#fn_create_ident(dims.into(), data)}),
                                     _marker: PhantomData,
+                                }
+                            }
+                        }
+
+                        impl Index<(#(#index_args),*)> for View<#ty, #dim_ty, #layout_ty> {
+                            type Output = #ty;
+
+                            fn index(&self, (#(#fn_get_at_args),*): (#(#index_args),*)) -> &Self::Output {
+                                match self.view_holder {
+                                    ViewHolder::#view_holder_extension_ident(v) => unsafe {
+                                        #fn_get_at_ident(v as *const _, #(#fn_get_at_args),*)
+                                    },
+                                    _ => unreachable!(),
                                 }
                             }
                         }
                     });
 
+                    deep_copy_matches_impls.push(quote! {
+                        ViewHolder::#view_holder_extension_ident(v1) => {
+                            match src.view_holder {
+                                ViewHolder::#view_holder_extension_ident(v2) => unsafe {
+                                    #fn_deep_copy_ident(v1 as *mut _, v2 as *const _);
+                                },
+                                _ => unreachable!()
+                            }
+                        }
+                    });
+
                     let kokkos_view_ty_str = format!(
-                        "Kokkos::View<{}{}, Kokkos::{}, Kokkos::DefaultExecutionSpace::memory_space>",
+                        "Kokkos::View<{}{}, Kokkos::{}, Kokkos::HostSpace>",
+                        cpp_type, kokkos_dim_stars, layout_str,
+                    );
+                    let kokkos_view_unmanaged_ty_str = format!(
+                        "Kokkos::View<const {}{}, Kokkos::{}, Kokkos::HostSpace, Kokkos::MemoryTraits<Kokkos::Unmanaged>>",
                         cpp_type, kokkos_dim_stars, layout_str,
                     );
                     let mut create_view_dims_args = (0..dim_val_usize)
@@ -393,59 +441,47 @@ namespace krokkos_bridge_ffi {
                         .collect::<String>();
                     create_view_dims_args.pop();
 
+                    let mut at_view_index_args = (0..dim_val_usize)
+                        .map(|i| format!("size_t i{},", i))
+                        .collect::<String>();
+                    at_view_index_args.pop();
+                    let mut at_view_index = (0..dim_val_usize)
+                        .map(|i| format!("i{},", i))
+                        .collect::<String>();
+                    at_view_index.pop();
+
                     to_write_cpp.push_str(&format!(
                         "
-struct ViewHolder_{} {{
-    {} view; 
+struct ViewHolder_{extension} {{
+    {kokkos_view_ty_str} view; 
 
-    ViewHolder_{}({}& view) : view(view) {{}}
+    ViewHolder_{extension}({kokkos_view_ty_str}& view) : view(view) {{}}
 
-    {} get_view() const {{
+    {kokkos_view_ty_str} get_view() const {{
         return view;
     }}
+
+    const {cpp_type}& at ({at_view_index_args}) const {{
+        return view({at_view_index});
+    }}
+
 }};
 
-std::shared_ptr<ViewHolder_{}> create_view_{}(rust::Vec<size_t> dimensions, rust::Slice<const {}> s) {{
-    {} view(\"krokkos_view_{}\", {});
-    auto view_holder = std::make_shared<ViewHolder_{}>(view);
-    return view_holder;
+ViewHolder_{extension}* create_view_{extension}(rust::Vec<size_t> dimensions, rust::Slice<const {cpp_type}> s) {{
+    {kokkos_view_ty_str} host_view(\"krokkos_view_{extension}\", {create_view_dims_args});
+    {kokkos_view_unmanaged_ty_str} rust_view(s.data(), {create_view_dims_args});
+    Kokkos::deep_copy(host_view, rust_view);
+    return new ViewHolder_{extension}(host_view);
 }}
-",
-                        extension,
-                        kokkos_view_ty_str,
-                        extension,
-                        kokkos_view_ty_str,
-                        kokkos_view_ty_str,
-                        extension,
-                        extension,
-                        cpp_type,
-                        kokkos_view_ty_str,
-                        extension,
-                        create_view_dims_args,
-                        extension,
-                    ));
 
-                    // for d in dimension.into_iter() {
-                    //     let fn_name_print = format_ident!("printcpp_{}", d).to_string();
+const {cpp_type}& get_at_{extension}(const ViewHolder_{extension}* view, {at_view_index_args}) {{
+    return view->at({at_view_index});
+}}
 
-                    //     let idents: Vec<Ident> = (1..=d).map(|i| format_ident!("i{}", i)).collect();
-
-                    //     func_decls.push(quote! {
-                    //         #[allow(dead_code)]
-                    //         #[rust_name = #fn_name_print]
-                    //         fn printcpp(#(#idents : i32),*);
-                    //     });
-                    // }
-
-                    //                 to_write_cpp.push_str(
-                    //                     "
-                    // template <typename... Is>
-                    // void printcpp(Is... args) {
-                    //     ((std::cout << std::forward<Is>(args) << \'\\n\'), ...);
-                    // }
-
-                    //                 ",
-                    //                 );
+void deep_copy_{extension}(ViewHolder_{extension}* dest, const ViewHolder_{extension}* src) {{
+    Kokkos::deep_copy(dest->get_view(), src->get_view());
+}}
+"));
                 }
 
                 let tokens = quote! {
@@ -455,6 +491,10 @@ std::shared_ptr<ViewHolder_{}> create_view_{}(rust::Vec<size_t> dimensions, rust
 
                         unsafe extern "C++" {
                             include!("krokkos_bridge.hpp");
+
+                            fn kokkos_initialize();
+                            fn kokkos_finalize();
+
                             #(#iview_types_decls)*
 
                             #(#func_decls)*
@@ -463,8 +503,10 @@ std::shared_ptr<ViewHolder_{}> create_view_{}(rust::Vec<size_t> dimensions, rust
 
                     use krokkos_bridge_ffi::*;
                     use std::fmt::Debug;
-                    use cxx::SharedPtr;
+                    use std::ops::Index;
                     use std::marker::PhantomData;
+
+                    pub use krokkos_bridge_ffi::{kokkos_initialize, kokkos_finalize};
 
                     pub trait DTType: Debug + Default + Clone + Copy {}
 
@@ -513,11 +555,17 @@ std::shared_ptr<ViewHolder_{}> create_view_{}(rust::Vec<size_t> dimensions, rust
 
                     #[allow(dead_code)]
                     pub struct View<T: DTType, D: Dimension, L: LayoutType>{
-                        view_holder: ViewHolder,
+                        pub view_holder: ViewHolder,
                         _marker: PhantomData<(T,D,L)>
                     }
 
                     #(#views_impls)*
+
+                    pub fn deep_copy<T: DTType, D: Dimension, L: LayoutType>(dest: &mut View<T,D,L>, src: &View<T,D,L>) {
+                        match dest.view_holder {
+                            #(#deep_copy_matches_impls),*
+                        }
+                    }
 
                 };
 
@@ -540,10 +588,6 @@ std::shared_ptr<ViewHolder_{}> create_view_{}(rust::Vec<size_t> dimensions, rust
                 )
                 .expect("Writing went wrong!");
                 let _ = cxx_build::bridge(rust_source_file.clone());
-                // .file(out_path.join("krokkos_bridge.cpp"))
-                // .include(&out_path)
-                // .include(out_path.join("../cxxbridge/rust"))
-                // .compile("krokkos_bridge");
                 println!("cargo:rerun-if-changed={}", rust_source_file.display());
             }
         }
