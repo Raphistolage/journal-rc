@@ -205,15 +205,6 @@ impl ToString for MemSpace {
     }
 }
 
-impl MemSpace {
-    fn mirror_space(&self) -> Self {
-        match self {
-            MemSpace::HostSpace => MemSpace::DeviceSpace,
-            MemSpace::DeviceSpace => MemSpace::HostSpace,
-        }
-    }
-}
-
 #[derive(Debug)]
 struct ViewConfig {
     data_type: ViewDataType,
@@ -390,7 +381,6 @@ void kokkos_finalize() {{
                     let fn_create_device_ident = format_ident!("create_view_{}", device_extension);
                     let mirror_fn_create_ident = format_ident!("create_view_{}", device_extension);
                     let fn_get_at_ident = format_ident!("get_at_{}", host_extension);
-                    let mirror_fn_get_at_ident = format_ident!("get_at_{}", device_extension);
                     let fn_deep_copy_hth_ident = format_ident!("deep_copy_hth_{}", raw_extension);
                     let fn_deep_copy_htd_ident = format_ident!("deep_copy_htd_{}", raw_extension);
                     let fn_deep_copy_dth_ident = format_ident!("deep_copy_dth_{}", raw_extension);
@@ -450,6 +440,7 @@ void kokkos_finalize() {{
 
                     views_impls.push(quote! {
                         impl View<#ty, #dim_ty, #layout_ty, #host_mem_space_ty> {
+                            #[allow(dead_code)]
                             pub fn from_shape<U: Into<#dim_ty>>(shape: U, data: &[#ty]) -> Self {
                                 let dims: #dim_ty = shape.into();
                                 Self{
@@ -460,6 +451,7 @@ void kokkos_finalize() {{
                         }
 
                         impl View<#ty, #dim_ty, #layout_ty, #device_mem_space_ty> {
+                            #[allow(dead_code)]
                             pub fn from_shape<U: Into<#dim_ty>>(shape: U, data: &[#ty]) -> Self {
                                 let dims: #dim_ty = shape.into();
                                 Self{
