@@ -3,7 +3,7 @@ use parser::*;
 
 use quote::{format_ident, quote};
 use std::fs;
-use syn::{Item, Token, Type, punctuated::Punctuated};
+use syn::{Ident, Item, Token, Type, punctuated::Punctuated};
 
 /// Core of the Krokkos crate.
 ///
@@ -34,7 +34,7 @@ pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
                 let mut dims_impls = vec![];
                 let mut layout_impls = vec![];
                 let mut enums_decls = vec![];
-                let mut iview_types_decls = vec![];
+                let mut view_holder_types_decls = vec![];
                 let mut views_impls = vec![];
 
                 let mut to_write_cpp = "
@@ -155,6 +155,11 @@ inline void kokkos_finalize() {{
 
                     let fn_create_host_ident = format_ident!("create_view_{}", host_extension);
                     let fn_create_device_ident = format_ident!("create_view_{}", device_extension);
+                    let fn_get_at_ident = format_ident!("get_at_{}", host_extension);
+
+                    let fn_get_at_args = (0..dim_val_usize)
+                        .map(|i| format_ident!("i{i}"))
+                        .collect::<Vec<Ident>>();
 
                     let host_view_holder_extension_ident = format_ident!(
                         "{}{}{}{}",
@@ -178,11 +183,13 @@ inline void kokkos_finalize() {{
                         #[allow(dead_code)]
                         unsafe fn #fn_create_host_ident(dimensions: Vec<usize>,s: &[#ty]) -> *mut #host_view_holder_ident;
                         #[allow(dead_code)]
-                        unsafe fn #fn_create_device_ident(dimensions: Vec<usize>,s: &[#ty]) -> *mut #device_view_holder_ident;
+                        unsafe fn #fn_create_device_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> *mut #device_view_holder_ident;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_get_at_ident<'a>(view: *const #host_view_holder_ident, #(#fn_get_at_args: usize),*) -> &'a #ty;
 
                     });
 
-                    iview_types_decls.push(quote! {
+                    view_holder_types_decls.push(quote! {
                         #[allow(dead_code)]
                         type #host_view_holder_ident;
                         #[allow(dead_code)]
@@ -194,6 +201,11 @@ inline void kokkos_finalize() {{
                         #device_view_holder_extension_ident(*mut #device_view_holder_ident)
                     });
 
+                    let usize_ty: Type = syn::parse_str("usize").unwrap();
+                    let index_args = (0..dim_val_usize)
+                        .map(|_| usize_ty.clone())
+                        .collect::<Vec<Type>>();
+
                     views_impls.push(quote! {
                         impl View<#ty, #dim_ty, #layout_ty, #host_mem_space_ty> {
                             pub fn from_shape<U: Into<#dim_ty>>(shape: U, data: &[#ty]) -> Self {
@@ -201,6 +213,19 @@ inline void kokkos_finalize() {{
                                 Self{
                                     view_holder: ViewHolder::#host_view_holder_extension_ident(unsafe{#fn_create_host_ident(dims.into(), data)}),
                                     _marker: PhantomData,
+                                }
+                            }
+                        }
+
+                        impl Index<(#(#index_args),*)> for View<#ty, #dim_ty, #layout_ty, #host_mem_space_ty> {
+                            type Output = #ty;
+
+                            fn index(&self, (#(#fn_get_at_args),*): (#(#index_args),*)) -> &Self::Output {
+                                match self.view_holder {
+                                    ViewHolder::#host_view_holder_extension_ident(v) => unsafe {
+                                        #fn_get_at_ident(v as *const _, #(#fn_get_at_args),*)
+                                    },
+                                    _ => unreachable!(),
                                 }
                             }
                         }
@@ -234,6 +259,15 @@ inline void kokkos_finalize() {{
                         .collect::<String>();
                     create_view_dims_args.pop();
 
+                    let mut at_view_index_args = (0..dim_val_usize)
+                        .map(|i| format!("size_t i{},", i))
+                        .collect::<String>();
+                    at_view_index_args.pop();
+                    let mut at_view_index = (0..dim_val_usize)
+                        .map(|i| format!("i{},", i))
+                        .collect::<String>();
+                    at_view_index.pop();
+
                     to_write_cpp.push_str(&format!(
                         "
 
@@ -245,6 +279,11 @@ struct ViewHolder_{host_extension} {{
     {kokkos_host_view_ty_str} get_view() const {{
         return view;
     }}
+
+    const {cpp_type}& at ({at_view_index_args}) const {{
+        return view({at_view_index});
+    }}
+
 }};
 
 ViewHolder_{host_extension}* create_view_{host_extension}(rust::Vec<size_t> dimensions, rust::Slice<const {cpp_type}> s) {{
@@ -254,6 +293,9 @@ ViewHolder_{host_extension}* create_view_{host_extension}(rust::Vec<size_t> dime
     return new ViewHolder_{host_extension}(host_view);
 }}
 
+const {cpp_type}& get_at_{host_extension}(const ViewHolder_{host_extension}* view, {at_view_index_args}) {{
+    return view->at({at_view_index});
+}}
 
 struct ViewHolder_{device_extension} {{
     {kokkos_device_view_ty_str} view; 
@@ -285,7 +327,7 @@ ViewHolder_{device_extension}* create_view_{device_extension}(rust::Vec<size_t> 
                             fn kokkos_initialize();
                             fn kokkos_finalize();
 
-                            #(#iview_types_decls)*
+                            #(#view_holder_types_decls)*
 
                             #(#func_decls)*
                         }
@@ -293,6 +335,7 @@ ViewHolder_{device_extension}* create_view_{device_extension}(rust::Vec<size_t> 
 
                     pub use krokkos_bridge::*;
                     use std::fmt::Debug;
+                    use std::ops::Index;
                     use std::marker::PhantomData;
 
                     pub trait DTType: Debug + Default + Clone + Copy {}
