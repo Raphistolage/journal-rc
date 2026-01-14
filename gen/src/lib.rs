@@ -36,6 +36,7 @@ pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
                 let mut enums_decls = vec![];
                 let mut view_holder_types_decls = vec![];
                 let mut views_impls = vec![];
+                let mut deep_copy_matches_impls = vec![];
 
                 let mut to_write_cpp = "
 #pragma once
@@ -156,6 +157,10 @@ inline void kokkos_finalize() {{
                     let fn_create_host_ident = format_ident!("create_view_{}", host_extension);
                     let fn_create_device_ident = format_ident!("create_view_{}", device_extension);
                     let fn_get_at_ident = format_ident!("get_at_{}", host_extension);
+                    let fn_deep_copy_hth_ident = format_ident!("deep_copy_hth_{}", raw_extension);
+                    let fn_deep_copy_htd_ident = format_ident!("deep_copy_htd_{}", raw_extension);
+                    let fn_deep_copy_dth_ident = format_ident!("deep_copy_dth_{}", raw_extension);
+                    let fn_deep_copy_dtd_ident = format_ident!("deep_copy_dtd_{}", raw_extension);
 
                     let fn_get_at_args = (0..dim_val_usize)
                         .map(|i| format_ident!("i{i}"))
@@ -186,7 +191,14 @@ inline void kokkos_finalize() {{
                         unsafe fn #fn_create_device_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> *mut #device_view_holder_ident;
                         #[allow(dead_code)]
                         unsafe fn #fn_get_at_ident<'a>(view: *const #host_view_holder_ident, #(#fn_get_at_args: usize),*) -> &'a #ty;
-
+                        #[allow(dead_code)]
+                        unsafe fn #fn_deep_copy_hth_ident(dest: *mut #host_view_holder_ident, src: *const #host_view_holder_ident);
+                        #[allow(dead_code)]
+                        unsafe fn #fn_deep_copy_htd_ident(dest: *mut #device_view_holder_ident, src: *const #host_view_holder_ident);
+                        #[allow(dead_code)]
+                        unsafe fn #fn_deep_copy_dth_ident(dest: *mut #host_view_holder_ident, src: *const #device_view_holder_ident);
+                        #[allow(dead_code)]
+                        unsafe fn #fn_deep_copy_dtd_ident(dest: *mut #device_view_holder_ident, src: *const #device_view_holder_ident);
                     });
 
                     view_holder_types_decls.push(quote! {
@@ -208,6 +220,7 @@ inline void kokkos_finalize() {{
 
                     views_impls.push(quote! {
                         impl View<#ty, #dim_ty, #layout_ty, #host_mem_space_ty> {
+                            #[allow(dead_code)]
                             pub fn from_shape<U: Into<#dim_ty>>(shape: U, data: &[#ty]) -> Self {
                                 let dims: #dim_ty = shape.into();
                                 Self{
@@ -217,6 +230,7 @@ inline void kokkos_finalize() {{
                             }
                         }
 
+                        #[allow(unused_parens)]
                         impl Index<(#(#index_args),*)> for View<#ty, #dim_ty, #layout_ty, #host_mem_space_ty> {
                             type Output = #ty;
 
@@ -231,12 +245,37 @@ inline void kokkos_finalize() {{
                         }
 
                         impl View<#ty, #dim_ty, #layout_ty, #device_mem_space_ty> {
+                            #[allow(dead_code)]
                             pub fn from_shape<U: Into<#dim_ty>>(shape: U, data: &[#ty]) -> Self {
                                 let dims: #dim_ty = shape.into();
                                 Self{
                                     view_holder: ViewHolder::#device_view_holder_extension_ident(unsafe{#fn_create_device_ident(dims.into(), data)}),
                                     _marker: PhantomData,
                                 }
+                            }
+                        }
+                    });
+                    deep_copy_matches_impls.push(quote! {
+                        ViewHolder::#host_view_holder_extension_ident(v1) => {
+                            match src.view_holder {
+                                ViewHolder::#host_view_holder_extension_ident(v2) => unsafe {
+                                    #fn_deep_copy_hth_ident(v1 as *mut _, v2 as *const _);
+                                },
+                                ViewHolder::#device_view_holder_extension_ident(v2) => unsafe {
+                                    #fn_deep_copy_dth_ident(v1 as *mut _, v2 as *const _);
+                                },
+                                _ => unreachable!()
+                            }
+                        },
+                        ViewHolder::#device_view_holder_extension_ident(v1) => {
+                            match src.view_holder {
+                                ViewHolder::#device_view_holder_extension_ident(v2) => unsafe {
+                                    #fn_deep_copy_dtd_ident(v1 as *mut _, v2 as *const _);
+                                },
+                                ViewHolder::#host_view_holder_extension_ident(v2) => unsafe {
+                                    #fn_deep_copy_htd_ident(v1 as *mut _, v2 as *const _);
+                                },
+                                _ => unreachable!()
                             }
                         }
 
@@ -313,6 +352,22 @@ ViewHolder_{device_extension}* create_view_{device_extension}(rust::Vec<size_t> 
     {kokkos_view_unmanaged_ty_str} rust_view(s.data(), {create_view_dims_args});
     Kokkos::deep_copy(device_view, rust_view);
     return new ViewHolder_{device_extension}(device_view);
+}}
+
+void deep_copy_hth_{raw_extension}(ViewHolder_{host_extension}* dest, const ViewHolder_{host_extension}* src) {{
+    Kokkos::deep_copy(dest->get_view(), src->get_view());
+}}
+
+void deep_copy_dth_{raw_extension}(ViewHolder_{host_extension}* dest, const ViewHolder_{device_extension}* src) {{
+    Kokkos::deep_copy(dest->get_view(), src->get_view());
+}}
+
+void deep_copy_htd_{raw_extension}(ViewHolder_{device_extension}* dest, const ViewHolder_{host_extension}* src) {{
+    Kokkos::deep_copy(dest->get_view(), src->get_view());
+}}
+
+void deep_copy_dtd_{raw_extension}(ViewHolder_{device_extension}* dest, const ViewHolder_{device_extension}* src) {{
+    Kokkos::deep_copy(dest->get_view(), src->get_view());
 }}
 "));
                 }
@@ -407,6 +462,14 @@ ViewHolder_{device_extension}* create_view_{device_extension}(rust::Vec<size_t> 
                     }
 
                     #(#views_impls)*
+
+                    #[allow(unreachable_patterns, dead_code)]
+                    pub fn deep_copy<T: DTType, D: Dimension, L: LayoutType, M1: MemorySpace, M2: MemorySpace>(dest: &mut View<T,D,L, M1>, src: &View<T,D,L, M2>) {
+                        match dest.view_holder {
+                            #(#deep_copy_matches_impls),*
+                        }
+                    }
+
 
                 };
 
