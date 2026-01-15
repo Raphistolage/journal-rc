@@ -1,5 +1,5 @@
 mod ffi;
-
+mod my_ffi;
 fn main() {
     ffi::kokkos_initialize();
     let mut v1 = ffi::View::<f64, ffi::Dim2, ffi::LayoutRight, ffi::DeviceSpace>::from_shape(
