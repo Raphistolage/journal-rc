@@ -38,16 +38,15 @@ pub fn build(rust_source_file: impl AsRef<std::path::Path>){
     let dst = final_dst_config.build();
 
     println!("cargo:rustc-link-search=native={}", dst.display());
-    println!("cargo:rustc-link-lib=krokkos");
+    println!("cargo:rustc-link-lib=Krokkos");
     println!("cargo:rustc-link-arg=-Wl,-rpath={}", dst.display());
-
 }
 
-pub fn bridge(rust_source_file: Option<impl AsRef<Path>>, cpp_source_file: Option<impl AsRef<Path>>){
+pub fn bridge(rust_source_file: impl AsRef<Path>, cpp_source_file: impl AsRef<Path>){
 
     let user_manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
 
-    let mut dst_config = Config::new(format!("{}/Release", KROKKOS_CRATE_ROOT));
+    let mut dst_config = Config::new(format!("{}/Bridge", KROKKOS_CRATE_ROOT));
 
     let out_dir = std::env::var("OUT_DIR").expect("OUT_DIR not defined");
     println!("cargo:warning=Out_dir is : {}", out_dir);
@@ -57,8 +56,7 @@ pub fn bridge(rust_source_file: Option<impl AsRef<Path>>, cpp_source_file: Optio
         std::fs::create_dir(format!("{}/../../../../krokkosbridge", out_dir)).unwrap();
     }
 
-    let cpp_source_file_path = cpp_source_file.unwrap();
-    let cpp_source_file_path = cpp_source_file_path.as_ref();
+    let cpp_source_file_path = cpp_source_file.as_ref();
     let cpp_source_folder_str = cpp_source_file_path.parent().unwrap();
     let cpp_source_file_str = cpp_source_file_path.to_str().unwrap();
 
@@ -82,20 +80,16 @@ pub fn bridge(rust_source_file: Option<impl AsRef<Path>>, cpp_source_file: Optio
         ))
     ;
 
-    let is_rust_source_file = rust_source_file.is_some();
-    if  is_rust_source_file {
-        let path = rust_source_file.unwrap();
-        let _ = cxx_build::bridge(&path);
+    let _ = cxx_build::bridge(&rust_source_file);
 
-        modified_dst_config.configure_arg(format!(
-            "-DUSER_CPP_FILE_PATH={}",
-            cpp_source_file_str
-        ))
-        .configure_arg(format!(
-            "-DUSER_RUST_FFI_FILE_PATH={}",
-            path.as_ref().display()
-        ));
-    }
+    modified_dst_config.configure_arg(format!(
+        "-DUSER_CPP_FILE_PATH={}",
+        cpp_source_file_str
+    ))
+    .configure_arg(format!(
+        "-DUSER_RUST_FFI_FILE_PATH={}",
+        rust_source_file.as_ref().display()
+    ));
 
     modified_dst_config.pic(true);
 
@@ -109,8 +103,6 @@ pub fn bridge(rust_source_file: Option<impl AsRef<Path>>, cpp_source_file: Optio
     let dst = final_dst_config.build();
 
     println!("cargo:rustc-link-search=native={}", dst.display());
-    if is_rust_source_file {
-        println!("cargo:rustc-link-lib=userCppFunctions")
-    }
+    println!("cargo:rustc-link-lib=userCppFunctions");
     println!("cargo:rustc-link-arg=-Wl,-rpath={}", dst.display());
 }
