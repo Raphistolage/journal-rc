@@ -254,6 +254,13 @@ inline void kokkos_finalize() {{
                                     _marker: PhantomData,
                                 }
                             }
+                            #[allow(dead_code)]
+                            pub fn get_view(&self) -> *const #host_view_holder_ident {
+                                match self.view_holder {
+                                    ViewHolder::#host_view_holder_extension_ident(v) => v as *const _,
+                                    _ => unreachable!(),
+                                }
+                            }
                         }
 
                         impl View<#ty, #dim_ty, #layout_ty, #device_mem_space_ty> {
@@ -263,6 +270,13 @@ inline void kokkos_finalize() {{
                                 Self{
                                     view_holder: ViewHolder::#device_view_holder_extension_ident(unsafe{#fn_create_device_ident(dims.into(), data)}),
                                     _marker: PhantomData,
+                                }
+                            }
+                            #[allow(dead_code)]
+                            pub fn get_view(&self) -> *const #device_view_holder_ident {
+                                match self.view_holder {
+                                    ViewHolder::#device_view_holder_extension_ident(v) => v as *const _,
+                                    _ => unreachable!(),
                                 }
                             }
                         }
@@ -560,7 +574,7 @@ inline ViewHolder_{device_extension}* create_mirror_view_and_copy_dtd_{raw_exten
                     use std::ops::Index;
                     use std::marker::PhantomData;
 
-                    pub use krokkos_bridge::{kokkos_initialize, kokkos_finalize};
+                    pub use krokkos_bridge::*;
 
                     pub trait DTType: Debug + Default + Clone + Copy {}
 
