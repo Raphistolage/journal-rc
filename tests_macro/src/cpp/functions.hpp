@@ -5,4 +5,4 @@
 using krokkos_bridge::ViewHolder_f64_Dim2_LayoutRight_HostSpace;
 using krokkos_bridge::ViewHolder_f64_Dim1_LayoutRight_HostSpace;
 
-double y_ax(const ViewHolder_f64_Dim1_LayoutRight_HostSpace& y, const ViewHolder_f64_Dim2_LayoutRight_HostSpace& A, const ViewHolder_f64_Dim1_LayoutRight_HostSpace& x);
+double y_ax(const ViewHolder_f64_Dim1_LayoutRight_HostSpace* y, const ViewHolder_f64_Dim2_LayoutRight_HostSpace* A, const ViewHolder_f64_Dim1_LayoutRight_HostSpace* x);

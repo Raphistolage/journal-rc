@@ -1,4 +1,4 @@
-use crate::ffi;
+
 #[cxx::bridge]
 mod ffi_bridge {
 
@@ -10,10 +10,9 @@ mod ffi_bridge {
         #[namespace = "krokkos_bridge"]
         type ViewHolder_f64_Dim2_LayoutRight_HostSpace = crate::ffi::ViewHolder_f64_Dim2_LayoutRight_HostSpace;
         #[namespace = "krokkos_bridge"]
-        type ViewHolder_f64_Dim1_LayoutRight_HostSpace = ffi::ViewHolder_f64_Dim1_LayoutRight_HostSpace;
+        type ViewHolder_f64_Dim1_LayoutRight_HostSpace = crate::ffi::ViewHolder_f64_Dim1_LayoutRight_HostSpace;
 
-        #[rust_name = "y_ax_f64"]
-        fn y_ax(y: &ViewHolder_f64_Dim1_LayoutRight_HostSpace, a: &ViewHolder_f64_Dim2_LayoutRight_HostSpace, x: &ViewHolder_f64_Dim1_LayoutRight_HostSpace) -> f64;
+        unsafe fn y_ax(y: *const ViewHolder_f64_Dim1_LayoutRight_HostSpace, a: *const ViewHolder_f64_Dim2_LayoutRight_HostSpace, x: *const ViewHolder_f64_Dim1_LayoutRight_HostSpace) -> f64;
     }
 }
 
