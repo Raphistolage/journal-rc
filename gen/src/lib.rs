@@ -44,13 +44,13 @@ pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
 
 #include \"cxx.h\"
 
-namespace krokkos_bridge_ffi {
+namespace krokkos_bridge {
 
-void kokkos_initialize() {{
+inline void kokkos_initialize() {{
     Kokkos::initialize();
 }}
 
-void kokkos_finalize() {{
+inline void kokkos_finalize() {{
     Kokkos::finalize();
 }}
 
@@ -423,14 +423,14 @@ struct ViewHolder_{host_extension} {{
 
 }};
 
-ViewHolder_{host_extension}* create_view_{host_extension}(rust::Vec<size_t> dimensions, rust::Slice<const {cpp_type}> s) {{
+inline ViewHolder_{host_extension}* create_view_{host_extension}(rust::Vec<size_t> dimensions, rust::Slice<const {cpp_type}> s) {{
     {kokkos_host_view_ty_str} host_view(\"krokkos_view_{host_extension}\", {create_view_dims_args});
     {kokkos_view_unmanaged_ty_str} rust_view(s.data(), {create_view_dims_args});
     Kokkos::deep_copy(host_view, rust_view);
     return new ViewHolder_{host_extension}(host_view);
 }}
 
-const {cpp_type}& get_at_{host_extension}(const ViewHolder_{host_extension}* view, {at_view_index_args}) {{
+inline const {cpp_type}& get_at_{host_extension}(const ViewHolder_{host_extension}* view, {at_view_index_args}) {{
     return view->at({at_view_index});
 }}
 
@@ -449,89 +449,89 @@ struct ViewHolder_{device_extension} {{
 
 }};
 
-ViewHolder_{device_extension}* create_view_{device_extension}(rust::Vec<size_t> dimensions, rust::Slice<const {cpp_type}> s) {{
+inline ViewHolder_{device_extension}* create_view_{device_extension}(rust::Vec<size_t> dimensions, rust::Slice<const {cpp_type}> s) {{
     {kokkos_device_view_ty_str} host_view(\"krokkos_view_{device_extension}\", {create_view_dims_args});
     {kokkos_view_unmanaged_ty_str} rust_view(s.data(), {create_view_dims_args});
     Kokkos::deep_copy(host_view, rust_view);
     return new ViewHolder_{device_extension}(host_view);
 }}
 
-const {cpp_type}& get_at_{device_extension}(const ViewHolder_{device_extension}* view, {at_view_index_args}) {{
+inline const {cpp_type}& get_at_{device_extension}(const ViewHolder_{device_extension}* view, {at_view_index_args}) {{
     return view->at({at_view_index});
 }}
 
-void deep_copy_hth_{raw_extension}(ViewHolder_{host_extension}* dest, const ViewHolder_{host_extension}* src) {{
+inline void deep_copy_hth_{raw_extension}(ViewHolder_{host_extension}* dest, const ViewHolder_{host_extension}* src) {{
     Kokkos::deep_copy(dest->get_view(), src->get_view());
 }}
 
-void deep_copy_dth_{raw_extension}(ViewHolder_{host_extension}* dest, const ViewHolder_{device_extension}* src) {{
+inline void deep_copy_dth_{raw_extension}(ViewHolder_{host_extension}* dest, const ViewHolder_{device_extension}* src) {{
     Kokkos::deep_copy(dest->get_view(), src->get_view());
 }}
 
-void deep_copy_htd_{raw_extension}(ViewHolder_{device_extension}* dest, const ViewHolder_{host_extension}* src) {{
+inline void deep_copy_htd_{raw_extension}(ViewHolder_{device_extension}* dest, const ViewHolder_{host_extension}* src) {{
     Kokkos::deep_copy(dest->get_view(), src->get_view());
 }}
 
-void deep_copy_dtd_{raw_extension}(ViewHolder_{device_extension}* dest, const ViewHolder_{device_extension}* src) {{
+inline void deep_copy_dtd_{raw_extension}(ViewHolder_{device_extension}* dest, const ViewHolder_{device_extension}* src) {{
     Kokkos::deep_copy(dest->get_view(), src->get_view());
 }}
 
-ViewHolder_{host_extension}* create_mirror_hth_{raw_extension}(const ViewHolder_{host_extension}* src) {{
+inline ViewHolder_{host_extension}* create_mirror_hth_{raw_extension}(const ViewHolder_{host_extension}* src) {{
     auto mirror_view = Kokkos::create_mirror(Kokkos::HostSpace(), src->get_view());
     return new ViewHolder_{host_extension}(mirror_view);
 }}
 
-ViewHolder_{host_extension}* create_mirror_dth_{raw_extension}(const ViewHolder_{device_extension}* src) {{
+inline ViewHolder_{host_extension}* create_mirror_dth_{raw_extension}(const ViewHolder_{device_extension}* src) {{
     auto mirror_view = Kokkos::create_mirror(Kokkos::HostSpace(), src->get_view());
     return new ViewHolder_{host_extension}(mirror_view);
 }}
 
-ViewHolder_{device_extension}* create_mirror_htd_{raw_extension}(const ViewHolder_{host_extension}* src) {{
+inline ViewHolder_{device_extension}* create_mirror_htd_{raw_extension}(const ViewHolder_{host_extension}* src) {{
     auto mirror_view = Kokkos::create_mirror(Kokkos::DefaultExecutionSpace::memory_space(), src->get_view());
     return new ViewHolder_{device_extension}(mirror_view);
 }}
 
-ViewHolder_{device_extension}* create_mirror_dtd_{raw_extension}(const ViewHolder_{device_extension}* src) {{
+inline ViewHolder_{device_extension}* create_mirror_dtd_{raw_extension}(const ViewHolder_{device_extension}* src) {{
     auto mirror_view = Kokkos::create_mirror(Kokkos::DefaultExecutionSpace::memory_space(), src->get_view());
     return new ViewHolder_{device_extension}(mirror_view);
 }}
 
-ViewHolder_{host_extension}* create_mirror_view_hth_{raw_extension}(const ViewHolder_{host_extension}* src) {{
+inline ViewHolder_{host_extension}* create_mirror_view_hth_{raw_extension}(const ViewHolder_{host_extension}* src) {{
     auto mirror_view = Kokkos::create_mirror_view(Kokkos::HostSpace(), src->get_view());
     return new ViewHolder_{host_extension}(mirror_view);
 }}
 
-ViewHolder_{host_extension}* create_mirror_view_dth_{raw_extension}(const ViewHolder_{device_extension}* src) {{
+inline ViewHolder_{host_extension}* create_mirror_view_dth_{raw_extension}(const ViewHolder_{device_extension}* src) {{
     auto mirror_view = Kokkos::create_mirror_view(Kokkos::HostSpace(), src->get_view());
     return new ViewHolder_{host_extension}(mirror_view);
 }}
 
-ViewHolder_{device_extension}* create_mirror_view_htd_{raw_extension}(const ViewHolder_{host_extension}* src) {{
+inline ViewHolder_{device_extension}* create_mirror_view_htd_{raw_extension}(const ViewHolder_{host_extension}* src) {{
     auto mirror_view = Kokkos::create_mirror_view(Kokkos::DefaultExecutionSpace::memory_space(), src->get_view());
     return new ViewHolder_{device_extension}(mirror_view);
 }}
 
-ViewHolder_{device_extension}* create_mirror_view_dtd_{raw_extension}(const ViewHolder_{device_extension}* src) {{
+inline ViewHolder_{device_extension}* create_mirror_view_dtd_{raw_extension}(const ViewHolder_{device_extension}* src) {{
     auto mirror_view = Kokkos::create_mirror_view(Kokkos::DefaultExecutionSpace::memory_space(), src->get_view());
     return new ViewHolder_{device_extension}(mirror_view);
 }}
 
-ViewHolder_{host_extension}* create_mirror_view_and_copy_hth_{raw_extension}(const ViewHolder_{host_extension}* src) {{
+inline ViewHolder_{host_extension}* create_mirror_view_and_copy_hth_{raw_extension}(const ViewHolder_{host_extension}* src) {{
     auto mirror_view = Kokkos::create_mirror_view(Kokkos::HostSpace(), src->get_view());
     return new ViewHolder_{host_extension}(mirror_view);
 }}
 
-ViewHolder_{host_extension}* create_mirror_view_and_copy_dth_{raw_extension}(const ViewHolder_{device_extension}* src) {{
+inline ViewHolder_{host_extension}* create_mirror_view_and_copy_dth_{raw_extension}(const ViewHolder_{device_extension}* src) {{
     auto mirror_view = Kokkos::create_mirror_view(Kokkos::HostSpace(), src->get_view());
     return new ViewHolder_{host_extension}(mirror_view);
 }}
 
-ViewHolder_{device_extension}* create_mirror_view_and_copy_htd_{raw_extension}(const ViewHolder_{host_extension}* src) {{
+inline ViewHolder_{device_extension}* create_mirror_view_and_copy_htd_{raw_extension}(const ViewHolder_{host_extension}* src) {{
     auto mirror_view = Kokkos::create_mirror_view(Kokkos::DefaultExecutionSpace::memory_space(), src->get_view());
     return new ViewHolder_{device_extension}(mirror_view);
 }}
 
-ViewHolder_{device_extension}* create_mirror_view_and_copy_dtd_{raw_extension}(const ViewHolder_{device_extension}* src) {{
+inline ViewHolder_{device_extension}* create_mirror_view_and_copy_dtd_{raw_extension}(const ViewHolder_{device_extension}* src) {{
     auto mirror_view = Kokkos::create_mirror_view(Kokkos::DefaultExecutionSpace::memory_space(), src->get_view());
     return new ViewHolder_{device_extension}(mirror_view);
 }}
@@ -540,8 +540,8 @@ ViewHolder_{device_extension}* create_mirror_view_and_copy_dtd_{raw_extension}(c
 
                 let tokens = quote! {
 
-                    #[cxx::bridge(namespace = "krokkos_bridge_ffi")]
-                    mod krokkos_bridge_ffi {
+                    #[cxx::bridge(namespace = "krokkos_bridge")]
+                    mod krokkos_bridge {
 
                         unsafe extern "C++" {
                             include!("krokkos_bridge.hpp");
@@ -555,12 +555,12 @@ ViewHolder_{device_extension}* create_mirror_view_and_copy_dtd_{raw_extension}(c
                         }
                     }
 
-                    use krokkos_bridge_ffi::*;
+                    use krokkos_bridge::*;
                     use std::fmt::Debug;
                     use std::ops::Index;
                     use std::marker::PhantomData;
 
-                    pub use krokkos_bridge_ffi::{kokkos_initialize, kokkos_finalize};
+                    pub use krokkos_bridge::{kokkos_initialize, kokkos_finalize};
 
                     pub trait DTType: Debug + Default + Clone + Copy {}
 
