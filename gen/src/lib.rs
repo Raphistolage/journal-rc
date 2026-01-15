@@ -280,10 +280,11 @@ inline void kokkos_finalize() {{
                                 }
                             }
                         }
-
+                        #[allow(unused_parens)]
                         impl Index<(#(#index_args),*)> for View<#ty, #dim_ty, #layout_ty, #host_mem_space_ty> {
                             type Output = #ty;
 
+                            #[allow(unused_parens)]
                             fn index(&self, (#(#fn_get_at_args),*): (#(#index_args),*)) -> &Self::Output {
                                 match self.view_holder {
                                     ViewHolder::#host_view_holder_extension_ident(v) => unsafe {
@@ -569,7 +570,6 @@ inline ViewHolder_{device_extension}* create_mirror_view_and_copy_dtd_{raw_exten
                         }
                     }
 
-                    use krokkos_bridge::*;
                     use std::fmt::Debug;
                     use std::ops::Index;
                     use std::marker::PhantomData;
