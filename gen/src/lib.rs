@@ -1,10 +1,8 @@
 use std::{collections::HashMap, fs};
 use quote::{format_ident, quote};
-use syn::{Item, Type, Ident, Token, punctuated::Punctuated};
+use syn::{Expr, Ident, Item, Token, Type, parse_quote, punctuated::Punctuated};
 mod parser;
 use parser::{ViewDataType, Dimension, Layout, MemSpace, ViewConfig};
-
-use crate::parser::rust_type_to_cpp_type;
 
 pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
 
@@ -38,7 +36,7 @@ pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
                 let mut create_mirror_matches_impls = vec![];
                 let mut create_mirror_view_matches_impls = vec![];
                 let mut create_mirror_view_and_copy_matches_impls = vec![];
-                let mut subview_matches_impls = vec![];
+                let mut subview_slice_matches_impls = vec![];
 
                 let mut to_write_cpp = "
 #pragma once
@@ -184,10 +182,15 @@ inline void kokkos_finalize() {{
                     let fn_create_mirror_view_and_copy_dth_ident = format_ident!("create_mirror_view_and_copy_dth_{}", raw_extension);
                     let fn_create_mirror_view_and_copy_htd_ident = format_ident!("create_mirror_view_and_copy_htd_{}", raw_extension);
                     let fn_create_mirror_view_and_copy_dtd_ident = format_ident!("create_mirror_view_and_copy_dtd_{}", raw_extension);
+                    let fn_subview_slice_host_ident = format_ident!("subview_slice_{}", host_extension);
+                    let fn_subview_slice_device_ident = format_ident!("subview_slice_{}", device_extension);
 
                     let fn_get_at_args = (0..dim_val_usize)
                         .map(|i| format_ident!("i{i}"))
                         .collect::<Vec<Ident>>();
+
+                    let index_pair_ty: Type = syn::parse_str("[usize; 2]").unwrap();
+                    let fn_subview_args = (0..dim_val_u8).map(|_| index_pair_ty.clone()).collect::<Vec<Type>>();
 
                     let host_view_holder_extension_ident =
                         format_ident!("{}{}{}{}", rust_type_str.to_uppercase(), dim_str, layout_str, host_mem_space_str);
@@ -236,6 +239,10 @@ inline void kokkos_finalize() {{
                         unsafe fn #fn_create_mirror_view_and_copy_htd_ident(src: *const #host_view_holder_ident) -> *mut #device_view_holder_ident;
                         #[allow(dead_code)]
                         unsafe fn #fn_create_mirror_view_and_copy_dtd_ident(src: *const #device_view_holder_ident) -> *mut #device_view_holder_ident;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_subview_slice_host_ident(v: *const #host_view_holder_ident, #(#fn_get_at_args :#fn_subview_args),*) -> *mut #host_view_holder_ident;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_subview_slice_device_ident(v: *const #device_view_holder_ident, #(#fn_get_at_args :#fn_subview_args),*) -> *mut #device_view_holder_ident;
                     });
 
                     iview_types_decls.push(quote! {
@@ -406,6 +413,23 @@ inline void kokkos_finalize() {{
                         }
                     });
 
+                    let fn_subview_slice_args = (0..dim_val_usize)
+                        .map(|i| parse_quote!(args[#i].into()))
+                        .collect::<Vec<Expr>>();
+
+                    subview_slice_matches_impls.push(quote! {
+                        ViewHolder::#host_view_holder_extension_ident(v) => {
+                            unsafe {
+                                ViewHolder::#host_view_holder_extension_ident(#fn_subview_slice_host_ident(v as *const _, #(#fn_subview_slice_args),* ))
+                            }    
+                        },
+                        ViewHolder::#device_view_holder_extension_ident(v) => {
+                            unsafe {
+                                ViewHolder::#device_view_holder_extension_ident(#fn_subview_slice_device_ident(v as *const _, #(#fn_subview_slice_args),* ))
+                            }
+                        }
+                    });
+
                     let kokkos_host_view_ty_str = format!(
                         "Kokkos::View<{}{}, Kokkos::{}, Kokkos::HostSpace>",
                         cpp_type, kokkos_dim_stars, layout_str,
@@ -431,6 +455,16 @@ inline void kokkos_finalize() {{
                         .map(|i| format!("i{},", i))
                         .collect::<String>();
                     at_view_index.pop();
+
+                    let mut subview_slice_cpp_args = (0..dim_val_u8)
+                        .map(|i| format!("std::array<size_t, 2> i{},", i))
+                        .collect::<String>();
+                    subview_slice_cpp_args.pop();
+
+                    let mut kokkos_subview_slice_index_args = (0..dim_val_u8)
+                        .map(|i| format!("std::make_pair(i{i}[0], i{i}[1]),"))
+                        .collect::<String>();
+                    kokkos_subview_slice_index_args.pop(); 
 
                     to_write_cpp.push_str(&format!(
                         "
@@ -561,134 +595,19 @@ inline ViewHolder_{device_extension}* create_mirror_view_and_copy_dtd_{raw_exten
     auto mirror_view = Kokkos::create_mirror_view_and_copy(Kokkos::DefaultExecutionSpace::memory_space(), src->get_view());
     return new ViewHolder_{device_extension}(mirror_view);
 }}
+
+inline ViewHolder_{host_extension}* subview_slice_{host_extension}(const ViewHolder_{host_extension}* v, {subview_slice_cpp_args}) {{
+    {kokkos_host_view_ty_str} host_view = v->get_view();
+    {kokkos_host_view_ty_str} sub_view = Kokkos::subview(host_view, {kokkos_subview_slice_index_args});
+    return new ViewHolder_{host_extension}(sub_view);
+}}
+
+inline ViewHolder_{device_extension}* subview_slice_{device_extension}(const ViewHolder_{device_extension}* v, {subview_slice_cpp_args}) {{
+    {kokkos_device_view_ty_str} device_view = v->get_view();
+    {kokkos_device_view_ty_str} sub_view = Kokkos::subview(device_view, {kokkos_subview_slice_index_args});
+    return new ViewHolder_{device_extension}(sub_view);
+}}
 "));
-                }
-
-                for ((dttype, layout), vec_dim) in dttype_dims_configs.iter() {
-                    let mut ordered_vec_dim = vec_dim.clone();
-                    ordered_vec_dim.sort_unstable();
-                    ordered_vec_dim.reverse();
-
-                    let number_of_conf = vec_dim.len();                    
-
-                    for i in 0..number_of_conf {
-                        let mut host_subview_dims_matches_impls = vec![];
-                        let mut device_subview_dims_matches_impls = vec![];
-
-                        let dim_val_u8 = ordered_vec_dim[i];
-                        let dim_val_str = dim_val_u8.to_string();
-                        let raw_extension = format!("{}_Dim{}_{}", dttype, dim_val_str, layout);
-                        let host_extension = format!("{}_{}", raw_extension, host_mem_space_str);
-                        let device_extension = format!("{}_{}", raw_extension, device_mem_space_str);
-
-                        let fn_subview_host_raw_ident = format_ident!("subview_{}", host_extension);
-                        let fn_subview_device_raw_ident = format_ident!("subview_{}", device_extension);
-
-                        let fn_get_at_args = (0..dim_val_u8)
-                            .map(|i| format_ident!("i{i}"))
-                            .collect::<Vec<Ident>>();
-
-                        let host_view_holder_extension_ident =
-                            format_ident!("{}Dim{}{}{}", dttype.to_uppercase(), dim_val_str, layout, host_mem_space_str);
-                        let host_view_holder_ident = format_ident!("ViewHolder_{}", host_extension);
-
-                        let device_view_holder_extension_ident =
-                            format_ident!("{}Dim{}{}{}", dttype.to_uppercase(), dim_val_str, layout, device_mem_space_str);
-                        let device_view_holder_ident = format_ident!("ViewHolder_{}", device_extension);
-
-                        let index_pair_ty: Type = syn::parse_str("[usize; 2]").unwrap();
-                        let fn_subview_args = (0..dim_val_u8).map(|_| index_pair_ty.clone()).collect::<Vec<Type>>();
-
-                        for j in i..number_of_conf {
-                            let new_dim = ordered_vec_dim[j];
-                            let new_dim_string = format!("Dim{}", new_dim.to_string());
-                            let new_dim_raw_extension = format!("{}_{}_{}", dttype, new_dim_string, layout);
-                            let new_dim_host_extension = format!("{}_{}", new_dim_raw_extension, host_mem_space_str);
-                            let new_dim_device_extension = format!("{}_{}", new_dim_raw_extension, device_mem_space_str);
-
-                            let new_dim_host_view_holder_extension_ident =
-                                format_ident!("{}{}{}{}", dttype.to_uppercase(), new_dim_string, layout, host_mem_space_str);
-                            let new_dim_host_view_holder_ident = format_ident!("ViewHolder_{}", new_dim_host_extension);
-
-                            let new_dim_device_view_holder_extension_ident =
-                                format_ident!("{}{}{}{}", dttype.to_uppercase(), new_dim_string, layout, device_mem_space_str);
-                            let new_dim_device_view_holder_ident = format_ident!("ViewHolder_{}", new_dim_device_extension);
-
-                            let fn_subview_host_ident = format_ident!("{}_to_{}", fn_subview_host_raw_ident, new_dim_string);
-                            let fn_subview_device_ident = format_ident!("{}_to_{}", fn_subview_device_raw_ident, new_dim_string);
-
-                            func_decls.push(quote! {
-                                #[allow(dead_code)]
-                                unsafe fn #fn_subview_host_ident(v: *const #host_view_holder_ident, #(#fn_get_at_args :#fn_subview_args),*) -> *mut #new_dim_host_view_holder_ident;
-                                #[allow(dead_code)]
-                                unsafe fn #fn_subview_device_ident(v: *const #device_view_holder_ident, #(#fn_get_at_args :#fn_subview_args),*) -> *mut #new_dim_device_view_holder_ident;
-                            });
-
-                            host_subview_dims_matches_impls.push(quote! {
-                                #new_dim => unsafe {
-                                    ViewHolder::#new_dim_host_view_holder_extension_ident(#fn_subview_host_ident(v as *const _, #(#fn_get_at_args),* ))
-                                }
-                            });
-
-                            device_subview_dims_matches_impls.push(quote! {
-                                #new_dim => unsafe {
-                                    ViewHolder::#new_dim_device_view_holder_extension_ident(#fn_subview_device_ident(v as *const _, #(#fn_get_at_args),* ))
-                                }
-                            });
-
-                            let mut subview_cpp_args = (0..dim_val_u8)
-                                .map(|i| format!("std::array<size_t, 2> i{},", i))
-                                .collect::<String>();
-                            subview_cpp_args.pop();
-
-                            let mut kokkos_subview_index_args = (0..dim_val_u8)
-                                .map(|i| format!("std::make_pair(i{i}[0], i{i}[1]),"))
-                                .collect::<String>();
-                            kokkos_subview_index_args.pop(); 
-
-                            let cpp_type = rust_type_to_cpp_type(dttype);
-
-                            let kokkos_dim_stars: String = '*'.to_string().repeat(new_dim as usize);
-                            let kokkos_host_view_ty_str = format!(
-                                "Kokkos::View<{}{}, Kokkos::{}, Kokkos::HostSpace>",
-                                cpp_type, kokkos_dim_stars, layout,
-                            );
-                            let kokkos_device_view_ty_str = format!(
-                                "Kokkos::View<{}{}, Kokkos::{}, Kokkos::DefaultExecutionSpace::memory_space>",
-                                cpp_type, kokkos_dim_stars, layout,
-                            );
-
-                            to_write_cpp.push_str(&format!(
-"
-inline ViewHolder_{new_dim_host_extension}* subview_{host_extension}_to_{new_dim_string}(const ViewHolder_{host_extension}* v, {subview_cpp_args}) {{
-    auto host_view = v->get_view();
-    auto sub_view = Kokkos::subview(host_view, {kokkos_subview_index_args});
-    return new ViewHolder_{new_dim_host_extension}(sub_view);
-}}
-
-inline ViewHolder_{new_dim_device_extension}* subview_{device_extension}_to_{new_dim_string}(const ViewHolder_{device_extension}* v, {subview_cpp_args}) {{
-    auto device_view = v->get_view();
-    auto sub_view = Kokkos::subview(device_view, {kokkos_subview_index_args});
-    return new ViewHolder_{new_dim_device_extension}(sub_view);
-}}
-
-"
-                        ));
-
-                        }
-                        subview_matches_impls.push(quote! {
-                            ViewHolder::#host_view_holder_extension_ident(v) => {
-                                match new_rank {
-                                    #(#host_subview_dims_matches_impls),*
-                                }
-                            },
-                            ViewHolder::#device_view_holder_extension_ident(v) => {
-                                match new_rank {
-                                    #(#device_subview_dims_matches_impls),*
-                                }
-                            }
-                        });
-                    }
                 }
 
                 let tokens = quote! {
@@ -839,20 +758,14 @@ inline ViewHolder_{new_dim_device_extension}* subview_{device_extension}_to_{new
                     }
 
                     #[allow(dead_code)]
-                    pub fn subview<T: DTType, D1: Dimension, D2: Dimension, L: LayoutType, M: MemorySpace>(v: &View<T,D1,L,M>, args: &[(usize, Option<usize>)]) -> View<T,D2,L,M> {
-                        if args.len() != D1::NDIM as usize {
+                    pub fn subview_slice<T: DTType, D: Dimension, L: LayoutType, M: MemorySpace>(v: &View<T,D,L,M>, args: &[(usize, usize)]) -> View<T,D,L,M> {
+                        if args.len() != D::NDIM as usize {
                             panic!("len of args must be equal to the dimension of v");
                         }
-                        let mut new_rank = D1::NDIM;
-                        for &(first, second) in args.iter() {
-                            if second.is_none() {
-                                new_rank -= 1;
-                            }
-                        };
-                        new_rank = max(1, new_rank);
-                        View::<T,D2,L,M> {
-                            view_holder: match src.view_holder {
-                                #(#subview_matches_impls),*
+
+                        View::<T,D,L,M> {
+                            view_holder: match v.view_holder {
+                                #(#subview_slice_matches_impls),*
                             },
                             _marker: PhantomData,
                         }
