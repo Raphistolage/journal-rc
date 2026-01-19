@@ -27,6 +27,7 @@ pub fn performance_test(n: u32) {
             64 * 2_i32.pow(i) as usize,
             64 * 2_i32.pow(i) as usize,
         ]);
+        println!("View a extents : {}, {}", a.extent(0).unwrap(), a.extent(1).unwrap());
         let b = ffi::View::<f64, ffi::Dim2, ffi::LayoutRight, ffi::DeviceSpace>::zeros(&[
             64 * 2_i32.pow(i) as usize,
             64 * 2_i32.pow(i) as usize,
