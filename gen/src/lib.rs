@@ -160,6 +160,8 @@ inline void kokkos_finalize() {{
                     let fn_create_host_ident = format_ident!("create_view_{}", host_extension);
                     let fn_create_device_ident = format_ident!("create_view_{}", device_extension);
                     let fn_get_at_ident = format_ident!("get_at_{}", host_extension);
+                    let fn_extent_host_ident = format_ident!("extent_{}", host_extension);
+                    let fn_extent_device_ident = format_ident!("extent_{}", device_extension);
                     let fn_deep_copy_hth_ident = format_ident!("deep_copy_hth_{}", raw_extension);
                     let fn_deep_copy_htd_ident = format_ident!("deep_copy_htd_{}", raw_extension);
                     let fn_deep_copy_dth_ident = format_ident!("deep_copy_dth_{}", raw_extension);
@@ -218,6 +220,10 @@ inline void kokkos_finalize() {{
                         unsafe fn #fn_create_device_ident(dimensions: Vec<usize>,s: &[#ty]) -> *mut #device_view_holder_ident;
                         #[allow(dead_code)]
                         unsafe fn #fn_get_at_ident<'a>(view: *const #host_view_holder_ident, #(#fn_get_at_args: usize),*) -> &'a #ty;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_extent_host_ident(view: *const #host_view_holder_ident, dim: i32) -> usize;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_extent_device_ident(view: *const #device_view_holder_ident, dim: i32) -> usize;
                         #[allow(dead_code)]
                         unsafe fn #fn_deep_copy_hth_ident(dest: *mut #host_view_holder_ident, src: *const #host_view_holder_ident);
                         #[allow(dead_code)]
@@ -279,6 +285,18 @@ inline void kokkos_finalize() {{
                                     _marker: PhantomData,
                                 }
                             }
+
+                            #[allow(dead_code)]
+                            pub fn extent(&self, dim: u8) -> Result<usize, &str> {
+                                if dim < #dim_ty::NDIM {
+                                    match self.view_holder {
+                                        ViewHolder::#host_view_holder_extension_ident(v) => Ok(unsafe{#fn_extent_host_ident(v as *const _, dim as i32)}),
+                                        _ => unreachable!(),
+                                    }
+                                }else {
+                                    Err("Out of scope extent.")
+                                }
+                            }
                         }
 
                         #[allow(unused_parens)]
@@ -302,6 +320,17 @@ inline void kokkos_finalize() {{
                                 Self{
                                     view_holder: ViewHolder::#device_view_holder_extension_ident(unsafe{#fn_create_device_ident(dims.into(), data)}),
                                     _marker: PhantomData,
+                                }
+                            }
+                            #[allow(dead_code)]
+                            pub fn extent(&self, dim: u8) -> Result<usize, &str> {
+                                if dim < #dim_ty::NDIM {
+                                    match self.view_holder {
+                                        ViewHolder::#device_view_holder_extension_ident(v) => Ok(unsafe{#fn_extent_device_ident(v as *const _, dim as i32)}),
+                                        _ => unreachable!(),
+                                    }
+                                }else {
+                                    Err("Out of scope extent.")
                                 }
                             }
                         }
@@ -456,6 +485,10 @@ const {cpp_type}& get_at_{host_extension}(const ViewHolder_{host_extension}* vie
     return view->at({at_view_index});
 }}
 
+size_t extent_{host_extension}(const ViewHolder_{host_extension}* view, int dim) {{ 
+    return view->get_view().extent(dim);
+}}
+
 struct ViewHolder_{device_extension} {{
     {kokkos_device_view_ty_str} view; 
 
@@ -472,6 +505,10 @@ ViewHolder_{device_extension}* create_view_{device_extension}(rust::Vec<size_t> 
     {kokkos_view_unmanaged_ty_str} rust_view(s.data(), {create_view_dims_args});
     Kokkos::deep_copy(device_view, rust_view);
     return new ViewHolder_{device_extension}(device_view);
+}}
+
+size_t extent_{device_extension}(const ViewHolder_{device_extension}* view, int dim) {{ 
+    return view->get_view().extent(dim);
 }}
 
 void deep_copy_hth_{raw_extension}(ViewHolder_{host_extension}* dest, const ViewHolder_{host_extension}* src) {{
