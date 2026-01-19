@@ -22,7 +22,7 @@ fn main() {
 
     // println!("YAX done, result value : {:?}", r);
 
-    performance_test(7);
+    performance_test(8);
 
     ffi::kokkos_finalize();
 }
