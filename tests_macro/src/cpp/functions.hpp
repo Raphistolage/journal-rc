@@ -2,7 +2,7 @@
 #include "krokkos_bridge.hpp"
 #include <Kokkos_Core.hpp>
 
-using krokkos_bridge::ViewHolder_f64_Dim2_LayoutRight_HostSpace;
-using krokkos_bridge::ViewHolder_f64_Dim1_LayoutRight_HostSpace;
+using krokkos_bridge::ViewHolder_f64_Dim2_LayoutRight_DeviceSpace;
+using krokkos_bridge::ViewHolder_f64_Dim1_LayoutRight_DeviceSpace;
 
-double y_ax(const ViewHolder_f64_Dim1_LayoutRight_HostSpace* y, const ViewHolder_f64_Dim2_LayoutRight_HostSpace* A, const ViewHolder_f64_Dim1_LayoutRight_HostSpace* x);
+double y_ax_device(const ViewHolder_f64_Dim1_LayoutRight_DeviceSpace* y, const ViewHolder_f64_Dim2_LayoutRight_DeviceSpace* A, const ViewHolder_f64_Dim1_LayoutRight_DeviceSpace* x);

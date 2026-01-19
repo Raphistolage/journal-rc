@@ -8,11 +8,11 @@ mod ffi_bridge {
 
 
         #[namespace = "krokkos_bridge"]
-        type ViewHolder_f64_Dim2_LayoutRight_HostSpace = crate::ffi::ViewHolder_f64_Dim2_LayoutRight_HostSpace;
+        type ViewHolder_f64_Dim2_LayoutRight_DeviceSpace = crate::ffi::ViewHolder_f64_Dim2_LayoutRight_DeviceSpace;
         #[namespace = "krokkos_bridge"]
-        type ViewHolder_f64_Dim1_LayoutRight_HostSpace = crate::ffi::ViewHolder_f64_Dim1_LayoutRight_HostSpace;
+        type ViewHolder_f64_Dim1_LayoutRight_DeviceSpace = crate::ffi::ViewHolder_f64_Dim1_LayoutRight_DeviceSpace;
 
-        unsafe fn y_ax(y: *const ViewHolder_f64_Dim1_LayoutRight_HostSpace, a: *const ViewHolder_f64_Dim2_LayoutRight_HostSpace, x: *const ViewHolder_f64_Dim1_LayoutRight_HostSpace) -> f64;
+        unsafe fn y_ax_device(y: *const ViewHolder_f64_Dim1_LayoutRight_DeviceSpace, a: *const ViewHolder_f64_Dim2_LayoutRight_DeviceSpace, x: *const ViewHolder_f64_Dim1_LayoutRight_DeviceSpace) -> f64;
     }
 }
 
