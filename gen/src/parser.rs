@@ -65,14 +65,14 @@ pub fn rust_type_to_cpp_type(s: &str) -> String {
     match s {
         "f64" => "double".to_string(),
         "f32" => "float".to_string(),
-        "u64" => "std::int64_t".to_string(),
-        "u32" => "std::int32_t".to_string(),
-        "u16" => "std::int16_t".to_string(),
-        "u8" => "std::int8_t".to_string(),
-        "i64" => "std::uint64_t".to_string(),
-        "i32" => "std::uint32_t".to_string(),
-        "i16" => "std::uint16_t".to_string(),
-        "i8" => "std::uint8_t".to_string(),
+        "u64" => "std::uint64_t".to_string(),
+        "u32" => "std::uint32_t".to_string(),
+        "u16" => "std::uint16_t".to_string(),
+        "u8" => "std::uint8_t".to_string(),
+        "i64" => "std::int64_t".to_string(),
+        "i32" => "std::int32_t".to_string(),
+        "i16" => "std::int16_t".to_string(),
+        "i8" => "std::int8_t".to_string(),
         _ => panic!("Can't convert, expected : f64, f32, i64, i32, i16, i8, u64, u32, u16, u8  ")
     }
 }
