@@ -165,6 +165,8 @@ inline void kokkos_finalize() {{
 
                     let fn_create_ident = format_ident!("create_view_{}", host_extension);
                     let fn_create_device_ident = format_ident!("create_view_{}", device_extension);
+                    let fn_create_from_slice_ident = format_ident!("create_view_from_slice_{}", host_extension);
+                    let fn_create_from_slice_device_ident = format_ident!("create_view_from_slice_{}", device_extension);
                     let fn_get_at_ident = format_ident!("get_at_{}", host_extension);
                     let fn_deep_copy_hth_ident = format_ident!("deep_copy_hth_{}", raw_extension);
                     let fn_deep_copy_htd_ident = format_ident!("deep_copy_htd_{}", raw_extension);
@@ -202,9 +204,13 @@ inline void kokkos_finalize() {{
 
                     func_decls.push(quote! {
                         #[allow(dead_code)]
-                        unsafe fn #fn_create_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> *mut #host_view_holder_ident;
+                        unsafe fn #fn_create_ident(dimensiosn: Vec<usize>) -> *mut #host_view_holder_ident;
                         #[allow(dead_code)]
-                        unsafe fn #fn_create_device_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> *mut #device_view_holder_ident;
+                        unsafe fn #fn_create_device_ident(dimensiosn: Vec<usize>) -> *mut #device_view_holder_ident;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_create_from_slice_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> *mut #host_view_holder_ident;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_create_from_slice_device_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> *mut #device_view_holder_ident;
                         #[allow(dead_code)]
                         unsafe fn #fn_get_at_ident<'a>(view: *const #host_view_holder_ident, #(#fn_get_at_args: usize),*) -> &'a #ty;
                         #[allow(dead_code)]
@@ -268,7 +274,15 @@ inline void kokkos_finalize() {{
                             pub fn from_shape<U: Into<#dim_ty>>(shape: U, data: &[#ty]) -> Self {
                                 let dims: #dim_ty = shape.into();
                                 Self{
-                                    view_holder: ViewHolder::#host_view_holder_extension_ident(unsafe{#fn_create_ident(dims.into(), data)}),
+                                    view_holder: ViewHolder::#host_view_holder_extension_ident(unsafe{#fn_create_from_slice_ident(dims.into(), data)}),
+                                    _marker: PhantomData,
+                                }
+                            }
+                            #[allow(dead_code)]
+                            pub fn zeros<U: Into<#dim_ty>>(shape: U) -> Self {
+                                let dims: #dim_ty = shape.into();
+                                Self{
+                                    view_holder: ViewHolder::#host_view_holder_extension_ident(unsafe{#fn_create_ident(dims.into())}),
                                     _marker: PhantomData,
                                 }
                             }
@@ -286,7 +300,15 @@ inline void kokkos_finalize() {{
                             pub fn from_shape<U: Into<#dim_ty>>(shape: U, data: &[#ty]) -> Self {
                                 let dims: #dim_ty = shape.into();
                                 Self{
-                                    view_holder: ViewHolder::#device_view_holder_extension_ident(unsafe{#fn_create_device_ident(dims.into(), data)}),
+                                    view_holder: ViewHolder::#device_view_holder_extension_ident(unsafe{#fn_create_from_slice_device_ident(dims.into(), data)}),
+                                    _marker: PhantomData,
+                                }
+                            }
+                            #[allow(dead_code)]
+                            pub fn zeros<U: Into<#dim_ty>>(shape: U) -> Self {
+                                let dims: #dim_ty = shape.into();
+                                Self{
+                                    view_holder: ViewHolder::#device_view_holder_extension_ident(unsafe{#fn_create_device_ident(dims.into())}),
                                     _marker: PhantomData,
                                 }
                             }
@@ -483,10 +505,15 @@ struct ViewHolder_{host_extension} {{
 
 }};
 
-inline ViewHolder_{host_extension}* create_view_{host_extension}(rust::Vec<size_t> dimensions, rust::Slice<const {cpp_type}> s) {{
+inline ViewHolder_{host_extension}* create_view_from_slice_{host_extension}(rust::Vec<size_t> dimensions, rust::Slice<const {cpp_type}> s) {{
     {kokkos_host_view_ty_str} host_view(\"krokkos_view_{host_extension}\", {create_view_dims_args});
     {kokkos_view_unmanaged_ty_str} rust_view(s.data(), {create_view_dims_args});
     Kokkos::deep_copy(host_view, rust_view);
+    return new ViewHolder_{host_extension}(host_view);
+}}
+
+inline ViewHolder_{host_extension}* create_view_{host_extension}(rust::Vec<size_t> dimensions) {{
+    {kokkos_host_view_ty_str} host_view(\"krokkos_view_{host_extension}\", {create_view_dims_args});
     return new ViewHolder_{host_extension}(host_view);
 }}
 
@@ -509,10 +536,15 @@ struct ViewHolder_{device_extension} {{
 
 }};
 
-inline ViewHolder_{device_extension}* create_view_{device_extension}(rust::Vec<size_t> dimensions, rust::Slice<const {cpp_type}> s) {{
+inline ViewHolder_{device_extension}* create_view_from_slice_{device_extension}(rust::Vec<size_t> dimensions, rust::Slice<const {cpp_type}> s) {{
     {kokkos_device_view_ty_str} host_view(\"krokkos_view_{device_extension}\", {create_view_dims_args});
     {kokkos_view_unmanaged_ty_str} rust_view(s.data(), {create_view_dims_args});
     Kokkos::deep_copy(host_view, rust_view);
+    return new ViewHolder_{device_extension}(host_view);
+}}
+
+inline ViewHolder_{device_extension}* create_view_{device_extension}(rust::Vec<size_t> dimensions) {{
+    {kokkos_device_view_ty_str} host_view(\"krokkos_view_{device_extension}\", {create_view_dims_args});
     return new ViewHolder_{device_extension}(host_view);
 }}
 
