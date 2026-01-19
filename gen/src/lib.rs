@@ -170,6 +170,8 @@ inline void kokkos_finalize() {{
                     let fn_get_at_ident = format_ident!("get_at_{}", host_extension);
                     let fn_extent_host_ident = format_ident!("extent_{}", host_extension);
                     let fn_extent_device_ident = format_ident!("extent_{}", device_extension);
+                    let fn_data_host_ident = format_ident!("data_{}", host_extension);
+                    let fn_data_device_ident = format_ident!("data_{}", device_extension);
                     let fn_deep_copy_hth_ident = format_ident!("deep_copy_hth_{}", raw_extension);
                     let fn_deep_copy_htd_ident = format_ident!("deep_copy_htd_{}", raw_extension);
                     let fn_deep_copy_dth_ident = format_ident!("deep_copy_dth_{}", raw_extension);
@@ -219,6 +221,10 @@ inline void kokkos_finalize() {{
                         unsafe fn #fn_extent_host_ident(view: *const #host_view_holder_ident, dim: i32) -> usize;
                         #[allow(dead_code)]
                         unsafe fn #fn_extent_device_ident(view: *const #device_view_holder_ident, dim: i32) -> usize;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_data_host_ident(view: *const #host_view_holder_ident) -> *const #ty;
+                        #[allow(dead_code)]
+                        unsafe fn #fn_data_device_ident(view: *const #device_view_holder_ident) -> *const #ty;
                         #[allow(dead_code)]
                         unsafe fn #fn_deep_copy_hth_ident(dest: *mut #host_view_holder_ident, src: *const #host_view_holder_ident);
                         #[allow(dead_code)]
@@ -310,6 +316,13 @@ inline void kokkos_finalize() {{
                                     Err(KrokkosError::OutOfScopeDim)
                                 }
                             }
+                            #[allow(dead_code)]
+                            pub fn data(&self) -> *const #ty {
+                                match self.view_holder {
+                                    ViewHolder::#host_view_holder_extension_ident(v) => unsafe{#fn_data_host_ident(v as *const _)},
+                                    _ => unreachable!(),
+                                }
+                            }
                         }
 
                         impl View<#ty, #dim_ty, #layout_ty, #device_mem_space_ty> {
@@ -345,6 +358,13 @@ inline void kokkos_finalize() {{
                                     }
                                 }else {
                                     Err(KrokkosError::OutOfScopeDim)
+                                }
+                            }
+                            #[allow(dead_code)]
+                            pub fn data(&self) -> *const #ty {
+                                match self.view_holder {
+                                    ViewHolder::#device_view_holder_extension_ident(v) => unsafe{#fn_data_device_ident(v as *const _)},
+                                    _ => unreachable!(),
                                 }
                             }
                         }
@@ -553,6 +573,10 @@ inline size_t extent_{host_extension}(const ViewHolder_{host_extension}* view, i
     return view->get_view().extent(dim);
 }}
 
+inline const {cpp_type}* data_{host_extension}(const ViewHolder_{host_extension}* view) {{
+    return view->get_view().data();
+}}
+
 struct ViewHolder_{device_extension} {{
     {kokkos_device_view_ty_str} view; 
 
@@ -586,6 +610,10 @@ inline const {cpp_type}& get_at_{device_extension}(const ViewHolder_{device_exte
 
 inline size_t extent_{device_extension}(const ViewHolder_{device_extension}* view, int dim) {{ 
     return view->get_view().extent(dim);
+}}
+
+inline const {cpp_type}* data_{device_extension}(const ViewHolder_{device_extension}* view) {{
+    return view->get_view().data();
 }}
 
 inline void deep_copy_hth_{raw_extension}(ViewHolder_{host_extension}* dest, const ViewHolder_{host_extension}* src) {{
