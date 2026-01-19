@@ -10,3 +10,6 @@ krokkos_macro = { path = "../macro" }
 
 [build-dependencies]
 krokkos_build = { path = "../build" }
+
+[features]
+cuda = ["krokkos_build/cuda"]
