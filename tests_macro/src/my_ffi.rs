@@ -9,11 +9,15 @@ mod ffi_bridge {
 
 
         #[namespace = "krokkos_bridge"]
+        type ViewHolder_f32_Dim2_LayoutRight_DeviceSpace = crate::ffi::ViewHolder_f32_Dim2_LayoutRight_DeviceSpace;
+        #[namespace = "krokkos_bridge"]
+        type ViewHolder_f32_Dim1_LayoutRight_DeviceSpace = crate::ffi::ViewHolder_f32_Dim1_LayoutRight_DeviceSpace;
+        #[namespace = "krokkos_bridge"]
         type ViewHolder_f64_Dim2_LayoutRight_DeviceSpace = crate::ffi::ViewHolder_f64_Dim2_LayoutRight_DeviceSpace;
         #[namespace = "krokkos_bridge"]
         type ViewHolder_f64_Dim1_LayoutRight_DeviceSpace = crate::ffi::ViewHolder_f64_Dim1_LayoutRight_DeviceSpace;
 
-        unsafe fn y_ax_device(y: *const ViewHolder_f64_Dim1_LayoutRight_DeviceSpace, a: *const ViewHolder_f64_Dim2_LayoutRight_DeviceSpace, x: *const ViewHolder_f64_Dim1_LayoutRight_DeviceSpace) -> f64;
+        unsafe fn y_ax_device(y: *const ViewHolder_f32_Dim1_LayoutRight_DeviceSpace, a: *const ViewHolder_f32_Dim2_LayoutRight_DeviceSpace, x: *const ViewHolder_f32_Dim1_LayoutRight_DeviceSpace) -> f64;
         unsafe fn cpp_perf_test(view1: *const ViewHolder_f64_Dim2_LayoutRight_DeviceSpace, view2: *const ViewHolder_f64_Dim2_LayoutRight_DeviceSpace, n: i32, m: i32);
 
     }

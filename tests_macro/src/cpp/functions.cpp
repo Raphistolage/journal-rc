@@ -1,6 +1,6 @@
 #include "functions.hpp"
 
-double y_ax_device(const ViewHolder_f64_Dim1_LayoutRight_DeviceSpace* y, const ViewHolder_f64_Dim2_LayoutRight_DeviceSpace* A, const ViewHolder_f64_Dim1_LayoutRight_DeviceSpace* x) {
+double y_ax_device(const ViewHolder_f32_Dim1_LayoutRight_DeviceSpace* y, const ViewHolder_f32_Dim2_LayoutRight_DeviceSpace* A, const ViewHolder_f32_Dim1_LayoutRight_DeviceSpace* x) {
     auto y_view = y->get_view();
     auto a_view = A->get_view();
     auto x_view = x->get_view();
@@ -8,7 +8,7 @@ double y_ax_device(const ViewHolder_f64_Dim1_LayoutRight_DeviceSpace* y, const V
     int N = a_view.extent(0);
     int M = a_view.extent(1);
 
-     double result = 0;
+    double result = 0;
 
     Kokkos::parallel_reduce( N, KOKKOS_LAMBDA ( const int j, double &update ) {
         double temp2 = 0;
