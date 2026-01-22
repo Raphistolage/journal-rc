@@ -16,13 +16,16 @@ fn main() {
         );
         println!("Views created.");
         
+        let mut v3 = ffi::create_mirror(ffi::HostSpace(), &v1);
+
+        println!("Mirror view created.");
         
-        ffi::deep_copy(&mut v2, &v1);
+        ffi::deep_copy(&mut v3, &v1);
 
         println!("Deep copy done.");
 
 
-        assert_eq!(v2[(0,0)], 1.0);
+        assert_eq!(v3[(0,0)], 1.0);
     }
 
     ffi::kokkos_finalize();
