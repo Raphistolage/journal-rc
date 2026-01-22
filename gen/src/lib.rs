@@ -170,9 +170,9 @@ inline void kokkos_finalize() {{
 
                     func_decls.push(quote! {
                         #[allow(dead_code)]
-                        unsafe fn #fn_create_host_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> *mut #host_view_holder_ident;
+                        unsafe fn #fn_create_host_ident(dimensions: Vec<usize>,s: &[#ty]) -> *mut #host_view_holder_ident;
                         #[allow(dead_code)]
-                        unsafe fn #fn_create_device_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> *mut #device_view_holder_ident;
+                        unsafe fn #fn_create_device_ident(dimensions: Vec<usize>,s: &[#ty]) -> *mut #device_view_holder_ident;
 
                     });
 
@@ -261,10 +261,10 @@ struct ViewHolder_{device_extension} {{
 }};
 
 ViewHolder_{device_extension}* create_view_{device_extension}(rust::Vec<size_t> dimensions, rust::Slice<const {cpp_type}> s) {{
-    {kokkos_device_view_ty_str} host_view(\"krokkos_view_{device_extension}\", {create_view_dims_args});
+    {kokkos_device_view_ty_str} device_view(\"krokkos_view_{device_extension}\", {create_view_dims_args});
     {kokkos_view_unmanaged_ty_str} rust_view(s.data(), {create_view_dims_args});
-    Kokkos::deep_copy(host_view, rust_view);
-    return new ViewHolder_{device_extension}(host_view);
+    Kokkos::deep_copy(device_view, rust_view);
+    return new ViewHolder_{device_extension}(device_view);
 }}
 "));
                 }

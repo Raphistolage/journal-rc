@@ -107,7 +107,7 @@ impl syn::parse::Parse for Dimension {
             7 => Ok(Dimension::Dim7),
             _ => Err(syn::Error::new_spanned(
                 lit,
-                "Number of dimension must be between 1 and 8",
+                "Number of dimension must be between 1 and 7",
             )),
         }
     }
