@@ -19,7 +19,7 @@ pub fn build(rust_source_file: impl AsRef<std::path::Path>){
     }
 
     let mut dst_config = Config::new(format!("{}/build/Release", KROKKOS_CRATE_ROOT));
-    let modifieid_dst_config = dst_config
+    let modified_dst_config = dst_config
         .configure_arg("-DCMAKE_BUILD_TYPE=Release")
         .configure_arg(format!(
             "-DTARGET_DIR={}",
@@ -32,11 +32,10 @@ pub fn build(rust_source_file: impl AsRef<std::path::Path>){
         .pic(true);
 
     #[cfg(feature = "omp")]
-    let final_dst_config = modifieid_dst_config.build_arg("KOKKOS_DEVICES=OpenMP");
+    let final_dst_config = modified_dst_config.configure_arg("-DKokkos_ENABLE_OPENMP=ON");
     #[cfg(feature = "cuda")]
-    let final_dst_config = modifieid_dst_config
-        .configure_arg("-DKokkos_ENABLE_CUDA=ON")
-        .build_arg("KOKKOS_DEVICES=Cuda");
+    let final_dst_config = modified_dst_config
+        .configure_arg("-DKokkos_ENABLE_CUDA=ON");
 
     let dst = final_dst_config.build();
 
