@@ -61,7 +61,7 @@ impl syn::parse::Parse for ViewDataType {
     }
 }
 
-pub trait ToCppTypeStr {
+pub(crate) trait ToCppTypeStr {
     fn cpp_type(&self) -> String;
 }
 
@@ -127,9 +127,9 @@ impl ToString for Dimension {
     }
 }
 
-impl Into<u8> for &Dimension {
-    fn into(self) -> u8 {
-        match self {
+impl From<&Dimension> for u8 {
+    fn from(value: &Dimension) -> Self {
+         match value {
             Dimension::Dim1 => 1,
 
             Dimension::Dim2 => 2,
@@ -147,11 +147,10 @@ impl Into<u8> for &Dimension {
     }
 }
 
-impl Into<usize> for &Dimension {
-    fn into(self) -> usize {
-        let b8: u8 = self.into();
-
-        b8 as usize
+impl From<&Dimension> for usize {
+    fn from(value: &Dimension) -> Self {
+        let dim_u8: u8 = value.into();
+        dim_u8 as usize
     }
 }
 
