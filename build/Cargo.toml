@@ -2,7 +2,7 @@
 name = "krokkos_build"
 version = "0.1.0"
 edition = "2024"
-description = "A build script to be called, specifying the path to the rust_source_file, and optionaly the cpp_source_file, on which the generator will be applied"
+description = "A build script to be called, specifying the path to the rust_source_file, and optionally the cpp_source_file, on which the generator will be applied"
 
 [dependencies]
 quote = "1"
