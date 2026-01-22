@@ -7,8 +7,8 @@ use syn::{Ident, Item, Token, Type, punctuated::Punctuated};
 
 /// Core of the Krokkos crate.
 ///
-/// This function fetches the specified Kokkos::View configurations passed in parameters to the krokkos_init_configs macro called in the specified 'rust_source_file',
-/// And generates the necessary bridge functions and types (both on the Rust and C++ side of it) to manipulate these views from Rust.
+/// This function fetches the specified Kokkos::View configurations passed as parameters to the krokkos_init_configs macro called in the specified 'rust_source_file' and
+/// generates the necessary bridge functions and types (both on the Rust and C++ sides of it) to manipulate these views from Rust.
 ///
 /// The user shouldn't call it on his own, as it is called by the krokkos_build::build function.
 pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
@@ -309,7 +309,7 @@ inline void kokkos_finalize() {{
                             match mem_space {
                                 MemSpace::HostSpace => unsafe {
                                     ViewHolder::#host_view_holder_extension_ident(#fn_create_mirror_dth_ident(v as *const _))
-                                }
+                                },
                                 MemSpace::DeviceSpace => unsafe {
                                     ViewHolder::#device_view_holder_extension_ident(#fn_create_mirror_dtd_ident(v as *const _))
                                 },
