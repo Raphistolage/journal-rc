@@ -4,7 +4,8 @@ use quote::quote;
 use syn;
 
 pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
-    let content = fs::read_to_string(rust_source_file).expect("unable to read file");
+    let rust_source_path = rust_source_file.as_ref();
+    let content = fs::read_to_string(rust_source_path).expect("unable to read file");
     let ast = syn::parse_file(&content).expect("unable to parse file");
     let out_dir = std::env::var("OUT_DIR").expect("OUT_DIR not set");
 
@@ -52,9 +53,9 @@ inline void kokkos_finalize() {{
 
     let to_write_rust = tokens.to_string();
 
-    let rust_source_file =
+    let generated_rust_source_file =
         std::path::Path::new(&out_dir).join("../../../../krokkosbridge/krokkos_bridge.rs");
-    fs::write(rust_source_file.clone(), to_write_rust).expect("Writing went wrong!");
+    fs::write(generated_rust_source_file.clone(), to_write_rust).expect("Writing went wrong!");
 
     to_write_cpp.push('}');
     let out_path = std::path::Path::new(&out_dir).join("../../../../krokkosbridge/");
@@ -64,6 +65,6 @@ inline void kokkos_finalize() {{
         "#include \"krokkos_bridge.hpp\"",
     )
     .expect("Writing went wrong!");
-    let _ = cxx_build::bridge(rust_source_file.clone());
-    println!("cargo:rerun-if-changed={}", rust_source_file.display());
+    let _ = cxx_build::bridge(generated_rust_source_file);
+    println!("cargo:rerun-if-changed={}", rust_source_path.display());
 }
