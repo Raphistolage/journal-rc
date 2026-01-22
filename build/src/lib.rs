@@ -22,7 +22,7 @@ pub fn build(rust_source_file: impl AsRef<std::path::Path>){
     let modifieid_dst_config = dst_config
         .configure_arg("-DCMAKE_BUILD_TYPE=Release")
         .configure_arg(format!(
-            "-DOUT_DIR={}",
+            "-DTARGET_DIR={}",
             out_dir  
         ))
         .configure_arg(format!(

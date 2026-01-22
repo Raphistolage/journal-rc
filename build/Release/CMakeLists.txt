@@ -17,14 +17,14 @@ endif()
 
 # Krokkos
 
-add_library(krokkos SHARED ${OUT_DIR}/cxxbridge/${PKG_NAME}/${OUT_DIR}/krokkosbridge/krokkos_bridge.rs.cc)
+add_library(krokkos SHARED ${TARGET_DIR}/cxxbridge/${PKG_NAME}/${TARGET_DIR}/krokkosbridge/krokkos_bridge.rs.cc)
 
 target_link_libraries(krokkos PUBLIC Kokkos::kokkos)
 
 target_include_directories(krokkos PUBLIC 
-${OUT_DIR}/cxxbridge/rust/
-${OUT_DIR}/cxxbridge/${PKG_NAME}/${OUT_DIR}/krokkosbridge/
-${OUT_DIR}/krokkosbridge/
+${TARGET_DIR}/cxxbridge/rust/
+${TARGET_DIR}/cxxbridge/${PKG_NAME}/${TARGET_DIR}/krokkosbridge/
+${TARGET_DIR}/krokkosbridge/
 )
 
 install(TARGETS krokkos DESTINATION .)
