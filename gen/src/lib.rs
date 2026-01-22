@@ -188,7 +188,7 @@ inline void kokkos_finalize() {{
                         #[allow(dead_code)]
                         unsafe fn #fn_create_host_ident(dimensions: Vec<usize>,s: &[#ty]) -> *mut #host_view_holder_ident;
                         #[allow(dead_code)]
-                        unsafe fn #fn_create_device_ident(dimensiosn: Vec<usize>,s: &[#ty]) -> *mut #device_view_holder_ident;
+                        unsafe fn #fn_create_device_ident(dimensions: Vec<usize>,s: &[#ty]) -> *mut #device_view_holder_ident;
                         #[allow(dead_code)]
                         unsafe fn #fn_get_at_ident<'a>(view: *const #host_view_holder_ident, #(#fn_get_at_args: usize),*) -> &'a #ty;
                         #[allow(dead_code)]
