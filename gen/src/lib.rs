@@ -5,6 +5,13 @@ use quote::{format_ident, quote};
 use std::fs;
 use syn::{Item, Token, Type, punctuated::Punctuated};
 
+/// Core of the Krokkos crate.
+///
+/// This function fetches the specified Kokkos::View configurations passed in parameters to the krokkos_init_configs macro called in the specified 'rust_source_file',
+/// And generates the necessary bridge functions and types (both on the Rust and C++ side of it) to manipulate these views from Rust.
+///
+/// The user shouldn't call it on his own, as it is called by the krokkos_build::build function.
+
 pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
     let rust_source_path = rust_source_file.as_ref();
     let out_dir = std::env::var("OUT_DIR").expect("OUT_DIR not set");
@@ -293,6 +300,8 @@ ViewHolder_{device_extension}* create_view_{device_extension}(rust::Vec<size_t> 
 
                     #(#dttype_impls)*
 
+                    // We need to specify allow(dead_code) for all the functions, traits and structs since we cannot use an inner attribute because all of this is 
+                    // generated in a .rs file which neither lib.rs nor main.rs
                     #[allow(dead_code)]
                     pub trait Dimension: Debug + Into<Vec<usize>> + Clone + Default {
                         const NDIM: u8;
