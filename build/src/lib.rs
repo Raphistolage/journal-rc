@@ -11,7 +11,13 @@ pub fn build(rust_source_file: impl AsRef<std::path::Path>){
 
     let mut target_dir = std::env::var("OUT_DIR").expect("OUT_DIR not defined");
     target_dir.push_str("/../../../..");
-    println!("cargo:warning=Out_dir : {}", target_dir);
+
+    // We consider that our crate Krokkos is being used directly by the user, not through another crate.
+    // This assumption makes it easy to move from the out_dir to the target_dir, following ../../../../
+    // If we want to cover transitive dependencies (where Krokkos is being used through another crate, or more), we would need to implement the same method as Cxx,
+    // Which would be to navigate in the parent folders, starting from OUT_DIR, until finding a .rustc_info.json file, meaning the current folder is the target folder.
+
+    println!("cargo:warning=TARGET_DIR : {}", target_dir);
 
     if !std::fs::exists(format!("{}/krokkosbridge", target_dir)).unwrap() {
         println!("cargo:warning=Creating krokkosbridge folder");
