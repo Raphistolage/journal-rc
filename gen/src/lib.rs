@@ -1,12 +1,8 @@
 use std::fs;
-
 use quote::quote;
-use syn;
 
 pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
     let rust_source_path = rust_source_file.as_ref();
-    let content = fs::read_to_string(rust_source_path).expect("unable to read file");
-    let ast = syn::parse_file(&content).expect("unable to parse file");
     let out_dir = std::env::var("OUT_DIR").expect("OUT_DIR not set");
 
     let mut to_write_cpp = "
