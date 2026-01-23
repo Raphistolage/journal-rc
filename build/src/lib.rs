@@ -4,9 +4,15 @@ use std::path::Path;
 
 const KROKKOS_CRATE_ROOT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/..");
 
-// Build function to specify the rust file calling the krokkos_init_configs macro, calling the generator/parser on it.
-// Then proceeds to compile and link to it, as well as Kokkos, calling a CMake script.
-pub fn build(rust_source_file: impl AsRef<Path>) {
+/// Build function to generate and link the Views and their associated functions.
+/// 
+/// Calls the Krokkos bridge generator, based on the views configurations specified in the `krokkos_init_configs` arguments found in the provided Rust source file,
+/// and proceeds to build, compile and link to it, as well as Kokkos, using CMake.
+/// 
+/// This is a function to be called from a build script (`build.rs`).
+/// 
+/// ***rust_source_file*** : The path to the rust file calling the `krokkos_init_configs` macro. It is recommended to do it in a dedicated rust file.
+pub fn build(rust_source_file: impl AsRef<Path>){
     krokkos_gen::bridge(rust_source_file);
 
     let mut target_dir = env::var("OUT_DIR").expect("OUT_DIR not defined");
