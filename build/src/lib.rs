@@ -9,7 +9,7 @@ const KROKKOS_CRATE_ROOT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/..");
 pub fn build(rust_source_file: impl AsRef<Path>) {
     krokkos_gen::bridge(rust_source_file);
 
-    let mut target_dir = std::env::var("OUT_DIR").expect("OUT_DIR not defined");
+    let mut target_dir = env::var("OUT_DIR").expect("OUT_DIR not defined");
     target_dir.push_str("/../../../..");
 
     // We consider that our crate Krokkos is being used directly by the user, not through another crate.
@@ -19,9 +19,9 @@ pub fn build(rust_source_file: impl AsRef<Path>) {
 
     println!("cargo:warning=TARGET_DIR : {}", target_dir);
 
-    if !std::fs::exists(format!("{}/krokkosbridge", target_dir)).unwrap() {
+    if !std::fs::exists(format!("{}/krokkosbridge", target_dir)).expect("Cannot create the krokkosbridge folder.") {
         println!("cargo:warning=Creating krokkosbridge folder");
-        std::fs::create_dir(format!("{}/krokkosbridge", target_dir)).unwrap();
+        std::fs::create_dir(format!("{}/krokkosbridge", target_dir)).expect("Error when creating the krokkosbridge folder.");
     }
 
     let mut dst_config = Config::new(format!("{}/build/cmake", KROKKOS_CRATE_ROOT));
@@ -30,7 +30,7 @@ pub fn build(rust_source_file: impl AsRef<Path>) {
         .configure_arg(format!("-DTARGET_DIR={}", target_dir))
         .configure_arg(format!(
             "-DPKG_NAME={}",
-            std::env::var("CARGO_PKG_NAME").expect("PKG_NAME is not defined")
+            env::var("CARGO_PKG_NAME").expect("PKG_NAME is not defined")
         ))
         .pic(true);
 
