@@ -1,5 +1,5 @@
-use std::fs;
 use quote::quote;
+use std::fs;
 
 pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
     let rust_source_path = rust_source_file.as_ref();
