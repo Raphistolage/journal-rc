@@ -63,7 +63,7 @@ impl syn::parse::Parse for ViewDataType {
 }
 
 /// Trait for converting a Rust type into its corresponding C++ type.
-/// 
+///
 /// The C++ types are returned as String.
 pub(crate) trait ToCppTypeStr {
     fn cpp_type(&self) -> String;
@@ -89,6 +89,7 @@ impl ToCppTypeStr for ViewDataType {
 /// This enum represents the number of dimensions of a View.
 #[derive(Debug, PartialEq)]
 pub enum Dimension {
+    Dim0,
     Dim1,
     Dim2,
     Dim3,
@@ -103,6 +104,7 @@ impl syn::parse::Parse for Dimension {
         let lit: LitInt = input.parse()?;
         let val = lit.base10_parse::<u8>()?;
         match val {
+            0 => Ok(Dimension::Dim0),
             1 => Ok(Dimension::Dim1),
             2 => Ok(Dimension::Dim2),
             3 => Ok(Dimension::Dim3),
@@ -112,7 +114,7 @@ impl syn::parse::Parse for Dimension {
             7 => Ok(Dimension::Dim7),
             _ => Err(syn::Error::new_spanned(
                 lit,
-                "Number of dimension must be between 1 and 7",
+                "Number of dimension must be between 0 and 7",
             )),
         }
     }
@@ -121,6 +123,7 @@ impl syn::parse::Parse for Dimension {
 impl ToString for Dimension {
     fn to_string(&self) -> String {
         match self {
+            Dimension::Dim0 => "Dim0".to_string(),
             Dimension::Dim1 => "Dim1".to_string(),
             Dimension::Dim2 => "Dim2".to_string(),
             Dimension::Dim3 => "Dim3".to_string(),
@@ -134,7 +137,9 @@ impl ToString for Dimension {
 
 impl From<&Dimension> for u8 {
     fn from(value: &Dimension) -> Self {
-         match value {
+        match value {
+            Dimension::Dim0 => 0,
+
             Dimension::Dim1 => 1,
 
             Dimension::Dim2 => 2,
@@ -197,9 +202,9 @@ impl ToString for Layout {
     }
 }
 
-/// This represents the View's memory space. 
-/// 
-/// For now we simplify the implementation by restraining it to HostSpace and DeviceSpace, but a future (more complete) implem could cover all the 
+/// This represents the View's memory space.
+///
+/// For now we simplify the implementation by restraining it to HostSpace and DeviceSpace, but a future (more complete) implem could cover all the
 /// memory spaces covered by Kokkos.
 #[derive(Debug, PartialEq)]
 pub enum MemSpace {
@@ -217,7 +222,7 @@ impl ToString for MemSpace {
 }
 
 /// The structure storing a View configuration specified by the user.
-/// 
+///
 /// The generator will go through an iterator of ViewConfig to generate the bridge functions and types for each.
 #[derive(Debug)]
 pub struct ViewConfig {
