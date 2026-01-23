@@ -8,9 +8,7 @@ else()
   include(FetchContent)
   FetchContent_Declare(
     Kokkos
-    GIT_REPOSITORY https://github.com/kokkos/kokkos.git
-    GIT_TAG        5.0.0
-    SOURCE_DIR ${Kokkos_COMMON_SOURCE_DIR}
+    URL https://github.com/kokkos/kokkos/archive/refs/tags/5.0.0.zip
   )
   FetchContent_MakeAvailable(Kokkos)
 endif()
