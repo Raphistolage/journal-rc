@@ -9,13 +9,13 @@ const KROKKOS_CRATE_ROOT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/..");
 pub fn build(rust_source_file: impl AsRef<std::path::Path>){
     krokkos_gen::bridge(rust_source_file);
 
-    let mut out_dir = std::env::var("OUT_DIR").expect("OUT_DIR not defined");
-    out_dir.push_str("/../../../..");
-    println!("cargo:warning=Out_dir : {}", out_dir);
+    let mut target_dir = std::env::var("OUT_DIR").expect("OUT_DIR not defined");
+    target_dir.push_str("/../../../..");
+    println!("cargo:warning=Out_dir : {}", target_dir);
 
-    if !std::fs::exists(format!("{}/krokkosbridge", out_dir)).unwrap() {
+    if !std::fs::exists(format!("{}/krokkosbridge", target_dir)).unwrap() {
         println!("cargo:warning=Creating krokkosbridge folder");
-        std::fs::create_dir(format!("{}/krokkosbridge", out_dir)).unwrap();
+        std::fs::create_dir(format!("{}/krokkosbridge", target_dir)).unwrap();
     }
 
     let mut dst_config = Config::new(format!("{}/build/Release", KROKKOS_CRATE_ROOT));
@@ -23,7 +23,7 @@ pub fn build(rust_source_file: impl AsRef<std::path::Path>){
         .configure_arg("-DCMAKE_BUILD_TYPE=Release")
         .configure_arg(format!(
             "-DTARGET_DIR={}",
-            out_dir  
+            target_dir  
         ))
         .configure_arg(format!(
             "-DPKG_NAME={}",
