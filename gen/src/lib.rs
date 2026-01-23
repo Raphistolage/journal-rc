@@ -300,7 +300,7 @@ ViewHolder_{device_extension}* create_view_{device_extension}(rust::Vec<size_t> 
 
                     #(#dttype_impls)*
 
-                    // We need to specify allow(dead_code) for all the functions, traits and structs since we cannot use an inner attribute because all of this is 
+                    // We need to specify allow(dead_code) for all the functions, traits and structs since we cannot use an inner attribute because all of this is
                     // generated in a .rs file which neither lib.rs nor main.rs
                     #[allow(dead_code)]
                     pub trait Dimension: Debug + Into<Vec<usize>> + Clone + Default {

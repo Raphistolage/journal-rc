@@ -1,5 +1,4 @@
 /// Structs and syn::parse::Parse implementation to properly recover the configuraitons specified in the krokkos_init_configs parameters.
-
 use syn::{LitInt, Path, Token, parenthesized, parse::ParseStream};
 
 #[derive(Debug, PartialEq)]
