@@ -61,6 +61,9 @@ impl syn::parse::Parse for ViewDataType {
     }
 }
 
+/// Trait for converting a Rust type into its corresponding C++ type.
+/// 
+/// The C++ types are returned as String.
 pub(crate) trait ToCppTypeStr {
     fn cpp_type(&self) -> String;
 }
