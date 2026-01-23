@@ -1,3 +1,5 @@
+/// Structs and syn::parse::Parse implementation to properly recover the configuraitons specified in the krokkos_init_configs parameters.
+
 use syn::{LitInt, Path, Token, parenthesized, parse::ParseStream};
 
 #[derive(Debug, PartialEq)]
@@ -85,6 +87,7 @@ impl ToCppTypeStr for ViewDataType {
     }
 }
 
+/// This enum represents the number of dimensions of a View.
 #[derive(Debug, PartialEq)]
 pub enum Dimension {
     Dim1,
@@ -157,6 +160,7 @@ impl From<&Dimension> for usize {
     }
 }
 
+/// This enum represents the desired Layout of the View (associated to Kokkos::LayoutRight and Kokkos::LayoutLeft)
 #[derive(Debug, PartialEq)]
 pub enum Layout {
     LayoutRight,
@@ -194,6 +198,10 @@ impl ToString for Layout {
     }
 }
 
+/// This represents the View's memory space. 
+/// 
+/// For now we simplify the implementation by restraining it to HostSpace and DeviceSpace, but a future (more complete) implem could cover all the 
+/// memory spaces covered by Kokkos.
 #[derive(Debug, PartialEq)]
 pub enum MemSpace {
     HostSpace,
@@ -209,6 +217,9 @@ impl ToString for MemSpace {
     }
 }
 
+/// The structure storing a View configuration specified by the user.
+/// 
+/// The generator will go through an iterator of ViewConfig to generate the bridge functions and types for each.
 #[derive(Debug)]
 pub struct ViewConfig {
     pub data_type: ViewDataType,
