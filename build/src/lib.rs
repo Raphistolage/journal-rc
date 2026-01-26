@@ -34,10 +34,14 @@ pub fn build(rust_source_file: impl AsRef<std::path::Path>) {
         ))
         .pic(true);
 
+
+    // FIXME : To be removed when linking with pre-installed user's Kokkos version.
+    // -------------------------------------------------------
     #[cfg(feature = "omp")]
     let final_dst_config = modified_dst_config.configure_arg("-DKokkos_ENABLE_OPENMP=ON");
     #[cfg(feature = "cuda")]
     let final_dst_config = modified_dst_config.configure_arg("-DKokkos_ENABLE_CUDA=ON");
+    // -------------------------------------------------------
 
     let dst = final_dst_config.build();
 

@@ -13,6 +13,7 @@ proc-macro2 = "1.0.103"
 cxx-build = "1.0"
 cmake = "0.1.31"
 
+# FIXME : To be removed when linking with pre-installed user's Kokkos version. 
 [features]
 default = ["omp"]
 omp = []
