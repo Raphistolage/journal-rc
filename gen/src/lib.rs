@@ -163,14 +163,22 @@ inline void kokkos_finalize() {{
                     let fn_deep_copy_htd_ident = format_ident!("deep_copy_htd_{}", raw_extension);
                     let fn_deep_copy_dth_ident = format_ident!("deep_copy_dth_{}", raw_extension);
                     let fn_deep_copy_dtd_ident = format_ident!("deep_copy_dtd_{}", raw_extension);
-                    let fn_create_mirror_hth_ident = format_ident!("create_mirror_hth_{}", raw_extension);
-                    let fn_create_mirror_dth_ident = format_ident!("create_mirror_dth_{}", raw_extension);
-                    let fn_create_mirror_htd_ident = format_ident!("create_mirror_htd_{}", raw_extension);
-                    let fn_create_mirror_dtd_ident = format_ident!("create_mirror_dtd_{}", raw_extension);
-                    let fn_create_mirror_view_hth_ident = format_ident!("create_mirror_view_hth_{}", raw_extension);
-                    let fn_create_mirror_view_dth_ident = format_ident!("create_mirror_view_dth_{}", raw_extension);
-                    let fn_create_mirror_view_htd_ident = format_ident!("create_mirror_view_htd_{}", raw_extension);
-                    let fn_create_mirror_view_dtd_ident = format_ident!("create_mirror_view_dtd_{}", raw_extension);
+                    let fn_create_mirror_hth_ident =
+                        format_ident!("create_mirror_hth_{}", raw_extension);
+                    let fn_create_mirror_dth_ident =
+                        format_ident!("create_mirror_dth_{}", raw_extension);
+                    let fn_create_mirror_htd_ident =
+                        format_ident!("create_mirror_htd_{}", raw_extension);
+                    let fn_create_mirror_dtd_ident =
+                        format_ident!("create_mirror_dtd_{}", raw_extension);
+                    let fn_create_mirror_view_hth_ident =
+                        format_ident!("create_mirror_view_hth_{}", raw_extension);
+                    let fn_create_mirror_view_dth_ident =
+                        format_ident!("create_mirror_view_dth_{}", raw_extension);
+                    let fn_create_mirror_view_htd_ident =
+                        format_ident!("create_mirror_view_htd_{}", raw_extension);
+                    let fn_create_mirror_view_dtd_ident =
+                        format_ident!("create_mirror_view_dtd_{}", raw_extension);
 
                     let fn_get_at_args = (0..dim_val_usize)
                         .map(|i| format_ident!("i{i}"))
@@ -616,7 +624,7 @@ ViewHolder_{device_extension}* create_mirror_view_dtd_{raw_extension}(const View
                             },
                             _marker: PhantomData,
                         }
-                        
+
                     }
 
                 };
