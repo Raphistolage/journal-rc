@@ -6,7 +6,7 @@ const KROKKOS_CRATE_ROOT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/..");
 
 // Build function to specify the rust file calling the krokkos_init_configs macro, calling the generator/parser on it.
 // Then proceeds to compile and link to it, as well as Kokkos, calling a CMake script.
-pub fn build(rust_source_file: impl AsRef<std::path::Path>) {
+pub fn build(rust_source_file: impl AsRef<Path>) {
     krokkos_gen::bridge(rust_source_file);
 
     let mut target_dir = std::env::var("OUT_DIR").expect("OUT_DIR not defined");
