@@ -11,7 +11,6 @@ use syn::{Item, Token, Type, punctuated::Punctuated};
 /// And generates the necessary bridge functions and types (both on the Rust and C++ side of it) to manipulate these views from Rust.
 ///
 /// The user shouldn't call it on his own, as it is called by the krokkos_build::build function.
-
 pub fn bridge(rust_source_file: impl AsRef<std::path::Path>) {
     let rust_source_path = rust_source_file.as_ref();
     let out_dir = std::env::var("OUT_DIR").expect("OUT_DIR not set");
