@@ -517,6 +517,26 @@ ViewHolder_{device_extension}* create_mirror_view_dtd_{raw_extension}(const View
     auto mirror_view = Kokkos::create_mirror_view(Kokkos::DefaultExecutionSpace::memory_space(), src->get_view());
     return new ViewHolder_{device_extension}(mirror_view);
 }}
+
+ViewHolder_{host_extension}* create_mirror_view_and_copy_hth_{raw_extension}(const ViewHolder_{host_extension}* src) {{
+    auto mirror_view = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), src->get_view());
+    return new ViewHolder_{host_extension}(mirror_view);
+}}
+
+ViewHolder_{host_extension}* create_mirror_view_and_copy_dth_{raw_extension}(const ViewHolder_{device_extension}* src) {{
+    auto mirror_view = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), src->get_view());
+    return new ViewHolder_{host_extension}(mirror_view);
+}}
+
+ViewHolder_{device_extension}* create_mirror_view_and_copy_htd_{raw_extension}(const ViewHolder_{host_extension}* src) {{
+    auto mirror_view = Kokkos::create_mirror_view_and_copy(Kokkos::DefaultExecutionSpace::memory_space(), src->get_view());
+    return new ViewHolder_{device_extension}(mirror_view);
+}}
+
+ViewHolder_{device_extension}* create_mirror_view_and_copy_dtd_{raw_extension}(const ViewHolder_{device_extension}* src) {{
+    auto mirror_view = Kokkos::create_mirror_view_and_copy(Kokkos::DefaultExecutionSpace::memory_space(), src->get_view());
+    return new ViewHolder_{device_extension}(mirror_view);
+}}
 "));
                 }
 
@@ -664,7 +684,7 @@ ViewHolder_{device_extension}* create_mirror_view_dtd_{raw_extension}(const View
                             },
                             _marker: PhantomData,
                         }
-
+                        
                     }
 
                 };
