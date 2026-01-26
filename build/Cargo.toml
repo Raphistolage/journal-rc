@@ -17,4 +17,3 @@ cmake = "0.1.31"
 default = ["omp"]
 omp = []
 cuda = []
-
